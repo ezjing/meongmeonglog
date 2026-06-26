@@ -1,0 +1,24 @@
+---
+description: Supabase DB, API, Edge Function 패턴
+globs: supabase/**,src/lib/**,src/hooks/**
+alwaysApply: false
+---
+
+# Supabase 패턴
+
+- 클라이언트: `src/lib/supabase.ts` 단일 인스턴스
+- 테이블 접근: `src/lib/api/{domain}Api.ts`
+- Edge Function: `src/lib/api/edgeFunctions.ts`
+- service role key 클라이언트 사용 금지 (RLS + anon key)
+- snake_case DB → camelCase는 `lib/mappers/`에서 변환
+
+```typescript
+// lib/api/walkApi.ts
+export async function startWalk(dogId: string): Promise<WalkSession> {
+  const { data, error } = await supabase.from('walks').insert({ dog_id: dogId }).select().single();
+  if (error) throw new AppError('walk_start_failed', error.message);
+  return toWalkSession(data);
+}
+```
+
+Edge Function 폴더: `supabase/functions/diaries-generate/index.ts`

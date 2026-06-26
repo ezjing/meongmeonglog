@@ -1,0 +1,27 @@
+---
+description: 파일·함수·변수 네이밍 컨벤션
+alwaysApply: true
+---
+
+# 네이밍 컨벤션
+
+| 대상 | 규칙 | 예시 |
+|------|------|------|
+| 폴더 | camelCase | `components/walk/` |
+| 컴포넌트 파일 | PascalCase | `Button.tsx`, `WalkMap.tsx` |
+| 훅 | camelCase, `use` 접두 | `useWalkTracker.ts` |
+| app 라우트 | camelCase | `dogBasic.tsx` |
+| 함수/변수 | camelCase | `startWalk()`, `walkId` |
+| 타입 | PascalCase | `DogProfile`, `WalkSession` |
+| DB 컬럼 | snake_case | `daily_quote` |
+| Edge Function | kebab-case | `diaries-generate/` |
+
+## 함수 패턴
+
+- API: `fetchDiaries`, `createDog`, `finishWalk`
+- Query hook: `useDiary(id)`, `useDiaryList()`
+- Mutation hook: `useCreateDog()`, `useGenerateDiary()`
+- Handler: `handleWalkStart()`
+- Boolean: `isWalkActive`, `hasPhotos`, `canGenerateDiary`
+
+DB row는 `lib/mappers/`에서 camelCase로 변환 후 사용.

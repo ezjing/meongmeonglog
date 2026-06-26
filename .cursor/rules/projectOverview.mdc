@@ -1,0 +1,28 @@
+---
+description: 멍멍로그 프로젝트 개요, 기술 스택, 폴더 구조
+alwaysApply: true
+---
+
+# 멍멍로그 프로젝트 개요
+
+- 서비스: 강아지 AI 산책 일기 앱 (React Native Expo 56)
+- 백엔드: Supabase (Auth, PostgreSQL, Storage, Edge Functions)
+- AI: OpenAI API (Edge Functions에서 호출)
+- Expo 문서: https://docs.expo.dev/versions/v56.0.0/
+
+## 폴더 구조 (Expo 기본 + 최소 추가)
+
+- `src/app/` — Expo Router 화면·라우트 (`_layout.tsx`로 네비게이션)
+- `src/components/` — 재사용 UI
+- `src/hooks/` — 커스텀 훅, React Query
+- `src/constants/` — 테마, 옵션
+- `src/lib/` — Supabase client, api, mappers, utils
+- `src/types/` — 공유 TypeScript 타입
+- `src/stores/` — Zustand (산책 세션 등)
+- `supabase/` — migrations, Edge Functions
+
+`features/` 레이어 사용 금지.
+
+## import alias
+
+`@/` → `src/`

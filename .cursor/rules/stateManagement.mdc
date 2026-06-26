@@ -1,0 +1,25 @@
+---
+description: Zustand + React Query 상태 관리
+globs: src/hooks/**,src/stores/**
+alwaysApply: false
+---
+
+# 상태 관리
+
+| 데이터 | 도구 | 위치 |
+|--------|------|------|
+| 서버 CRUD | React Query | `hooks/useDiaries.ts` |
+| 산책 진행 세션 | Zustand | `stores/walkStore.ts` |
+| UI-only | useState | 컴포넌트 내부 |
+
+- Query keys: `diaryKeys.list()`, `walkKeys.detail(id)`
+- 서버 데이터를 Zustand에 복제하지 않음
+- React Query Provider: `app/_layout.tsx`
+
+```typescript
+export const diaryKeys = {
+  all: ['diaries'] as const,
+  list: () => [...diaryKeys.all, 'list'] as const,
+  detail: (id: string) => [...diaryKeys.all, id] as const,
+};
+```

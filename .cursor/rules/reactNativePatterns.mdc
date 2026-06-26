@@ -1,0 +1,24 @@
+---
+description: React Native / Expo 컴포넌트 패턴
+globs: src/**/*.tsx
+alwaysApply: false
+---
+
+# React Native 패턴
+
+- 함수형 컴포넌트 + TypeScript strict
+- `StyleSheet.create` co-located, 색상은 `constants/theme.ts` 토큰만 사용
+- `app/` 화면: default export (Expo Router). 재사용 UI는 `components/` named export
+- 200줄 초과 시 `components/{domain}/`로 분리
+- `app/`·`components/`에서 Supabase client 직접 import 금지
+
+```tsx
+// ✅ app/walk/active.tsx
+import { WalkMap } from '@/components/walk/WalkMap';
+import { useWalkTracker } from '@/hooks/useWalkTracker';
+
+export default function WalkActiveScreen() {
+  const { elapsedSec, distanceMeter } = useWalkTracker();
+  return <WalkMap distanceMeter={distanceMeter} />;
+}
+```
