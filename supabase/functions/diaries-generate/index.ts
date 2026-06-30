@@ -1,5 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import OpenAI from "https://esm.sh/openai@4";
+import {
+  GEMINI_MODEL,
+  generateGeminiContent,
+} from "../_shared/gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -42,34 +45,16 @@ Deno.serve(async (req) => {
 JSON 형식으로 응답: {"content":"일기 본문","dailyQuote":"오늘의 한마디 한 줄"}
 `.trim();
 
-    const openai = new OpenAI({ apiKey: Deno.env.get("OPENAI_API_KEY")! });
-
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      {
-        role: "system",
-        content:
-          "당신은 반려견 시점의 감성 일기 작가입니다. 따뜻하고 자연스러운 한국어로 작성합니다.",
-      },
-      { role: "user", content: prompt },
-    ];
-
-    if (photos.length > 0 && photos[0].image_url) {
-      messages.push({
-        role: "user",
-        content: [
-          { type: "text", text: "산책 사진을 참고해 상황을 묘사해주세요." },
-          { type: "image_url", image_url: { url: photos[0].image_url } },
-        ],
-      });
-    }
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages,
-      response_format: { type: "json_object" },
+    const content = await generateGeminiContent({
+      systemInstruction:
+        "당신은 반려견 시점의 감성 일기 작가입니다. 따뜻하고 자연스러운 한국어로 작성합니다.",
+      userPrompt: prompt,
+      jsonResponse: true,
+      imageUrl: photos.length > 0 ? photos[0].image_url : undefined,
+      imagePrompt: "산책 사진을 참고해 상황을 묘사해주세요.",
     });
 
-    const parsed = JSON.parse(completion.choices[0].message.content ?? "{}");
+    const parsed = JSON.parse(content);
 
     const { data: diary, error: diaryError } = await supabase
       .from("diaries")
@@ -78,7 +63,7 @@ JSON 형식으로 응답: {"content":"일기 본문","dailyQuote":"오늘의 한
         dog_id: dog.id,
         diary_content: parsed.content ?? "오늘 산책 정말 즐거웠어!",
         daily_quote: parsed.dailyQuote ?? "산책은 최고야!",
-        ai_model: "gpt-4o-mini",
+        ai_model: GEMINI_MODEL,
         generated_at: new Date().toISOString(),
       })
       .select()

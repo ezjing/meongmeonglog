@@ -1,38 +1,63 @@
 import { router } from "expo-router";
-import { useRef } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import MapView, { Polyline, type Region } from "react-native-maps";
+import { StyleSheet, Text, View } from "react-native";
 
+import { WalkMap } from "@/components/walk/WalkMap";
 import { Button } from "@/components/ui/Button";
+import { useOverlay } from "@/components/ui/overlay";
 import { colors, spacing } from "@/constants/theme";
+import { useCancelWalk } from "@/hooks/useWalkMutations";
 import { useWalkTracker } from "@/hooks/useWalkTracker";
 import { formatDistance, formatDuration } from "@/lib/utils/formatDistance";
 import { useWalkStore } from "@/stores/walkStore";
 
-const DEFAULT_REGION: Region = {
-  latitude: 37.5665,
-  longitude: 126.978,
-  latitudeDelta: 0.01,
-  longitudeDelta: 0.01,
-};
-
 export default function WalkActiveScreen() {
-  const { activeWalk, isPaused, elapsedSec, distanceMeter } = useWalkTracker();
-  const setPaused = useWalkStore((s) => s.setPaused);
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { activeWalk, elapsedSec, distanceMeter } = useWalkTracker();
+  const walkPath = useWalkStore((s) => s.walkPath);
+  const reset = useWalkStore((s) => s.reset);
+  const { showAlert, showToast } = useOverlay();
+  const cancelWalk = useCancelWalk();
 
   const weatherLabel = activeWalk?.weatherIcon
     ? `${activeWalk.weatherCondition ?? "맑음"} ${activeWalk.weatherTemp ?? 23}°C`
     : "맑음 23°C";
 
-  const handleFinishPressIn = () => {
-    longPressTimer.current = setTimeout(() => {
+  const handleFinishPress = async () => {
+    const confirmed = await showAlert({
+      icon: "🐾",
+      title: "산책을 종료할까요?",
+      message:
+        "지금까지 기록한 이동 거리와 시간이 저장돼요. 사진과 특이사항을 입력하러 갈게요.",
+      cancelLabel: "취소",
+      confirmLabel: "종료하기",
+    });
+    if (confirmed) {
       router.push("/walk/finish");
-    }, 800);
+    }
   };
 
-  const handleFinishPressOut = () => {
-    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+  const handleCancelPress = async () => {
+    if (!activeWalk) return;
+
+    const confirmed = await showAlert({
+      icon: "🐾",
+      title: "산책을 취소할까요?",
+      message: "지금까지 기록한 이동 거리와 시간은 저장되지 않아요.",
+      cancelLabel: "계속하기",
+      confirmLabel: "취소하기",
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    try {
+      await cancelWalk.mutateAsync(activeWalk.walkId);
+      reset();
+      router.replace("/(tabs)");
+    } catch {
+      showToast({
+        message: "⚠️ 산책 취소에 실패했어요. 잠시 후 다시 시도해 주세요.",
+        variant: "warning",
+      });
+    }
   };
 
   if (!activeWalk) {
@@ -47,17 +72,7 @@ export default function WalkActiveScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.mapWrap}>
-        <MapView
-          style={styles.map}
-          initialRegion={DEFAULT_REGION}
-          showsUserLocation
-        >
-          <Polyline
-            coordinates={[{ latitude: 37.5665, longitude: 126.978 }]}
-            strokeColor={colors.apricot}
-            strokeWidth={3}
-          />
-        </MapView>
+        <WalkMap routePath={walkPath} />
         <View style={styles.weatherBadge}>
           <Text style={styles.weatherText}>
             ☀️ {activeWalk.weatherTemp ?? 23}°C
@@ -84,18 +99,18 @@ export default function WalkActiveScreen() {
 
       <View style={styles.actions}>
         <Button
-          label={isPaused ? "▶" : "⏸"}
-          variant="outline"
-          onPress={() => setPaused(!isPaused)}
-          style={styles.pauseBtn}
+          label="산책 취소"
+          variant="soft"
+          onPress={handleCancelPress}
+          disabled={cancelWalk.isPending}
+          style={styles.cancelBtn}
         />
-        <Pressable
-          onPressIn={handleFinishPressIn}
-          onPressOut={handleFinishPressOut}
+        <Button
+          label="산책 종료"
+          variant="primary"
+          onPress={handleFinishPress}
           style={styles.finishBtn}
-        >
-          <Text style={styles.finishText}>길게 눌러 산책 종료</Text>
-        </Pressable>
+        />
       </View>
     </View>
   );
@@ -111,7 +126,6 @@ const styles = StyleSheet.create({
   },
   empty: { color: colors.grey, marginBottom: spacing.md },
   mapWrap: { height: 230, position: "relative" },
-  map: { flex: 1 },
   weatherBadge: {
     position: "absolute",
     top: spacing.sm + 2,
@@ -141,14 +155,6 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginTop: "auto",
   },
-  pauseBtn: { width: 52 },
-  finishBtn: {
-    flex: 1,
-    backgroundColor: colors.apricot,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: spacing.md - 3,
-  },
-  finishText: { color: colors.white, fontWeight: "700", fontSize: 14 },
+  cancelBtn: { flexShrink: 0 },
+  finishBtn: { flex: 1 },
 });

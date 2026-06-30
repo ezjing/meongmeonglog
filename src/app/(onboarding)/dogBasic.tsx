@@ -1,43 +1,67 @@
-import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { BreedPicker } from '@/components/onboarding/BreedPicker';
+import { OnboardingHeader } from '@/components/onboarding/OnboardingHeader';
 import { Button } from '@/components/ui/Button';
-import { PawProgress } from '@/components/ui/PawProgress';
+import { BottomSheet, useOverlay } from '@/components/ui/overlay';
 import { colors, radius, spacing } from '@/constants/theme';
+import { pickImageFromCamera, pickImageFromLibrary } from '@/lib/pickImage';
 import { useOnboardingStore } from '@/stores/walkStore';
 
 export default function DogBasicScreen() {
-  const { name, breed, birthDate, gender, weightKg, profileImageUri, setBasic } = useOnboardingStore();
+  const { name, breed, birthDate, gender, weightKg, profileImageUri, setBasic, reset } =
+    useOnboardingStore();
+  const { showAlert } = useOverlay();
+  const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
 
   const canNext = name.trim().length > 0;
 
-  const handlePickProfileImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') return;
+  const handleCancelRegistration = async () => {
+    const confirmed = await showAlert({
+      icon: '🐾',
+      title: '등록을 취소할까요?',
+      message: '입력한 내용은 저장되지 않아요.',
+      cancelLabel: '계속 등록',
+      confirmLabel: '취소하기',
+      destructive: true,
+    });
+    if (!confirmed) return;
+    reset();
+    router.replace('/(auth)/login');
+  };
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+  const handlePickFromLibrary = async () => {
+    const uris = await pickImageFromLibrary({
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
     });
+    if (uris?.[0]) {
+      setBasic({ profileImageUri: uris[0] });
+    }
+  };
 
-    if (!result.canceled && result.assets[0]) {
-      setBasic({ profileImageUri: result.assets[0].uri });
+  const handlePickFromCamera = async () => {
+    const uris = await pickImageFromCamera({
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+    if (uris?.[0]) {
+      setBasic({ profileImageUri: uris[0] });
     }
   };
 
   return (
+    <>
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <PawProgress currentStep={1} />
+      <OnboardingHeader currentStep={1} onBack={handleCancelRegistration} />
 
       <Text style={styles.title}>우리 아이를 소개해주세요</Text>
       <Text style={styles.subtitle}>기본 정보를 입력하면 등록이 완료돼요</Text>
 
-      <Pressable style={styles.avatarWrap} onPress={handlePickProfileImage}>
+      <Pressable style={styles.avatarWrap} onPress={() => setPhotoSheetVisible(true)}>
         <View style={styles.avatar}>
           {profileImageUri ? (
             <Image source={{ uri: profileImageUri }} style={styles.avatarImage} contentFit="cover" />
@@ -103,6 +127,18 @@ export default function DogBasicScreen() {
         style={styles.nextBtn}
       />
     </ScrollView>
+
+    <BottomSheet
+      visible={photoSheetVisible}
+      onClose={() => setPhotoSheetVisible(false)}
+      title="프로필 사진 추가"
+      subtitle="강아지 프로필 사진을 등록해주세요"
+      options={[
+        { icon: '📷', label: '카메라로 촬영', onPress: handlePickFromCamera },
+        { icon: '🖼️', label: '갤러리에서 선택', onPress: handlePickFromLibrary },
+      ]}
+    />
+  </>
   );
 }
 

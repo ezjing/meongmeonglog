@@ -5,12 +5,11 @@ import type { WalkSession } from '@/types/domain';
 
 interface WalkStore {
   activeWalk: WalkSession | null;
-  isPaused: boolean;
   elapsedSec: number;
   distanceMeter: number;
   locationBuffer: { latitude: number; longitude: number }[];
+  walkPath: { latitude: number; longitude: number }[];
   setActiveWalk: (walk: WalkSession | null) => void;
-  setPaused: (paused: boolean) => void;
   tickElapsed: () => void;
   addDistance: (meters: number) => void;
   addLocation: (latitude: number, longitude: number) => void;
@@ -20,19 +19,18 @@ interface WalkStore {
 
 export const useWalkStore = create<WalkStore>((set, get) => ({
   activeWalk: null,
-  isPaused: false,
   elapsedSec: 0,
   distanceMeter: 0,
   locationBuffer: [],
+  walkPath: [],
   setActiveWalk: (walk) => set({ activeWalk: walk }),
-  setPaused: (paused) => set({ isPaused: paused }),
-  tickElapsed: () => {
-    const { isPaused, elapsedSec } = get();
-    if (!isPaused) set({ elapsedSec: elapsedSec + 1 });
-  },
+  tickElapsed: () => set({ elapsedSec: get().elapsedSec + 1 }),
   addDistance: (meters) => set({ distanceMeter: get().distanceMeter + meters }),
   addLocation: (latitude, longitude) =>
-    set({ locationBuffer: [...get().locationBuffer, { latitude, longitude }] }),
+    set({
+      locationBuffer: [...get().locationBuffer, { latitude, longitude }],
+      walkPath: [...get().walkPath, { latitude, longitude }],
+    }),
   flushLocationBuffer: () => {
     const buffer = get().locationBuffer;
     set({ locationBuffer: [] });
@@ -41,10 +39,10 @@ export const useWalkStore = create<WalkStore>((set, get) => ({
   reset: () =>
     set({
       activeWalk: null,
-      isPaused: false,
       elapsedSec: 0,
       distanceMeter: 0,
       locationBuffer: [],
+      walkPath: [],
     }),
 }));
 

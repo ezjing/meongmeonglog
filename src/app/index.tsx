@@ -1,6 +1,7 @@
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { loadAuthSession } from '@/lib/authStorage';
 import { colors } from '@/constants/theme';
@@ -20,9 +21,9 @@ export default function Index() {
 
   if (!ready) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+      <SafeAreaView style={styles.loading}>
         <ActivityIndicator color={colors.apricot} />
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -32,3 +33,12 @@ export default function Index() {
 
   return <Redirect href="/(tabs)" />;
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+  },
+});

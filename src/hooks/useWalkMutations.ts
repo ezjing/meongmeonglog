@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import {
   startWalk,
   finishWalk,
+  cancelWalk,
   saveWalkEvent,
   uploadWalkPhotos,
   fetchWalkPhotos,
@@ -32,6 +33,12 @@ export function useFinishWalk() {
       payload: Parameters<typeof finishWalk>[1];
     }) => finishWalk(walkId, payload),
     onSuccess: () => trackEvent(AnalyticsEvents.walkFinished),
+  });
+}
+
+export function useCancelWalk() {
+  return useMutation({
+    mutationFn: cancelWalk,
   });
 }
 

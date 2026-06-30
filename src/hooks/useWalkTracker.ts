@@ -10,7 +10,6 @@ const LOCATION_INTERVAL_MS = 15_000;
 export function useWalkTracker() {
   const {
     activeWalk,
-    isPaused,
     elapsedSec,
     distanceMeter,
     tickElapsed,
@@ -24,16 +23,16 @@ export function useWalkTracker() {
   const locationRef = useRef<Location.LocationSubscription | null>(null);
 
   useEffect(() => {
-    if (!activeWalk || isPaused) return;
+    if (!activeWalk) return;
 
     timerRef.current = setInterval(tickElapsed, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [activeWalk, isPaused, tickElapsed]);
+  }, [activeWalk, tickElapsed]);
 
   useEffect(() => {
-    if (!activeWalk || isPaused) return;
+    if (!activeWalk) return;
 
     let cancelled = false;
 
@@ -71,7 +70,7 @@ export function useWalkTracker() {
       cancelled = true;
       locationRef.current?.remove();
     };
-  }, [activeWalk, isPaused, addLocation, addDistance]);
+  }, [activeWalk, addLocation, addDistance]);
 
   useEffect(() => {
     if (!activeWalk) return;
@@ -88,7 +87,6 @@ export function useWalkTracker() {
 
   return {
     activeWalk,
-    isPaused,
     elapsedSec,
     distanceMeter,
   };

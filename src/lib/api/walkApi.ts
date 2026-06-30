@@ -39,6 +39,19 @@ export async function startWalk(dogId: string): Promise<WalkSession> {
   return toWalkSession(data as WalkRow);
 }
 
+export async function cancelWalk(walkId: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mockWalks.delete(walkId);
+    mockPhotos.delete(walkId);
+    mockEvents.delete(walkId);
+    return;
+  }
+
+  const { error } = await supabase.from('walks').delete().eq('id', walkId);
+
+  if (error) throw new AppError('walk_cancel_failed', error.message);
+}
+
 export async function saveWalkLocation(
   walkId: string,
   latitude: number,

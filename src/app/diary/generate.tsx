@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { LoadingPaws } from "@/components/ui/LoadingPaws";
 import { QuoteCard } from "@/components/ui/ScreenContainer";
+import { useOverlay } from "@/components/ui/overlay";
 import { colors, spacing } from "@/constants/theme";
 import { useGenerateDiary } from "@/hooks/useDiaries";
 import { formatDistance, formatDuration } from "@/lib/utils/formatDistance";
@@ -16,6 +17,7 @@ export default function DiaryGenerateScreen() {
   const { walkId } = useLocalSearchParams<{ walkId: string }>();
   const generateDiary = useGenerateDiary();
   const resetWalk = useWalkStore((s) => s.reset);
+  const { showToast } = useOverlay();
   const [diary, setDiary] = useState<Diary | null>(null);
 
   useEffect(() => {
@@ -70,7 +72,10 @@ export default function DiaryGenerateScreen() {
           label="저장만 하기"
           variant="soft"
           style={styles.actionBtn}
-          onPress={() => router.replace("/(tabs)")}
+          onPress={() => {
+            showToast({ message: '🐾 일기가 저장되었어요', variant: 'success' });
+            router.replace("/(tabs)");
+          }}
         />
         <Button
           label="저장하고 공유하기"

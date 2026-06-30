@@ -1,15 +1,18 @@
 import { router } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image } from 'expo-image';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
+import { BottomSheet, useOverlay } from '@/components/ui/overlay';
 import {
   useFinishWalk,
   useSaveWalkEvent,
   useUploadWalkPhotos,
 } from '@/hooks/useWalkMutations';
 import { formatDistance, formatDuration } from '@/lib/utils/formatDistance';
+import { pickImageFromCamera, pickImageFromLibrary } from '@/lib/pickImage';
 import { colors, radius, spacing } from '@/constants/theme';
 import { useFinishWalkStore, useWalkStore } from '@/stores/walkStore';
 import type { DogMeetingLevel } from '@/types/database';
@@ -31,27 +34,42 @@ export default function WalkFinishScreen() {
   const finishWalk = useFinishWalk();
   const saveEvent = useSaveWalkEvent();
   const uploadPhotos = useUploadWalkPhotos();
+  const { showToast } = useOverlay();
+  const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
 
   const canGenerate = form.photoUris.length >= 1;
+  const remainingSlots = Math.max(0, 5 - form.photoUris.length);
 
-  const handlePickPhotos = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') return;
+  const appendPhotos = (uris: string[]) => {
+    if (uris.length === 0) return;
+    const merged = [...form.photoUris, ...uris].slice(0, 5);
+    setPhotoUris(merged);
+  };
 
-    const result = await ImagePicker.launchImageLibraryAsync({
+  const handleRemovePhoto = (index: number) => {
+    setPhotoUris(form.photoUris.filter((_, i) => i !== index));
+  };
+
+  const handlePickFromLibrary = async () => {
+    const uris = await pickImageFromLibrary({
       allowsMultipleSelection: true,
-      selectionLimit: 5,
-      mediaTypes: ['images'],
-      quality: 0.8,
+      selectionLimit: remainingSlots,
     });
+    if (uris) appendPhotos(uris);
+  };
 
-    if (!result.canceled) {
-      setPhotoUris(result.assets.map((a) => a.uri).slice(0, 5));
-    }
+  const handlePickFromCamera = async () => {
+    if (remainingSlots <= 0) return;
+    const uris = await pickImageFromCamera();
+    if (uris) appendPhotos(uris.slice(0, 1));
   };
 
   const handleGenerate = async () => {
-    if (!activeWalk || !canGenerate) return;
+    if (!activeWalk) return;
+    if (!canGenerate) {
+      showToast({ message: '⚠️ 사진을 1장 이상 첨부해주세요', variant: 'warning' });
+      return;
+    }
 
     await finishWalk.mutateAsync({
       walkId: activeWalk.walkId,
@@ -88,6 +106,7 @@ export default function WalkFinishScreen() {
   ];
 
   return (
+    <>
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.summaryBar}>
         <Chip label={`🚶 ${formatDistance(distanceMeter)}`} selected />
@@ -98,18 +117,25 @@ export default function WalkFinishScreen() {
       <Text style={styles.label}>사진 업로드 (1~5장)</Text>
       <View style={styles.photoGrid}>
         {form.photoUris.map((uri, i) => (
-          <View key={uri} style={styles.photo}>
-            <Text style={styles.photoEmoji}>🐶</Text>
+          <View key={`${uri}-${i}`} style={styles.photo}>
+            <Image source={{ uri }} style={styles.photoImage} contentFit="cover" />
+            <Pressable
+              style={styles.photoRemove}
+              onPress={() => handleRemovePhoto(i)}
+              accessibilityLabel="사진 삭제"
+            >
+              <Text style={styles.photoRemoveText}>×</Text>
+            </Pressable>
           </View>
         ))}
-        {Array.from({ length: Math.max(0, 5 - form.photoUris.length) }).map((_, i) => (
-          <Button
+        {Array.from({ length: remainingSlots }).map((_, i) => (
+          <Pressable
             key={`add-${i}`}
-            label="+"
-            variant="soft"
-            onPress={handlePickPhotos}
             style={styles.photoAdd}
-          />
+            onPress={() => setPhotoSheetVisible(true)}
+          >
+            <Text style={styles.photoAddText}>+</Text>
+          </Pressable>
         ))}
       </View>
 
@@ -142,11 +168,23 @@ export default function WalkFinishScreen() {
 
       <Button
         label="🐾 AI 일기 만들기"
-        disabled={!canGenerate || finishWalk.isPending}
+        disabled={finishWalk.isPending}
         onPress={handleGenerate}
         style={styles.cta}
       />
     </ScrollView>
+
+    <BottomSheet
+      visible={photoSheetVisible}
+      onClose={() => setPhotoSheetVisible(false)}
+      title="사진 추가하기"
+      subtitle="최대 5장까지 첨부할 수 있어요"
+      options={[
+        { icon: '📷', label: '카메라로 촬영', onPress: handlePickFromCamera },
+        { icon: '🖼️', label: '갤러리에서 선택', onPress: handlePickFromLibrary },
+      ]}
+    />
+    </>
   );
 }
 
@@ -161,11 +199,40 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: radius.sm - 1,
     backgroundColor: colors.clay,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  photoImage: { width: '100%', height: '100%' },
+  photoRemove: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: 'rgba(43,43,61,0.72)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  photoEmoji: { fontSize: 20 },
-  photoAdd: { width: 56, height: 56, paddingVertical: 0 },
+  photoRemoveText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 16,
+    marginTop: -1,
+  },
+  photoAdd: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.sm - 1,
+    backgroundColor: colors.white,
+    borderWidth: 1.4,
+    borderStyle: 'dashed',
+    borderColor: colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoAddText: { fontSize: 16, color: colors.grey, fontWeight: '700' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm - 2, marginBottom: spacing.md },
   memo: {
     backgroundColor: colors.white,

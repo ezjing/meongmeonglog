@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { OnboardingHeader } from '@/components/onboarding/OnboardingHeader';
 import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
-import { PawProgress } from '@/components/ui/PawProgress';
 import { personalityOptions, speechStyleOptions } from '@/constants/personalityOptions';
 import { colors, radius, spacing } from '@/constants/theme';
 import { useOnboardingStore } from '@/stores/walkStore';
@@ -20,7 +20,7 @@ export default function DogPersonalityScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <PawProgress currentStep={2} />
+      <OnboardingHeader currentStep={2} />
 
       <Text style={styles.title}>{name || '우리 아이'}는 어떤 성격인가요?</Text>
       <Text style={styles.subtitle}>중복 선택 가능 · AI 일기 말투에 반영돼요</Text>

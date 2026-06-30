@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, spacing } from '@/constants/theme';
@@ -8,18 +9,18 @@ interface PawProgressProps {
 }
 
 export function PawProgress({ currentStep, totalSteps = 3 }: PawProgressProps) {
+  const steps = Array.from({ length: totalSteps }, (_, i) => i + 1);
+
   return (
     <View style={styles.row}>
-      {Array.from({ length: totalSteps }, (_, i) => {
-        const step = i + 1;
-        const active = step <= currentStep;
-        return (
-          <View key={step} style={styles.item}>
-            {i > 0 && <View style={[styles.line, active && styles.lineActive]} />}
-            <Text style={[styles.paw, active && styles.pawActive]}>🐾</Text>
-          </View>
-        );
-      })}
+      {steps.map((step, index) => (
+        <Fragment key={step}>
+          <Text style={[styles.paw, step <= currentStep && styles.pawActive]}>🐾</Text>
+          {index < totalSteps - 1 ? (
+            <View style={[styles.line, currentStep > index + 1 && styles.lineActive]} />
+          ) : null}
+        </Fragment>
+      ))}
     </View>
   );
 }
@@ -28,20 +29,11 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md - 2,
-    gap: spacing.sm - 2,
-  },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
   },
   line: {
     flex: 1,
     height: 2,
     backgroundColor: colors.line,
-    marginRight: spacing.sm - 2,
   },
   lineActive: {
     backgroundColor: colors.apricot,

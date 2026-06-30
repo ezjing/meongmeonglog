@@ -1,6 +1,8 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
 import { Card } from '@/components/ui/Card';
 import { useDogs } from '@/hooks/useAuthSession';
 import { useDiaryList } from '@/hooks/useDiaries';
@@ -17,6 +19,7 @@ export default function HomeScreen() {
   const startWalk = useStartWalk();
   const setActiveWalk = useWalkStore((s) => s.setActiveWalk);
   const resetWalk = useWalkStore((s) => s.reset);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
   const dog = dogs?.[0];
   const recentDiary = diaries?.[0];
@@ -31,16 +34,22 @@ export default function HomeScreen() {
   };
 
   return (
+    <>
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {dog ? (
         <View style={styles.header}>
-          <View style={styles.avatar} />
-          <View>
-            <Text style={styles.dogName}>{dog.name}</Text>
-            <Text style={styles.dogBreed}>
-              {dog.breed} · {calculateAge(dog.birthDate)}살
-            </Text>
-          </View>
+          <Pressable style={styles.headerMain} onPress={() => setDrawerVisible(true)}>
+            <View style={styles.avatar} />
+            <View>
+              <Text style={styles.dogName}>{dog.name}</Text>
+              <Text style={styles.dogBreed}>
+                {dog.breed} · {calculateAge(dog.birthDate)}살
+              </Text>
+            </View>
+          </Pressable>
+          <Pressable style={styles.menuBtn} onPress={() => setDrawerVisible(true)}>
+            <Text style={styles.menuBtnText}>☰</Text>
+          </Pressable>
         </View>
       ) : null}
 
@@ -72,13 +81,34 @@ export default function HomeScreen() {
         <Text style={styles.emptyText}>아직 작성된 일기가 없어요</Text>
       )}
     </ScrollView>
+
+    <SettingsDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
-  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + 2, marginBottom: spacing.md },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm + 2,
+    marginBottom: spacing.md,
+  },
+  headerMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + 2, flex: 1 },
+  menuBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuBtnText: { fontSize: 16, color: colors.ink },
   avatar: {
     width: 42,
     height: 42,

@@ -14,6 +14,8 @@ export const colors = {
   kakaoText: '#3C1E1E',
   naver: '#03C75A',
   quoteBg: '#FFE9DC',
+  danger: '#D9534F',
+  overlay: 'rgba(43,43,61,0.46)',
 } as const;
 
 export const spacing = {

@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
+import { useOverlay } from '@/components/ui/overlay';
 import { fetchDogs } from '@/lib/api/dogApi';
 import { AnalyticsEvents, trackEvent } from '@/lib/analytics';
 import { useAuthSession } from '@/hooks/useAuthSession';
@@ -12,6 +13,7 @@ import { colors, spacing } from '@/constants/theme';
 
 export default function LoginScreen() {
   const { login, isLoggingIn } = useAuthSession();
+  const { showToast } = useOverlay();
 
   const navigateAfterLogin = async (userId: string) => {
     const dogs = await fetchDogs(userId);
@@ -35,7 +37,7 @@ export default function LoginScreen() {
           : error instanceof Error
             ? error.message
             : '카카오 로그인에 실패했습니다.';
-      Alert.alert('로그인 실패', message);
+      showToast({ message: `⚠️ ${message}`, variant: 'warning' });
     }
   };
 
@@ -52,7 +54,7 @@ export default function LoginScreen() {
           : error instanceof Error
             ? error.message
             : '네이버 로그인에 실패했습니다.';
-      Alert.alert('로그인 실패', message);
+      showToast({ message: `⚠️ ${message}`, variant: 'warning' });
     }
   };
 

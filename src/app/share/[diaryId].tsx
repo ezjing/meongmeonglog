@@ -2,10 +2,11 @@ import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
 import type { ComponentRef } from "react";
 import { useEffect, useRef, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import ViewShot from "react-native-view-shot";
 
 import { Button } from "@/components/ui/Button";
+import { useOverlay } from "@/components/ui/overlay";
 import { QuoteCard } from "@/components/ui/ScreenContainer";
 import { colors, radius, spacing } from "@/constants/theme";
 import { useDiary, useShareCard } from "@/hooks/useDiaries";
@@ -15,6 +16,7 @@ export default function ShareScreen() {
   const { diaryId } = useLocalSearchParams<{ diaryId: string }>();
   const { data: diary } = useDiary(diaryId ?? "");
   const shareCard = useShareCard();
+  const { showToast } = useOverlay();
   const viewShotRef = useRef<ComponentRef<typeof ViewShot>>(null);
   const [remoteUrl, setRemoteUrl] = useState<string | null>(null);
 
@@ -34,11 +36,11 @@ export default function ShareScreen() {
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(uri);
         } else {
-          Alert.alert("공유", "이 기기에서는 공유 기능을 사용할 수 없습니다.");
+          showToast({ message: "📶 이 기기에서는 공유 기능을 사용할 수 없어요", variant: "default" });
         }
       }
     } catch {
-      Alert.alert("오류", "이미지 저장에 실패했습니다.");
+      showToast({ message: "⚠️ 이미지 저장에 실패했어요", variant: "warning" });
     }
   };
 

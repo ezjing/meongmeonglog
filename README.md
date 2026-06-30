@@ -1,6 +1,6 @@
 # 멍멍로그 (Meongmeonglog)
 
-강아지 AI 산책 일기 앱 — React Native (Expo 56) + Supabase + OpenAI
+강아지 AI 산책 일기 앱 — React Native (Expo 56) + Supabase + Gemini
 
 ## 시작하기
 
@@ -24,7 +24,12 @@ supabase functions deploy welcome-greeting
 supabase functions deploy share-card
 ```
 
-Edge Function secrets: `OPENAI_API_KEY`, `DEV_AUTH`, `SUPABASE_SERVICE_ROLE_KEY`
+Edge Function secrets: `GEMINI_API_KEY`, `DEV_AUTH`, `SUPABASE_SERVICE_ROLE_KEY`
+
+```bash
+# Google AI Studio에서 API Key 발급 후
+supabase secrets set GEMINI_API_KEY=your-gemini-api-key --project-ref ansjpqdsujostrhukygy
+```
 
 ### 카카오 실연동 (Dev Client 필수)
 
@@ -42,12 +47,48 @@ npx expo prebuild --clean
 npx expo run:ios   # 또는 run:android
 ```
 
+#### Android 추가 설정
+
+`.env`에 Android SDK 경로를 등록하세요 (`.env.example` 참고):
+
+```bash
+ANDROID_SDK_PATH=$HOME/Library/Android/sdk
+```
+
+`npx expo prebuild` 실행 시 `plugins/withAndroidLocalProperties.js`가 `android/local.properties`를 자동 생성합니다.
+
+Android Studio에서 에뮬레이터를 켠 뒤:
+
+```bash
+npx expo run:android   # 최초 1회: Dev Client 빌드·설치
+npx expo start         # 이후 개발 시 Metro 실행 후 a
+```
+
+카카오 SDK Maven 저장소는 `plugins/withKakaoMaven.js` config plugin으로 prebuild 시 자동 추가됩니다.
+
+#### 산책 지도 (react-native-maps)
+
+- **iOS**: Apple Maps (별도 API 키 불필요)
+- **Android Dev Client**: Google Maps API 키 필요
+
+```bash
+# .env — Google Cloud Console > Maps SDK for Android 활성화 후 API 키 발급
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=발급받은_API_키
+```
+
+Android 키 제한: 앱 패키지 `com.ezjing.meongmeonglog` + SHA-1 지문 등록.  
+설정 후 `npx expo prebuild --clean` → `npx expo run:android` 로 다시 빌드하세요.
+
+Expo Go에서는 Android/iOS 모두 추가 설정 없이 지도가 표시됩니다.
+
 카카오 개발자 콘솔 등록:
+
 - Android 패키지: `com.ezjing.meongmeonglog` + 키 해시
 - iOS 번들 ID: `com.ezjing.meongmeonglog`
 - 동의항목: 닉네임, 카카오계정(이메일)
 
 네이버 개발자센터 iOS 등록:
+
 - Bundle ID: `com.ezjing.meongmeonglog`
 - URL Scheme: `navergCz8w9XGrHS81JnOoJB6`
 - Android 패키지: `com.ezjing.meongmeonglog`
