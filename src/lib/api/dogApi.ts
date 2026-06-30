@@ -107,8 +107,7 @@ export async function uploadDogProfileImage(userId: string, uri: string): Promis
   }
 
   const ownerId = authUserId ?? userId;
-  const ext = uri.split('.').pop()?.split('?')[0]?.toLowerCase() || 'jpg';
-  const path = `${ownerId}/profile-${Date.now()}.${ext}`;
+  const path = `${ownerId}/profile-${Date.now()}.jpg`;
 
   return uploadStorageImage('dog-profiles', path, uri);
 }

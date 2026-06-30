@@ -1,4 +1,4 @@
-import { generateGeminiContent } from "../_shared/gemini.ts";
+import { generateGroqContent } from "../_shared/groq.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,9 +14,9 @@ Deno.serve(async (req) => {
   try {
     const { dogName, personality, speechStyle } = await req.json();
 
-    const greeting = await generateGeminiContent({
+    const { text: greeting } = await generateGroqContent({
       systemInstruction:
-        "강아지 1인칭으로 짧은 환영 인사말을 작성합니다. 2문장 이내.",
+        "강아지 1인칭으로 짧은 환영 인사말을 작성합니다. 2문장 이내. 반드시 한국어로만 작성합니다.",
       userPrompt: `이름: ${dogName}, 성격: ${JSON.stringify(personality)}, 말투: ${speechStyle ?? "기본"}`,
     });
 

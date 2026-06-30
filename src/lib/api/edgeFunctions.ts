@@ -8,8 +8,8 @@ function toUserFriendlyMessage(message: string): string {
   if (message.includes('429') || message.toLowerCase().includes('quota')) {
     return 'AI API 사용 한도를 초과했습니다. API 키/크레딧을 확인해주세요.';
   }
-  if (message.includes('GEMINI_API_KEY')) {
-    return 'Gemini API 키가 설정되지 않았습니다. Supabase secret을 확인해주세요.';
+  if (message.includes('GROQ_API_KEY')) {
+    return 'Groq API 키가 설정되지 않았습니다. Supabase secret을 확인해주세요.';
   }
   if (message.includes('Walk not found')) {
     return '산책 기록을 찾을 수 없습니다.';

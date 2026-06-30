@@ -155,8 +155,7 @@ export async function uploadWalkPhotos(
 
   for (let i = 0; i < uris.length; i++) {
     const uri = uris[i];
-    const ext = uri.split('.').pop()?.split('?')[0]?.toLowerCase() || 'jpg';
-    const path = `${ownerId}/${walkId}/${i}.${ext}`;
+    const path = `${ownerId}/${walkId}/${i}.jpg`;
     const publicUrl = await uploadStorageImage('walk-photos', path, uri);
 
     const { data, error } = await supabase

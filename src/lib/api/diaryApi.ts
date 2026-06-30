@@ -132,7 +132,7 @@ export async function generateDiary(walkId: string): Promise<Diary> {
       content:
         "오늘은 엄마랑 공원에 다녀왔어! 친구도 만나고 잔디밭도 열심히 뛰어다녔지. 간식도 먹고 냄새 탐험도 많이 해서 정말 즐거운 하루였어!",
       dailyQuote: "친구는 냄새만 맡아도 알 수 있대!",
-      aiModel: "gemini-2.5-flash",
+      aiModel: "qwen/qwen3-32b",
       generatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       dogName: "코코",
@@ -160,6 +160,7 @@ export async function generateDiary(walkId: string): Promise<Diary> {
     diaryId: string;
     content: string;
     dailyQuote: string;
+    aiModel?: string;
   };
   return {
     diaryId: result.diaryId,
@@ -167,7 +168,7 @@ export async function generateDiary(walkId: string): Promise<Diary> {
     dogId: "",
     content: result.content,
     dailyQuote: result.dailyQuote,
-    aiModel: "gemini-2.5-flash",
+    aiModel: result.aiModel ?? "qwen/qwen3-32b",
     generatedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
   };

@@ -1,8 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import {
-  GEMINI_MODEL,
-  generateGeminiContent,
-} from "../_shared/gemini.ts";
+import { generateGroqContent } from "../_shared/groq.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,7 +42,7 @@ Deno.serve(async (req) => {
 JSON 형식으로 응답: {"content":"일기 본문","dailyQuote":"오늘의 한마디 한 줄"}
 `.trim();
 
-    const content = await generateGeminiContent({
+    const { text: content, model } = await generateGroqContent({
       systemInstruction:
         "당신은 반려견 시점의 감성 일기 작가입니다. 따뜻하고 자연스러운 한국어로 작성합니다.",
       userPrompt: prompt,
@@ -63,7 +60,7 @@ JSON 형식으로 응답: {"content":"일기 본문","dailyQuote":"오늘의 한
         dog_id: dog.id,
         diary_content: parsed.content ?? "오늘 산책 정말 즐거웠어!",
         daily_quote: parsed.dailyQuote ?? "산책은 최고야!",
-        ai_model: GEMINI_MODEL,
+        ai_model: model,
         generated_at: new Date().toISOString(),
       })
       .select()
@@ -76,6 +73,7 @@ JSON 형식으로 응답: {"content":"일기 본문","dailyQuote":"오늘의 한
         diaryId: diary.id,
         content: diary.diary_content,
         dailyQuote: diary.daily_quote,
+        aiModel: model,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );

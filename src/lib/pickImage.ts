@@ -7,6 +7,9 @@ interface PickImageOptions {
   selectionLimit?: number;
 }
 
+const iosCompatibleAssetMode =
+  ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible;
+
 export async function pickImageFromLibrary(options: PickImageOptions = {}) {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (status !== 'granted') return null;
@@ -18,6 +21,7 @@ export async function pickImageFromLibrary(options: PickImageOptions = {}) {
     allowsMultipleSelection: options.allowsMultipleSelection ?? false,
     selectionLimit: options.selectionLimit,
     quality: 0.8,
+    preferredAssetRepresentationMode: iosCompatibleAssetMode,
   });
 
   if (result.canceled) return null;
@@ -33,6 +37,7 @@ export async function pickImageFromCamera(options: PickImageOptions = {}) {
     allowsEditing: options.allowsEditing ?? false,
     aspect: options.aspect,
     quality: 0.8,
+    preferredAssetRepresentationMode: iosCompatibleAssetMode,
   });
 
   if (result.canceled) return null;

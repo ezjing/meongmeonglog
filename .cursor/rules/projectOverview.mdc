@@ -7,7 +7,7 @@ alwaysApply: true
 
 - 서비스: 강아지 AI 산책 일기 앱 (React Native Expo 56)
 - 백엔드: Supabase (Auth, PostgreSQL, Storage, Edge Functions)
-- AI: OpenAI API (Edge Functions에서 호출)
+- AI: Groq API (Edge Functions에서 호출)
 - Expo 문서: https://docs.expo.dev/versions/v56.0.0/
 
 ## 폴더 구조 (Expo 기본 + 최소 추가)

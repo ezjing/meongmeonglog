@@ -1,6 +1,6 @@
 # 멍멍로그 (Meongmeonglog)
 
-강아지 AI 산책 일기 앱 — React Native (Expo 56) + Supabase + Gemini
+강아지 AI 산책 일기 앱 — React Native (Expo 56) + Supabase + Groq
 
 ## 시작하기
 
@@ -24,11 +24,11 @@ supabase functions deploy welcome-greeting
 supabase functions deploy share-card
 ```
 
-Edge Function secrets: `GEMINI_API_KEY`, `DEV_AUTH`, `SUPABASE_SERVICE_ROLE_KEY`
+Edge Function secrets: `GROQ_API_KEY`, `DEV_AUTH`, `SUPABASE_SERVICE_ROLE_KEY`
 
 ```bash
-# Google AI Studio에서 API Key 발급 후
-supabase secrets set GEMINI_API_KEY=your-gemini-api-key --project-ref ansjpqdsujostrhukygy
+# console.groq.com 에서 API Key 발급 후 (카드 불필요)
+supabase secrets set GROQ_API_KEY=your-groq-api-key --project-ref ansjpqdsujostrhukygy
 ```
 
 ### 카카오 실연동 (Dev Client 필수)
