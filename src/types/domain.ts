@@ -1,4 +1,4 @@
-import type { AuthProvider, DogGender, DogMeetingLevel } from './database';
+import type { AuthProvider, DogGender, DogMeetingLevel } from "./database";
 
 export interface DogProfile {
   dogId: string;
@@ -69,6 +69,21 @@ export interface AuthSession {
   userId: string;
   accessToken: string;
   provider: AuthProvider;
+}
+
+export interface GuardianProfile {
+  guardianTitle: string | null;
+  parentingStyle: string | null;
+  currentConcern: string | null;
+  guardianProfileImageUrl: string | null;
+}
+
+export interface UpdateGuardianProfileInput {
+  guardianTitle: string;
+  parentingStyle?: string;
+  currentConcern?: string;
+  profileImageUri?: string;
+  guardianProfileImageUrl?: string | null;
 }
 
 export interface CreateDogInput {

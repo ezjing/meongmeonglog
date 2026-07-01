@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useOverlay } from '@/components/ui/overlay';
 import { useAuthSession, useDogs, useUpdateDog } from '@/hooks/useAuthSession';
+import { useGuardianProfile } from '@/hooks/useGuardianProfile';
 import { requestLocationPermission } from '@/hooks/useWalkTracker';
 import { colors, spacing } from '@/constants/theme';
 
@@ -15,8 +16,10 @@ export default function SettingsScreen() {
   const { data: dogs } = useDogs();
   const updateDog = useUpdateDog();
   const { showAlert, showToast } = useOverlay();
+  const { data: guardianProfile } = useGuardianProfile();
   const [drawerVisible, setDrawerVisible] = useState(false);
   const dog = dogs?.[0];
+  const guardianTitle = guardianProfile?.guardianTitle?.trim();
 
   const handleLogout = async () => {
     const confirmed = await showAlert({
@@ -49,6 +52,33 @@ export default function SettingsScreen() {
             <Text style={styles.menuBtnText}>☰</Text>
           </Pressable>
         </View>
+
+        <Card style={styles.section}>
+          <Text style={styles.sectionTitle}>보호자 정보</Text>
+          {guardianTitle ? (
+            <>
+              <Text style={styles.row}>호칭: {guardianTitle}</Text>
+              {guardianProfile?.parentingStyle ? (
+                <Text style={styles.row}>
+                  양육 스타일: {guardianProfile.parentingStyle}
+                </Text>
+              ) : null}
+              {guardianProfile?.currentConcern ? (
+                <Text style={styles.row}>
+                  현재 고민: {guardianProfile.currentConcern}
+                </Text>
+              ) : null}
+            </>
+          ) : (
+            <Text style={styles.row}>등록된 보호자 정보가 없어요</Text>
+          )}
+          <Button
+            label="보호자 정보 수정"
+            variant="soft"
+            onPress={() => router.push('/guardian/edit')}
+            style={styles.btn}
+          />
+        </Card>
 
         <Card style={styles.section}>
           <Text style={styles.sectionTitle}>내 강아지</Text>

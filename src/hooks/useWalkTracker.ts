@@ -1,11 +1,45 @@
 import { useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
 
-import { saveWalkLocation } from '@/lib/api/walkApi';
+import { fetchCurrentWeather } from '@/lib/api/weatherApi';
+import { saveWalkLocation, updateWalkWeather } from '@/lib/api/walkApi';
 import { haversineDistance } from '@/lib/utils/formatDistance';
 import { useWalkStore } from '@/stores/walkStore';
 
 const LOCATION_INTERVAL_MS = 15_000;
+
+export async function getCurrentCoordinates(): Promise<{
+  latitude: number;
+  longitude: number;
+} | null> {
+  const { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== 'granted') return null;
+
+  const position = await Location.getCurrentPositionAsync({
+    accuracy: Location.Accuracy.Balanced,
+  });
+
+  return {
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude,
+  };
+}
+
+async function applyWeatherForCoords(
+  walkId: string,
+  latitude: number,
+  longitude: number,
+): Promise<void> {
+  const weather = await fetchCurrentWeather(latitude, longitude);
+  const payload = {
+    weatherCondition: weather.condition,
+    weatherTemp: weather.temp,
+    weatherIcon: weather.icon,
+  };
+
+  useWalkStore.getState().updateActiveWalkWeather(payload);
+  await updateWalkWeather(walkId, payload).catch(() => {});
+}
 
 export function useWalkTracker() {
   const {
@@ -21,6 +55,7 @@ export function useWalkTracker() {
   const lastCoords = useRef<{ latitude: number; longitude: number } | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const locationRef = useRef<Location.LocationSubscription | null>(null);
+  const weatherFetchedRef = useRef(false);
 
   useEffect(() => {
     if (!activeWalk) return;
@@ -30,6 +65,10 @@ export function useWalkTracker() {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [activeWalk, tickElapsed]);
+
+  useEffect(() => {
+    weatherFetchedRef.current = false;
+  }, [activeWalk?.walkId]);
 
   useEffect(() => {
     if (!activeWalk) return;
@@ -49,6 +88,13 @@ export function useWalkTracker() {
         (loc) => {
           const { latitude, longitude } = loc.coords;
           addLocation(latitude, longitude);
+
+          if (!weatherFetchedRef.current && activeWalk.weatherTemp == null) {
+            weatherFetchedRef.current = true;
+            applyWeatherForCoords(activeWalk.walkId, latitude, longitude).catch(() => {
+              weatherFetchedRef.current = false;
+            });
+          }
 
           if (lastCoords.current) {
             const delta = haversineDistance(

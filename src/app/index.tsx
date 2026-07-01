@@ -1,20 +1,26 @@
-import { Redirect } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Redirect, type Href } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { loadAuthSession } from '@/lib/authStorage';
-import { colors } from '@/constants/theme';
-import { useAuthStore } from '@/stores/walkStore';
+import { colors } from "@/constants/theme";
+import { loadAuthSession } from "@/lib/authStorage";
+import { resolveOnboardingRoute } from "@/lib/onboardingRoute";
+import { useAuthStore } from "@/stores/walkStore";
 
 export default function Index() {
   const userId = useAuthStore((s) => s.userId);
   const setSession = useAuthStore((s) => s.setSession);
   const [ready, setReady] = useState(false);
+  const [route, setRoute] = useState<Href | null>(null);
 
   useEffect(() => {
-    loadAuthSession().then((stored) => {
-      if (stored) setSession(stored.userId, stored.provider);
+    loadAuthSession().then(async (stored) => {
+      if (stored) {
+        setSession(stored.userId, stored.provider);
+        const nextRoute = await resolveOnboardingRoute(stored.userId);
+        setRoute(nextRoute);
+      }
       setReady(true);
     });
   }, [setSession]);
@@ -31,14 +37,14 @@ export default function Index() {
     return <Redirect href="/(auth)/login" />;
   }
 
-  return <Redirect href="/(tabs)" />;
+  return <Redirect href={route ?? "/(tabs)"} />;
 }
 
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: colors.background,
   },
 });

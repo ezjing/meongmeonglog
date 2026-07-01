@@ -37,6 +37,7 @@ export default function RootLayout() {
               <Stack.Screen name="walk" />
               <Stack.Screen name="diary" />
               <Stack.Screen name="share" />
+              <Stack.Screen name="guardian" />
             </Stack>
           </QueryClientProvider>
         </OverlayProvider>

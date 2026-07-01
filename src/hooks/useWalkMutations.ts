@@ -7,6 +7,7 @@ import {
   saveWalkEvent,
   uploadWalkPhotos,
   fetchWalkPhotos,
+  type WalkWeatherPayload,
 } from '@/lib/api/walkApi';
 import { AnalyticsEvents, trackEvent } from '@/lib/analytics';
 import type { WalkEvent } from '@/types/domain';
@@ -18,7 +19,13 @@ export const walkKeys = {
 
 export function useStartWalk() {
   return useMutation({
-    mutationFn: startWalk,
+    mutationFn: ({
+      dogId,
+      weather,
+    }: {
+      dogId: string;
+      weather?: WalkWeatherPayload;
+    }) => startWalk(dogId, weather),
     onSuccess: () => trackEvent(AnalyticsEvents.walkStarted),
   });
 }

@@ -1,17 +1,17 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { LoadingOverlayCard } from '@/components/ui/LoadingOverlay';
 import { colors, spacing } from '@/constants/theme';
 
 interface LoadingPawsProps {
   message: string;
+  subtitle?: string;
 }
 
-export function LoadingPaws({ message }: LoadingPawsProps) {
+export function LoadingPaws({ message, subtitle }: LoadingPawsProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.paws}>🐾 🐾 🐾</Text>
-      <ActivityIndicator color={colors.apricot} style={styles.spinner} />
-      <Text style={styles.message}>{message}</Text>
+      <LoadingOverlayCard title={message} subtitle={subtitle} />
     </View>
   );
 }
@@ -22,17 +22,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
-  },
-  paws: {
-    fontSize: 24,
-    marginBottom: spacing.md,
-  },
-  spinner: {
-    marginBottom: spacing.md,
-  },
-  message: {
-    fontSize: 14,
-    color: colors.grey,
-    textAlign: 'center',
+    backgroundColor: colors.background,
   },
 });

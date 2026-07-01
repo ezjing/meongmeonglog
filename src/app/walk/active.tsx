@@ -17,9 +17,11 @@ export default function WalkActiveScreen() {
   const { showAlert, showToast } = useOverlay();
   const cancelWalk = useCancelWalk();
 
-  const weatherLabel = activeWalk?.weatherIcon
-    ? `${activeWalk.weatherCondition ?? "맑음"} ${activeWalk.weatherTemp ?? 23}°C`
-    : "맑음 23°C";
+  const weatherIcon = activeWalk?.weatherIcon ?? "🌡️";
+  const weatherLabel =
+    activeWalk?.weatherTemp != null
+      ? `${activeWalk.weatherCondition ?? "날씨"} ${activeWalk.weatherTemp}°C`
+      : "날씨 조회 중…";
 
   const handleFinishPress = async () => {
     const confirmed = await showAlert({
@@ -75,7 +77,8 @@ export default function WalkActiveScreen() {
         <WalkMap routePath={walkPath} />
         <View style={styles.weatherBadge}>
           <Text style={styles.weatherText}>
-            ☀️ {activeWalk.weatherTemp ?? 23}°C
+            {weatherIcon}{" "}
+            {activeWalk.weatherTemp != null ? `${activeWalk.weatherTemp}°C` : "…"}
           </Text>
         </View>
       </View>

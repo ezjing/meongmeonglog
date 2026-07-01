@@ -28,7 +28,6 @@ export default function WalkFinishScreen() {
     togglePoop,
     setDogMeetingLevel,
     setMemo,
-    reset: resetForm,
   } = useFinishWalkStore();
 
   const finishWalk = useFinishWalk();
@@ -77,9 +76,9 @@ export default function WalkFinishScreen() {
         endedAt: new Date().toISOString(),
         distanceMeter: Math.round(distanceMeter),
         durationSec: elapsedSec,
-        weatherCondition: activeWalk.weatherCondition ?? '맑음',
-        weatherTemp: activeWalk.weatherTemp ?? 23,
-        weatherIcon: activeWalk.weatherIcon ?? '☀️',
+        weatherCondition: activeWalk.weatherCondition ?? undefined,
+        weatherTemp: activeWalk.weatherTemp ?? undefined,
+        weatherIcon: activeWalk.weatherIcon ?? undefined,
       },
     });
 
@@ -93,9 +92,12 @@ export default function WalkFinishScreen() {
       },
     });
 
-    await uploadPhotos.mutateAsync({ walkId: activeWalk.walkId, uris: form.photoUris });
+    const uploaded = await uploadPhotos.mutateAsync({
+      walkId: activeWalk.walkId,
+      uris: form.photoUris,
+    });
 
-    resetForm();
+    useWalkStore.getState().setPendingWalkPhotos(activeWalk.walkId, uploaded);
     router.push({ pathname: '/diary/generate', params: { walkId: activeWalk.walkId } });
   };
 
@@ -111,7 +113,14 @@ export default function WalkFinishScreen() {
       <View style={styles.summaryBar}>
         <Chip label={`🚶 ${formatDistance(distanceMeter)}`} selected />
         <Chip label={`⏱ ${formatDuration(elapsedSec)}`} selected />
-        <Chip label={`☀️ ${activeWalk?.weatherTemp ?? 23}°C`} selected />
+        <Chip
+          label={
+            activeWalk?.weatherTemp != null
+              ? `${activeWalk.weatherIcon ?? '🌡️'} ${activeWalk.weatherTemp}°C`
+              : '🌡️ 날씨 조회 중'
+          }
+          selected
+        />
       </View>
 
       <Text style={styles.label}>사진 업로드 (1~5장)</Text>

@@ -1,17 +1,20 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
+import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
 import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
 import { useDiaryList } from '@/hooks/useDiaries';
 import { formatDate, formatDistance, formatDuration } from '@/lib/utils/formatDistance';
-import { colors, radius, spacing } from '@/constants/theme';
+import { colors, spacing } from '@/constants/theme';
+import { useWalkStore } from '@/stores/walkStore';
 import type { DiaryListItem } from '@/types/domain';
 
 export default function ListScreen() {
   const [sortByDate, setSortByDate] = useState(false);
   const { data: diaries, isLoading } = useDiaryList();
+  const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
 
   const sorted = [...(diaries ?? [])].sort((a, b) => {
     if (sortByDate) {
@@ -22,7 +25,11 @@ export default function ListScreen() {
 
   const renderItem = ({ item }: { item: DiaryListItem }) => (
     <Card style={styles.card} onTouchEnd={() => router.push(`/diary/${item.diaryId}`)}>
-      <View style={styles.thumb} />
+      <DiaryThumbnail
+        diary={item}
+        pendingPhotosByWalkId={pendingPhotosByWalkId}
+        size={50}
+      />
       <View style={styles.body}>
         <Text style={styles.meta}>
           {formatDate(item.createdAt)}
@@ -59,7 +66,6 @@ const styles = StyleSheet.create({
   sortRow: { flexDirection: 'row', gap: spacing.sm, padding: spacing.md, paddingBottom: spacing.xs },
   list: { padding: spacing.md, paddingTop: spacing.xs, gap: spacing.sm },
   card: { flexDirection: 'row', gap: spacing.sm + 2, alignItems: 'center', marginBottom: spacing.sm },
-  thumb: { width: 50, height: 50, borderRadius: radius.sm, backgroundColor: colors.apricot },
   body: { flex: 1 },
   meta: { fontSize: 10, color: colors.grey, marginBottom: 3 },
   quote: { fontSize: 12, fontWeight: '600', color: colors.ink },

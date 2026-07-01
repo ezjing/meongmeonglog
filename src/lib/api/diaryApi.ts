@@ -1,11 +1,59 @@
-import { AppError } from "@/lib/AppError";
 import { getEdgeFunctionErrorMessage } from "@/lib/api/edgeFunctions";
+import { fetchWalkPhotos } from "@/lib/api/walkApi";
+import { AppError } from "@/lib/AppError";
 import { toDiary } from "@/lib/mappers/diaryMappers";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import type { DiaryRow } from "@/types/database";
 import type { CalendarDay, Diary, DiaryListItem } from "@/types/domain";
 
 const mockDiaries: DiaryListItem[] = [];
+
+type WalkPhotoRow = { image_url: string; sort_order: number };
+
+type WalkWithPhotos = {
+  distance_meter: number;
+  duration_sec: number;
+  walk_photos: WalkPhotoRow[] | null;
+};
+
+function pickThumbnailUrl(
+  walkPhotos: WalkPhotoRow[] | null | undefined,
+): string | null {
+  if (!walkPhotos?.length) return null;
+  return (
+    [...walkPhotos].sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url ??
+    null
+  );
+}
+
+async function attachMockThumbnail(
+  diary: DiaryListItem,
+): Promise<DiaryListItem> {
+  const photos = await fetchWalkPhotos(diary.walkId);
+  return {
+    ...diary,
+    thumbnailUrl: photos[0]?.imageUrl ?? null,
+  };
+}
+
+async function attachMockThumbnails(
+  diaries: DiaryListItem[],
+): Promise<DiaryListItem[]> {
+  return Promise.all(diaries.map(attachMockThumbnail));
+}
+
+function mapDiaryRow(row: Record<string, unknown>): DiaryListItem {
+  const diary = toDiary(row as DiaryRow);
+  const walks = row.walks as WalkWithPhotos | null;
+  const dogs = row.dogs as { name: string } | null;
+  return {
+    ...diary,
+    dogName: dogs?.name,
+    distanceMeter: walks?.distance_meter,
+    durationSec: walks?.duration_sec,
+    thumbnailUrl: pickThumbnailUrl(walks?.walk_photos),
+  };
+}
 
 export const diaryKeys = {
   all: ["diaries"] as const,
@@ -17,18 +65,20 @@ export const diaryKeys = {
 
 export async function fetchDiaries(date?: string): Promise<DiaryListItem[]> {
   if (!isSupabaseConfigured) {
-    if (date) {
-      return mockDiaries.filter((d) => d.createdAt.startsWith(date));
-    }
-    return [...mockDiaries].sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    const filtered = date
+      ? mockDiaries.filter((d) => d.createdAt.startsWith(date))
+      : [...mockDiaries].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+    return attachMockThumbnails(filtered);
   }
 
   let query = supabase
     .from("diaries")
-    .select("*, walks(distance_meter, duration_sec), dogs(name)")
+    .select(
+      "*, walks(distance_meter, duration_sec, walk_photos(image_url, sort_order)), dogs(name)",
+    )
     .order("created_at", { ascending: false });
 
   if (date) {
@@ -40,50 +90,28 @@ export async function fetchDiaries(date?: string): Promise<DiaryListItem[]> {
   const { data, error } = await query;
   if (error) throw new AppError("fetch_diaries_failed", error.message);
 
-  return (data ?? []).map((row) => {
-    const diary = toDiary(row as DiaryRow);
-    const walks = row.walks as {
-      distance_meter: number;
-      duration_sec: number;
-    } | null;
-    const dogs = row.dogs as { name: string } | null;
-    return {
-      ...diary,
-      dogName: dogs?.name,
-      distanceMeter: walks?.distance_meter,
-      durationSec: walks?.duration_sec,
-    };
-  });
+  return (data ?? []).map((row) => mapDiaryRow(row as Record<string, unknown>));
 }
 
 export async function fetchDiary(
   diaryId: string,
 ): Promise<DiaryListItem | null> {
   if (!isSupabaseConfigured) {
-    return mockDiaries.find((d) => d.diaryId === diaryId) ?? null;
+    const diary = mockDiaries.find((d) => d.diaryId === diaryId);
+    if (!diary) return null;
+    return attachMockThumbnail(diary);
   }
 
   const { data, error } = await supabase
     .from("diaries")
-    .select("*, walks(*), dogs(name)")
+    .select("*, walks(*, walk_photos(image_url, sort_order)), dogs(name)")
     .eq("id", diaryId)
     .maybeSingle();
 
   if (error) throw new AppError("fetch_diary_failed", error.message);
   if (!data) return null;
 
-  const diary = toDiary(data as DiaryRow);
-  const walks = data.walks as {
-    distance_meter: number;
-    duration_sec: number;
-  } | null;
-  const dogs = data.dogs as { name: string } | null;
-  return {
-    ...diary,
-    dogName: dogs?.name,
-    distanceMeter: walks?.distance_meter,
-    durationSec: walks?.duration_sec,
-  };
+  return mapDiaryRow(data as Record<string, unknown>);
 }
 
 export async function fetchCalendar(
@@ -125,6 +153,7 @@ export async function fetchCalendar(
 
 export async function generateDiary(walkId: string): Promise<Diary> {
   if (!isSupabaseConfigured) {
+    const photos = await fetchWalkPhotos(walkId);
     const diary: DiaryListItem = {
       diaryId: `diary-${Date.now()}`,
       walkId,
@@ -135,9 +164,10 @@ export async function generateDiary(walkId: string): Promise<Diary> {
       aiModel: "qwen/qwen3-32b",
       generatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
-      dogName: "코코",
+      dogName: DEFAULT_DOG_NAME,
       distanceMeter: 1200,
       durationSec: 1080,
+      thumbnailUrl: photos[0]?.imageUrl ?? null,
     };
     mockDiaries.unshift(diary);
     return diary;

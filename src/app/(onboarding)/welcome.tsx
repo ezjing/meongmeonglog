@@ -1,16 +1,16 @@
-import { router } from 'expo-router';
-import { Image } from 'expo-image';
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-import { Button } from '@/components/ui/Button';
-import { LoadingPaws } from '@/components/ui/LoadingPaws';
-import { AnalyticsEvents, trackEvent } from '@/lib/analytics';
-import { uploadDogProfileImage } from '@/lib/api/dogApi';
-import { useCreateDog } from '@/hooks/useAuthSession';
-import { useWelcomeGreeting } from '@/hooks/useDiaries';
-import { colors, radius, spacing } from '@/constants/theme';
-import { useAuthStore, useOnboardingStore } from '@/stores/walkStore';
+import { Button } from "@/components/ui/Button";
+import { LoadingPaws } from "@/components/ui/LoadingPaws";
+import { colors, radius, spacing } from "@/constants/theme";
+import { useCreateDog } from "@/hooks/useAuthSession";
+import { useWelcomeGreeting } from "@/hooks/useDiaries";
+import { AnalyticsEvents, trackEvent } from "@/lib/analytics";
+import { uploadDogProfileImage } from "@/lib/api/dogApi";
+import { useAuthStore, useOnboardingStore } from "@/stores/walkStore";
 
 function parseWeightKg(value: string): number | null {
   const parsed = Number.parseFloat(value);
@@ -31,7 +31,10 @@ export default function WelcomeScreen() {
       try {
         let profileImageUrl: string | undefined;
         if (store.profileImageUri && userId) {
-          profileImageUrl = await uploadDogProfileImage(userId, store.profileImageUri);
+          profileImageUrl = await uploadDogProfileImage(
+            userId,
+            store.profileImageUri,
+          );
         }
 
         await createDog.mutateAsync({
@@ -59,9 +62,7 @@ export default function WelcomeScreen() {
   }, []);
 
   if (isCreating || !greeting) {
-    return (
-      <LoadingPaws message={`${store.name || '우리 아이'}가 인사말을 쓰고 있어요`} />
-    );
+    return <LoadingPaws message={`${store.name}가 인사말을 쓰고 있어요`} />;
   }
 
   return (
@@ -76,7 +77,11 @@ export default function WelcomeScreen() {
 
       <View style={styles.avatar}>
         {store.profileImageUri ? (
-          <Image source={{ uri: store.profileImageUri }} style={styles.avatarImage} contentFit="cover" />
+          <Image
+            source={{ uri: store.profileImageUri }}
+            style={styles.avatarImage}
+            contentFit="cover"
+          />
         ) : (
           <Text style={styles.avatarEmoji}>🐶</Text>
         )}
@@ -92,7 +97,7 @@ export default function WelcomeScreen() {
         label="산책하러 가볼까?"
         onPress={() => {
           store.reset();
-          router.replace('/(tabs)');
+          router.replace("/(tabs)");
         }}
         style={styles.cta}
       />
@@ -104,8 +109,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: spacing.lg,
   },
   check: {
@@ -113,30 +118,35 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: 23,
     backgroundColor: colors.moss,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: spacing.sm,
   },
-  checkText: { color: colors.white, fontSize: 20, fontWeight: '700' },
-  doneTitle: { fontSize: 14, fontWeight: '800', color: colors.ink },
-  doneSub: { fontSize: 11, color: colors.grey, marginBottom: spacing.md, textAlign: 'center' },
+  checkText: { color: colors.white, fontSize: 20, fontWeight: "700" },
+  doneTitle: { fontSize: 14, fontWeight: "800", color: colors.ink },
+  doneSub: {
+    fontSize: 11,
+    color: colors.grey,
+    marginBottom: spacing.md,
+    textAlign: "center",
+  },
   avatar: {
     width: 64,
     height: 64,
     borderRadius: 32,
     backgroundColor: colors.apricot,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginVertical: spacing.md,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
-  avatarImage: { width: '100%', height: '100%' },
+  avatarImage: { width: "100%", height: "100%" },
   avatarEmoji: { fontSize: 28 },
   speech: {
     backgroundColor: colors.white,
     borderRadius: radius.xl,
     padding: spacing.md,
-    width: '100%',
+    width: "100%",
     shadowColor: colors.ink,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.1,
@@ -145,5 +155,5 @@ const styles = StyleSheet.create({
   },
   speechText: { fontSize: 14, lineHeight: 22, color: colors.ink },
   paws: { fontSize: 14, marginVertical: spacing.md },
-  cta: { width: '100%' },
+  cta: { width: "100%" },
 });

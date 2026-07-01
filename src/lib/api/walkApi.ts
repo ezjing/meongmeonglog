@@ -9,7 +9,16 @@ const mockWalks = new Map<string, WalkSession>();
 const mockPhotos = new Map<string, WalkPhoto[]>();
 const mockEvents = new Map<string, WalkEvent>();
 
-export async function startWalk(dogId: string): Promise<WalkSession> {
+export interface WalkWeatherPayload {
+  weatherCondition: string;
+  weatherTemp: number;
+  weatherIcon: string;
+}
+
+export async function startWalk(
+  dogId: string,
+  weather?: WalkWeatherPayload,
+): Promise<WalkSession> {
   if (!isSupabaseConfigured) {
     const walk: WalkSession = {
       walkId: `walk-${Date.now()}`,
@@ -18,9 +27,9 @@ export async function startWalk(dogId: string): Promise<WalkSession> {
       endedAt: null,
       durationSec: null,
       distanceMeter: null,
-      weatherCondition: '맑음',
-      weatherTemp: 23,
-      weatherIcon: '☀️',
+      weatherCondition: weather?.weatherCondition ?? null,
+      weatherTemp: weather?.weatherTemp ?? null,
+      weatherIcon: weather?.weatherIcon ?? null,
     };
     mockWalks.set(walk.walkId, walk);
     return walk;
@@ -31,12 +40,44 @@ export async function startWalk(dogId: string): Promise<WalkSession> {
     .insert({
       dog_id: dogId,
       started_at: new Date().toISOString(),
+      weather_condition: weather?.weatherCondition,
+      weather_temp: weather?.weatherTemp,
+      weather_icon: weather?.weatherIcon,
     })
     .select()
     .single();
 
   if (error) throw new AppError('walk_start_failed', error.message);
   return toWalkSession(data as WalkRow);
+}
+
+export async function updateWalkWeather(
+  walkId: string,
+  weather: WalkWeatherPayload,
+): Promise<void> {
+  if (!isSupabaseConfigured) {
+    const walk = mockWalks.get(walkId);
+    if (walk) {
+      mockWalks.set(walkId, {
+        ...walk,
+        weatherCondition: weather.weatherCondition,
+        weatherTemp: weather.weatherTemp,
+        weatherIcon: weather.weatherIcon,
+      });
+    }
+    return;
+  }
+
+  const { error } = await supabase
+    .from('walks')
+    .update({
+      weather_condition: weather.weatherCondition,
+      weather_temp: weather.weatherTemp,
+      weather_icon: weather.weatherIcon,
+    })
+    .eq('id', walkId);
+
+  if (error) throw new AppError('weather_update_failed', error.message);
 }
 
 export async function cancelWalk(walkId: string): Promise<void> {

@@ -126,6 +126,26 @@ function parseGroqError(errorText: string, status: number): string {
   return errorText || `Groq API error: ${status}`;
 }
 
+/** qwen3 등 reasoning 모델이 content에 포함하는 추론 블록 제거 */
+export function stripModelReasoning(text: string): string {
+  let result = text;
+
+  result = result.replace(
+    /<(?:think|redacted_reasoning)[^>]*>[\s\S]*?<\/(?:think|redacted_reasoning)>\s*/gi,
+    "",
+  );
+
+  const segments = result.split(/<\/(?:think|redacted_reasoning)>/i);
+  if (segments.length > 1) {
+    result = segments[segments.length - 1];
+  }
+
+  result = result.replace(/<\/?(?:think|redacted_reasoning)[^>]*>/gi, "");
+  result = result.trim().replace(/^["'`]+|["'`]+$/g, "").trim();
+
+  return result;
+}
+
 export async function generateGroqContent(options: {
   systemInstruction?: string;
   userPrompt: string;
@@ -197,7 +217,13 @@ export async function generateGroqContent(options: {
   }
 
   const data = await response.json();
-  const text = data?.choices?.[0]?.message?.content;
+  const rawText = data?.choices?.[0]?.message?.content;
+
+  if (!rawText) {
+    throw new Error("Groq가 응답을 생성하지 못했습니다.");
+  }
+
+  const text = stripModelReasoning(rawText);
 
   if (!text) {
     throw new Error("Groq가 응답을 생성하지 못했습니다.");

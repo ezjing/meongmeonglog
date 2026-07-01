@@ -1,7 +1,7 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-import type { DogGender, DogMeetingLevel } from '@/types/database';
-import type { WalkSession } from '@/types/domain';
+import type { DogGender, DogMeetingLevel } from "@/types/database";
+import type { WalkPhoto, WalkSession } from "@/types/domain";
 
 interface WalkStore {
   activeWalk: WalkSession | null;
@@ -9,7 +9,15 @@ interface WalkStore {
   distanceMeter: number;
   locationBuffer: { latitude: number; longitude: number }[];
   walkPath: { latitude: number; longitude: number }[];
+  pendingWalkPhotosByWalkId: Record<string, WalkPhoto[]>;
   setActiveWalk: (walk: WalkSession | null) => void;
+  updateActiveWalkWeather: (weather: {
+    weatherCondition: string;
+    weatherTemp: number;
+    weatherIcon: string;
+  }) => void;
+  setPendingWalkPhotos: (walkId: string, photos: WalkPhoto[]) => void;
+  clearPendingWalkPhotos: (walkId: string) => void;
   tickElapsed: () => void;
   addDistance: (meters: number) => void;
   addLocation: (latitude: number, longitude: number) => void;
@@ -23,7 +31,33 @@ export const useWalkStore = create<WalkStore>((set, get) => ({
   distanceMeter: 0,
   locationBuffer: [],
   walkPath: [],
+  pendingWalkPhotosByWalkId: {},
   setActiveWalk: (walk) => set({ activeWalk: walk }),
+  updateActiveWalkWeather: (weather) => {
+    const walk = get().activeWalk;
+    if (!walk) return;
+    set({
+      activeWalk: {
+        ...walk,
+        weatherCondition: weather.weatherCondition,
+        weatherTemp: weather.weatherTemp,
+        weatherIcon: weather.weatherIcon,
+      },
+    });
+  },
+  setPendingWalkPhotos: (walkId, photos) =>
+    set((state) => ({
+      pendingWalkPhotosByWalkId: {
+        ...state.pendingWalkPhotosByWalkId,
+        [walkId]: photos,
+      },
+    })),
+  clearPendingWalkPhotos: (walkId) =>
+    set((state) => {
+      const next = { ...state.pendingWalkPhotosByWalkId };
+      delete next[walkId];
+      return { pendingWalkPhotosByWalkId: next };
+    }),
   tickElapsed: () => set({ elapsedSec: get().elapsedSec + 1 }),
   addDistance: (meters) => set({ distanceMeter: get().distanceMeter + meters }),
   addLocation: (latitude, longitude) =>
@@ -57,21 +91,43 @@ interface OnboardingStore {
   customPersonality: string;
   customSpeechStyle: string;
   profileImageUri: string | null;
-  setBasic: (data: Partial<Pick<OnboardingStore, 'name' | 'breed' | 'birthDate' | 'gender' | 'weightKg' | 'profileImageUri'>>) => void;
-  setPersonality: (data: Partial<Pick<OnboardingStore, 'personality' | 'speechStyle' | 'customPersonality' | 'customSpeechStyle'>>) => void;
+  setBasic: (
+    data: Partial<
+      Pick<
+        OnboardingStore,
+        | "name"
+        | "breed"
+        | "birthDate"
+        | "gender"
+        | "weightKg"
+        | "profileImageUri"
+      >
+    >,
+  ) => void;
+  setPersonality: (
+    data: Partial<
+      Pick<
+        OnboardingStore,
+        | "personality"
+        | "speechStyle"
+        | "customPersonality"
+        | "customSpeechStyle"
+      >
+    >,
+  ) => void;
   reset: () => void;
 }
 
 const defaultOnboarding = {
-  name: '',
-  breed: '포메라니안',
-  birthDate: '2023-05-12',
-  gender: 'MALE' as DogGender,
-  weightKg: '',
+  name: "",
+  breed: "포메라니안",
+  birthDate: "2023-05-12",
+  gender: "MALE" as DogGender,
+  weightKg: "",
   personality: [] as string[],
-  speechStyle: '기본',
-  customPersonality: '',
-  customSpeechStyle: '',
+  speechStyle: "기본",
+  customPersonality: "",
+  customSpeechStyle: "",
   profileImageUri: null as string | null,
 };
 
@@ -84,8 +140,8 @@ export const useOnboardingStore = create<OnboardingStore>((set) => ({
 
 interface AuthStore {
   userId: string | null;
-  provider: 'kakao' | 'naver' | null;
-  setSession: (userId: string, provider: 'kakao' | 'naver') => void;
+  provider: "kakao" | "naver" | null;
+  setSession: (userId: string, provider: "kakao" | "naver") => void;
   clearSession: () => void;
 }
 
@@ -118,8 +174,8 @@ const defaultFinishForm: FinishWalkForm = {
   photoUris: [],
   peeSelected: false,
   poopSelected: false,
-  dogMeetingLevel: 'NONE',
-  memo: '',
+  dogMeetingLevel: "NONE",
+  memo: "",
 };
 
 export const useFinishWalkStore = create<FinishWalkStore>((set, get) => ({

@@ -2,23 +2,30 @@ import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
 import type { ComponentRef } from "react";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import ViewShot from "react-native-view-shot";
 
+import { WalkPhotoCarousel } from "@/components/diary/WalkPhotoCarousel";
 import { Button } from "@/components/ui/Button";
 import { useOverlay } from "@/components/ui/overlay";
 import { QuoteCard } from "@/components/ui/ScreenContainer";
 import { colors, radius, spacing } from "@/constants/theme";
 import { useDiary, useShareCard } from "@/hooks/useDiaries";
+import { useDiaryDogName } from "@/hooks/useDogName";
+import { useDiaryWalkPhotos } from "@/hooks/useWalkPhotos";
 import { formatDate } from "@/lib/utils/formatDistance";
 
 export default function ShareScreen() {
   const { diaryId } = useLocalSearchParams<{ diaryId: string }>();
   const { data: diary } = useDiary(diaryId ?? "");
+  const dogName = useDiaryDogName(diary?.dogName);
   const shareCard = useShareCard();
   const { showToast } = useOverlay();
   const viewShotRef = useRef<ComponentRef<typeof ViewShot>>(null);
   const [remoteUrl, setRemoteUrl] = useState<string | null>(null);
+  const photos = useDiaryWalkPhotos(diary?.walkId, diary?.thumbnailUrl);
+  const { width } = useWindowDimensions();
+  const cardWidth = width - spacing.md * 2;
 
   useEffect(() => {
     if (diaryId) {
@@ -58,11 +65,17 @@ export default function ShareScreen() {
 
       <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1 }}>
         <View style={styles.card}>
-          <View style={styles.cardPhoto}>
-            <Text style={styles.tag}>
-              🐾 {diary.dogName ?? "코코"} · {formatDate(diary.createdAt)}
-            </Text>
-          </View>
+          <WalkPhotoCarousel
+            photos={photos}
+            width={cardWidth}
+            height={150}
+          >
+            <View style={styles.tagWrap}>
+              <Text style={styles.tag}>
+                🐾 {dogName} · {formatDate(diary.createdAt)}
+              </Text>
+            </View>
+          </WalkPhotoCarousel>
           <View style={styles.cardBody}>
             <Text style={styles.summary} numberOfLines={3}>
               {diary.content}
@@ -127,9 +140,8 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 4,
   },
-  cardPhoto: {
-    height: 150,
-    backgroundColor: colors.apricot,
+  tagWrap: {
+    flex: 1,
     justifyContent: "flex-end",
     padding: spacing.sm + 2,
   },

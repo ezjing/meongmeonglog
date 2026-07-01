@@ -2,10 +2,12 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
 import { Card } from '@/components/ui/Card';
 import { useDiaryList, useCalendar } from '@/hooks/useDiaries';
 import { formatDate } from '@/lib/utils/formatDistance';
 import { colors, spacing } from '@/constants/theme';
+import { useWalkStore } from '@/stores/walkStore';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const CELL_SIZE = (Dimensions.get('window').width - 32) / 7;
@@ -18,6 +20,7 @@ export default function CalendarScreen() {
 
   const { data: calendarDays } = useCalendar(year, month);
   const { data: dayDiaries } = useDiaryList(selectedDate ?? undefined);
+  const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
 
   const firstDay = new Date(year, month - 1, 1).getDay();
   const daysInMonth = calendarDays?.length ?? 0;
@@ -75,7 +78,10 @@ export default function CalendarScreen() {
 
       {selectedDiary ? (
         <Card style={styles.sheet}>
-          <View style={styles.sheetThumb} />
+          <DiaryThumbnail
+            diary={selectedDiary}
+            pendingPhotosByWalkId={pendingPhotosByWalkId}
+          />
           <View style={styles.sheetBody}>
             <Text style={styles.sheetDate}>{formatDate(selectedDiary.createdAt)}</Text>
             <Text style={styles.sheetQuote} numberOfLines={1}>{selectedDiary.dailyQuote}</Text>
@@ -109,7 +115,6 @@ const styles = StyleSheet.create({
   todayText: { color: colors.white, fontWeight: '800' },
   paw: { fontSize: 7, marginTop: 1 },
   sheet: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md, alignItems: 'center' },
-  sheetThumb: { width: 46, height: 46, borderRadius: 10, backgroundColor: colors.clay },
   sheetBody: { flex: 1 },
   sheetDate: { fontSize: 10, color: colors.grey },
   sheetQuote: { fontSize: 12, fontWeight: '600', color: colors.ink },

@@ -2,15 +2,18 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
+import { DogAvatar } from '@/components/dog/DogAvatar';
 import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
 import { Card } from '@/components/ui/Card';
 import { useDogs } from '@/hooks/useAuthSession';
 import { useDiaryList } from '@/hooks/useDiaries';
 import { useStartWalk } from '@/hooks/useWalkMutations';
-import { requestLocationPermission } from '@/hooks/useWalkTracker';
+import { fetchCurrentWeather } from '@/lib/api/weatherApi';
+import { getCurrentCoordinates, requestLocationPermission } from '@/hooks/useWalkTracker';
 import { formatDate } from '@/lib/utils/formatDistance';
 import { calculateAge } from '@/lib/utils/formatDistance';
-import { colors, radius, spacing } from '@/constants/theme';
+import { colors, spacing } from '@/constants/theme';
 import { useWalkStore } from '@/stores/walkStore';
 
 export default function HomeScreen() {
@@ -19,16 +22,35 @@ export default function HomeScreen() {
   const startWalk = useStartWalk();
   const setActiveWalk = useWalkStore((s) => s.setActiveWalk);
   const resetWalk = useWalkStore((s) => s.reset);
+  const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   const dog = dogs?.[0];
-  const recentDiary = diaries?.[0];
+  const sortedDiaries = [...(diaries ?? [])].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 
   const handleStartWalk = async () => {
     if (!dog) return;
     await requestLocationPermission();
     resetWalk();
-    const walk = await startWalk.mutateAsync(dog.dogId);
+
+    let weather: { weatherCondition: string; weatherTemp: number; weatherIcon: string } | undefined;
+    try {
+      const coords = await getCurrentCoordinates();
+      if (coords) {
+        const current = await fetchCurrentWeather(coords.latitude, coords.longitude);
+        weather = {
+          weatherCondition: current.condition,
+          weatherTemp: current.temp,
+          weatherIcon: current.icon,
+        };
+      }
+    } catch {
+      // 위치·날씨 조회 실패 시 산책 중 GPS로 다시 시도
+    }
+
+    const walk = await startWalk.mutateAsync({ dogId: dog.dogId, weather });
     setActiveWalk(walk);
     router.push('/walk/active');
   };
@@ -39,7 +61,7 @@ export default function HomeScreen() {
       {dog ? (
         <View style={styles.header}>
           <Pressable style={styles.headerMain} onPress={() => setDrawerVisible(true)}>
-            <View style={styles.avatar} />
+            <DogAvatar imageUri={dog.profileImageUrl} />
             <View>
               <Text style={styles.dogName}>{dog.name}</Text>
               <Text style={styles.dogBreed}>
@@ -64,19 +86,25 @@ export default function HomeScreen() {
       </Pressable>
 
       <Text style={styles.sectionTitle}>최근 일기</Text>
-      {recentDiary ? (
-        <Card
-          style={styles.recentCard}
-          onTouchEnd={() => router.push(`/diary/${recentDiary.diaryId}`)}
-        >
-          <View style={styles.recentThumb} />
-          <View style={styles.recentBody}>
-            <Text style={styles.recentDate}>{formatDate(recentDiary.createdAt)}</Text>
-            <Text style={styles.recentQuote} numberOfLines={1}>
-              {recentDiary.dailyQuote}
-            </Text>
-          </View>
-        </Card>
+      {sortedDiaries.length > 0 ? (
+        sortedDiaries.map((diary) => (
+          <Card
+            key={diary.diaryId}
+            style={styles.recentCard}
+            onTouchEnd={() => router.push(`/diary/${diary.diaryId}`)}
+          >
+            <DiaryThumbnail
+              diary={diary}
+              pendingPhotosByWalkId={pendingPhotosByWalkId}
+            />
+            <View style={styles.recentBody}>
+              <Text style={styles.recentDate}>{formatDate(diary.createdAt)}</Text>
+              <Text style={styles.recentQuote} numberOfLines={1}>
+                {diary.dailyQuote}
+              </Text>
+            </View>
+          </Card>
+        ))
       ) : (
         <Text style={styles.emptyText}>아직 작성된 일기가 없어요</Text>
       )}
@@ -109,12 +137,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   menuBtnText: { fontSize: 16, color: colors.ink },
-  avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: colors.apricot,
-  },
   dogName: { fontSize: 15, fontWeight: '800', color: colors.ink },
   dogBreed: { fontSize: 11, color: colors.grey },
   statusCard: {
@@ -147,12 +169,11 @@ const styles = StyleSheet.create({
     color: colors.grey,
     marginBottom: spacing.sm,
   },
-  recentCard: { flexDirection: 'row', gap: spacing.sm + 2, alignItems: 'center' },
-  recentThumb: {
-    width: 46,
-    height: 46,
-    borderRadius: radius.sm,
-    backgroundColor: colors.clay,
+  recentCard: {
+    flexDirection: 'row',
+    gap: spacing.sm + 2,
+    alignItems: 'center',
+    marginBottom: spacing.sm,
   },
   recentBody: { flex: 1 },
   recentDate: { fontSize: 10, color: colors.grey, marginBottom: 2 },

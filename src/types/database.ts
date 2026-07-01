@@ -1,8 +1,8 @@
-export type AuthProvider = 'kakao' | 'naver';
+export type AuthProvider = "kakao" | "naver";
 
-export type DogGender = 'MALE' | 'FEMALE';
+export type DogGender = "MALE" | "FEMALE";
 
-export type DogMeetingLevel = 'NONE' | 'ONE_TO_TWO' | 'THREE_OR_MORE';
+export type DogMeetingLevel = "NONE" | "ONE_TO_TWO" | "THREE_OR_MORE";
 
 export interface UserRow {
   id: string;
@@ -10,6 +10,10 @@ export interface UserRow {
   email: string | null;
   nickname: string | null;
   profile_image: string | null;
+  guardian_title: string | null;
+  parenting_style: string | null;
+  current_concern: string | null;
+  guardian_profile_image: string | null;
   created_at: string;
 }
 

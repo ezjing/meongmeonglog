@@ -28,17 +28,32 @@ Deno.serve(async (req) => {
     if (walkError || !walk) throw new Error("Walk not found");
 
     const dog = walk.dogs;
+
+    const { data: guardian } = await supabase
+      .from("users")
+      .select("guardian_title, parenting_style, current_concern")
+      .eq("id", dog.user_id)
+      .maybeSingle();
+
     const event = walk.walk_events?.[0] ?? walk.walk_events;
     const photos = walk.walk_photos ?? [];
+
+    const guardianTitle = guardian?.guardian_title?.trim() || "보호자";
+    const parentingStyle = guardian?.parenting_style?.trim();
+    const currentConcern = guardian?.current_concern?.trim();
 
     const prompt = `
 강아지 ${dog.name}(${dog.breed})의 1인칭 시점으로 산책 일기를 작성해주세요.
 성격: ${JSON.stringify(dog.personality)}
 말투: ${dog.speech_style ?? "기본"}
+보호자 호칭: ${guardianTitle}
+${parentingStyle ? `양육 스타일/가치관: ${parentingStyle}` : ""}
+${currentConcern ? `보호자의 현재 고민: ${currentConcern}` : ""}
 산책 시간: ${walk.duration_sec ?? 0}초, 거리: ${walk.distance_meter ?? 0}m
 날씨: ${walk.weather_condition ?? "맑음"} ${walk.weather_temp ?? ""}°C
 특이사항: 배변 소변 ${event?.pee_count ?? 0}, 대변 ${event?.poop_count ?? 0}, 친구 만남 ${event?.dog_meeting_level ?? "NONE"}, 메모: ${event?.memo ?? ""}
 
+보호자를 언급할 때는 반드시 "${guardianTitle}"(으)로 부르세요.
 JSON 형식으로 응답: {"content":"일기 본문","dailyQuote":"오늘의 한마디 한 줄"}
 `.trim();
 
