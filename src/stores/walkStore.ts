@@ -1,16 +1,19 @@
 import { create } from "zustand";
 
+import type { PersistedWalkState } from '@/lib/walk/walkSessionStorage';
 import type { DogGender, DogMeetingLevel } from "@/types/database";
 import type { WalkPhoto, WalkSession } from "@/types/domain";
 
 interface WalkStore {
   activeWalk: WalkSession | null;
-  elapsedSec: number;
   distanceMeter: number;
+  frozenElapsedSec: number | null;
   locationBuffer: { latitude: number; longitude: number }[];
   walkPath: { latitude: number; longitude: number }[];
   pendingWalkPhotosByWalkId: Record<string, WalkPhoto[]>;
   setActiveWalk: (walk: WalkSession | null) => void;
+  hydrateFromPersisted: (state: PersistedWalkState) => void;
+  freezeWalkElapsed: (elapsedSec: number) => void;
   updateActiveWalkWeather: (weather: {
     weatherCondition: string;
     weatherTemp: number;
@@ -18,7 +21,6 @@ interface WalkStore {
   }) => void;
   setPendingWalkPhotos: (walkId: string, photos: WalkPhoto[]) => void;
   clearPendingWalkPhotos: (walkId: string) => void;
-  tickElapsed: () => void;
   addDistance: (meters: number) => void;
   addLocation: (latitude: number, longitude: number) => void;
   flushLocationBuffer: () => { latitude: number; longitude: number }[];
@@ -27,12 +29,21 @@ interface WalkStore {
 
 export const useWalkStore = create<WalkStore>((set, get) => ({
   activeWalk: null,
-  elapsedSec: 0,
   distanceMeter: 0,
+  frozenElapsedSec: null,
   locationBuffer: [],
   walkPath: [],
   pendingWalkPhotosByWalkId: {},
   setActiveWalk: (walk) => set({ activeWalk: walk }),
+  hydrateFromPersisted: (state) =>
+    set({
+      activeWalk: state.activeWalk,
+      distanceMeter: state.distanceMeter,
+      walkPath: state.walkPath,
+      frozenElapsedSec: state.frozenElapsedSec ?? null,
+      locationBuffer: [],
+    }),
+  freezeWalkElapsed: (elapsedSec) => set({ frozenElapsedSec: elapsedSec }),
   updateActiveWalkWeather: (weather) => {
     const walk = get().activeWalk;
     if (!walk) return;
@@ -58,7 +69,6 @@ export const useWalkStore = create<WalkStore>((set, get) => ({
       delete next[walkId];
       return { pendingWalkPhotosByWalkId: next };
     }),
-  tickElapsed: () => set({ elapsedSec: get().elapsedSec + 1 }),
   addDistance: (meters) => set({ distanceMeter: get().distanceMeter + meters }),
   addLocation: (latitude, longitude) =>
     set({
@@ -73,8 +83,8 @@ export const useWalkStore = create<WalkStore>((set, get) => ({
   reset: () =>
     set({
       activeWalk: null,
-      elapsedSec: 0,
       distanceMeter: 0,
+      frozenElapsedSec: null,
       locationBuffer: [],
       walkPath: [],
     }),

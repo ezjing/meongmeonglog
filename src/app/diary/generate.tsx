@@ -1,6 +1,12 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 
 import { WalkPhotoCarousel } from "@/components/diary/WalkPhotoCarousel";
 import { Button } from "@/components/ui/Button";
@@ -9,8 +15,9 @@ import { LoadingOverlayScreen } from "@/components/ui/LoadingOverlay";
 import { QuoteCard } from "@/components/ui/ScreenContainer";
 import { useOverlay } from "@/components/ui/overlay";
 import { colors, spacing } from "@/constants/theme";
-import { useDogDisplayName } from "@/hooks/useDogName";
 import { useGenerateDiary } from "@/hooks/useDiaries";
+import { useDogDisplayName } from "@/hooks/useDogName";
+import { useWalk } from "@/hooks/useWalkMutations";
 import { useWalkPhotos } from "@/hooks/useWalkPhotos";
 import { formatDistance, formatDuration } from "@/lib/utils/formatDistance";
 import { useFinishWalkStore, useWalkStore } from "@/stores/walkStore";
@@ -24,8 +31,9 @@ export default function DiaryGenerateScreen() {
   const { showToast } = useOverlay();
   const dogName = useDogDisplayName();
   const photos = useWalkPhotos(walkId);
-  const { width } = useWindowDimensions();
-  const heroWidth = width - spacing.md * 2;
+  const { data: walk } = useWalk(walkId);
+  const { width, height: screenHeight } = useWindowDimensions();
+  const photoHeight = Math.round(screenHeight * 0.3);
   const [diary, setDiary] = useState<Diary | null>(null);
 
   const isGenerating = generateDiary.isPending || !diary;
@@ -69,13 +77,15 @@ export default function DiaryGenerateScreen() {
       title={`${dogName}의 일기를 쓰고 있어요`}
       subtitle="성격·말투와 산책 기록을 반영하는 중"
     >
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
         <View style={styles.heroWrap}>
           <WalkPhotoCarousel
             photos={photos}
-            width={heroWidth}
-            height={140}
-            borderRadius={14}
+            width={width}
+            height={photoHeight}
           />
         </View>
 
@@ -91,8 +101,21 @@ export default function DiaryGenerateScreen() {
             <QuoteCard quote={diary.dailyQuote} />
 
             <View style={styles.chips}>
-              <Text style={styles.chip}>🚶 {formatDistance(1200)}</Text>
-              <Text style={styles.chip}>⏱ {formatDuration(1080)}</Text>
+              {walk?.distanceMeter != null ? (
+                <Text style={styles.chip}>
+                  🚶 {formatDistance(walk.distanceMeter)}
+                </Text>
+              ) : null}
+              {walk?.durationSec != null ? (
+                <Text style={styles.chip}>
+                  ⏱ {formatDuration(walk.durationSec)}
+                </Text>
+              ) : null}
+              {walk?.weatherTemp != null ? (
+                <Text style={styles.chip}>
+                  {walk.weatherIcon ?? "🌡️"} {walk.weatherTemp}°C
+                </Text>
+              ) : null}
             </View>
 
             <View style={styles.actions}>
@@ -132,7 +155,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   error: { color: colors.apricotDark, marginBottom: spacing.md },
-  heroWrap: { marginBottom: spacing.md },
+  heroWrap: {
+    marginHorizontal: -spacing.md,
+    marginBottom: spacing.md,
+  },
   diaryTitle: {
     fontWeight: "800",
     fontSize: 14,

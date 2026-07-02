@@ -1,15 +1,16 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router } from "expo-router";
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { useOverlay } from '@/components/ui/overlay';
-import { useAuthSession, useDogs, useUpdateDog } from '@/hooks/useAuthSession';
-import { useGuardianProfile } from '@/hooks/useGuardianProfile';
-import { requestLocationPermission } from '@/hooks/useWalkTracker';
-import { colors, spacing } from '@/constants/theme';
+import { SettingsDrawer } from "@/components/settings/SettingsDrawer";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { TabAppBar } from "@/components/ui/TabAppBar";
+import { useOverlay } from "@/components/ui/overlay";
+import { colors, spacing } from "@/constants/theme";
+import { useAuthSession, useDogs, useUpdateDog } from "@/hooks/useAuthSession";
+import { useGuardianProfile } from "@/hooks/useGuardianProfile";
+import { requestLocationPermission } from "@/hooks/useWalkTracker";
 
 export default function SettingsScreen() {
   const { logout } = useAuthSession();
@@ -23,35 +24,35 @@ export default function SettingsScreen() {
 
   const handleLogout = async () => {
     const confirmed = await showAlert({
-      icon: '🚪',
-      title: '로그아웃할까요?',
-      message: '다시 로그인하면 이어서 이용할 수 있어요.',
-      cancelLabel: '취소',
-      confirmLabel: '로그아웃',
+      icon: "🚪",
+      title: "로그아웃할까요?",
+      message: "다시 로그인하면 이어서 이용할 수 있어요.",
+      cancelLabel: "취소",
+      confirmLabel: "로그아웃",
       destructive: true,
     });
     if (!confirmed) return;
     await logout();
-    router.replace('/(auth)/login');
+    router.replace("/(auth)/login");
   };
 
   const handleLocationPermission = async () => {
     const granted = await requestLocationPermission();
     showToast({
-      message: granted ? '📍 위치 권한이 허용되었어요' : '⚠️ 설정에서 위치 권한을 허용해주세요',
-      variant: granted ? 'success' : 'warning',
+      message: granted
+        ? "📍 위치 권한이 허용되었어요"
+        : "⚠️ 설정에서 위치 권한을 허용해주세요",
+      variant: granted ? "success" : "warning",
     });
   };
 
   return (
     <>
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <View style={styles.headRow}>
-          <Text style={styles.title}>설정</Text>
-          <Pressable style={styles.menuBtn} onPress={() => setDrawerVisible(true)}>
-            <Text style={styles.menuBtnText}>☰</Text>
-          </Pressable>
-        </View>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
+        <TabAppBar title="설정" onMenuPress={() => setDrawerVisible(true)} />
 
         <Card style={styles.section}>
           <Text style={styles.sectionTitle}>보호자 정보</Text>
@@ -75,7 +76,7 @@ export default function SettingsScreen() {
           <Button
             label="보호자 정보 수정"
             variant="soft"
-            onPress={() => router.push('/guardian/edit')}
+            onPress={() => router.push("/guardian/edit")}
             style={styles.btn}
           />
         </Card>
@@ -84,7 +85,9 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>내 강아지</Text>
           {dog ? (
             <>
-              <Text style={styles.row}>{dog.name} · {dog.breed}</Text>
+              <Text style={styles.row}>
+                {dog.name} · {dog.breed}
+              </Text>
               <Button
                 label="프로필 수정 (이름)"
                 variant="soft"
@@ -104,16 +107,28 @@ export default function SettingsScreen() {
 
         <Card style={styles.section}>
           <Text style={styles.sectionTitle}>앱 권한</Text>
-          <Button label="위치 권한 확인" variant="outline" onPress={handleLocationPermission} />
+          <Button
+            label="위치 권한 확인"
+            variant="outline"
+            onPress={handleLocationPermission}
+          />
           <Text style={styles.hint}>
             산책 기록을 위해 위치·카메라(사진) 권한이 필요합니다.
           </Text>
         </Card>
 
-        <Button label="로그아웃" variant="outline" onPress={handleLogout} style={styles.logout} />
+        <Button
+          label="로그아웃"
+          variant="outline"
+          onPress={handleLogout}
+          style={styles.logout}
+        />
       </ScrollView>
 
-      <SettingsDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
+      <SettingsDrawer
+        visible={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+      />
     </>
   );
 }
@@ -121,28 +136,20 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
-  headRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md,
-  },
-  title: { fontSize: 20, fontWeight: '800', color: colors.ink },
-  menuBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.line,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  menuBtnText: { fontSize: 16, color: colors.ink },
   section: { marginBottom: spacing.md },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.ink, marginBottom: spacing.sm },
-  row: { fontSize: 14, color: '#5b5b66', marginBottom: spacing.sm },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.ink,
+    marginBottom: spacing.sm,
+  },
+  row: { fontSize: 14, color: "#5b5b66", marginBottom: spacing.sm },
   btn: { marginTop: spacing.xs },
-  hint: { fontSize: 11, color: colors.grey, marginTop: spacing.sm, lineHeight: 16 },
+  hint: {
+    fontSize: 11,
+    color: colors.grey,
+    marginTop: spacing.sm,
+    lineHeight: 16,
+  },
   logout: { marginTop: spacing.lg },
 });

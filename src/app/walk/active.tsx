@@ -1,12 +1,14 @@
 import { router } from "expo-router";
+import { useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { WalkMap } from "@/components/walk/WalkMap";
 import { Button } from "@/components/ui/Button";
 import { useOverlay } from "@/components/ui/overlay";
 import { colors, spacing } from "@/constants/theme";
+import { useBackConfirmAction } from "@/hooks/useBackConfirmAction";
 import { useCancelWalk } from "@/hooks/useWalkMutations";
-import { useWalkTracker } from "@/hooks/useWalkTracker";
+import { stopWalkTracking, useWalkTracker, freezeWalkSession } from "@/hooks/useWalkTracker";
 import { formatDistance, formatDuration } from "@/lib/utils/formatDistance";
 import { useWalkStore } from "@/stores/walkStore";
 
@@ -16,6 +18,12 @@ export default function WalkActiveScreen() {
   const reset = useWalkStore((s) => s.reset);
   const { showAlert, showToast } = useOverlay();
   const cancelWalk = useCancelWalk();
+  const backHandlerRef = useRef<() => void | Promise<void>>(() => {});
+
+  const { allowLeave } = useBackConfirmAction(
+    () => backHandlerRef.current(),
+    !!activeWalk,
+  );
 
   const weatherIcon = activeWalk?.weatherIcon ?? "🌡️";
   const weatherLabel =
@@ -33,6 +41,8 @@ export default function WalkActiveScreen() {
       confirmLabel: "종료하기",
     });
     if (confirmed) {
+      await freezeWalkSession();
+      allowLeave();
       router.push("/walk/finish");
     }
   };
@@ -52,7 +62,9 @@ export default function WalkActiveScreen() {
 
     try {
       await cancelWalk.mutateAsync(activeWalk.walkId);
+      await stopWalkTracking();
       reset();
+      allowLeave();
       router.replace("/(tabs)");
     } catch {
       showToast({
@@ -61,6 +73,8 @@ export default function WalkActiveScreen() {
       });
     }
   };
+
+  backHandlerRef.current = handleCancelPress;
 
   if (!activeWalk) {
     return (
@@ -128,7 +142,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   empty: { color: colors.grey, marginBottom: spacing.md },
-  mapWrap: { height: 230, position: "relative" },
+  mapWrap: { height: "50%", position: "relative" },
   weatherBadge: {
     position: "absolute",
     top: spacing.sm + 2,

@@ -1,12 +1,22 @@
 import { useEffect, useRef } from 'react';
+import { AppState } from 'react-native';
 import * as Location from 'expo-location';
 
+import { useElapsedSec } from '@/hooks/useElapsedSec';
 import { fetchCurrentWeather } from '@/lib/api/weatherApi';
-import { saveWalkLocation, updateWalkWeather } from '@/lib/api/walkApi';
-import { haversineDistance } from '@/lib/utils/formatDistance';
+import { updateWalkWeather } from '@/lib/api/walkApi';
+import { flushAllPendingDbLocations } from '@/lib/walk/walkLocationProcessor';
+import {
+  loadPersistedWalkState,
+  savePersistedWalkState,
+} from '@/lib/walk/walkSessionStorage';
+import {
+  requestWalkLocationPermissions,
+  startWalkTracking,
+} from '@/lib/walk/walkLocationService';
 import { useWalkStore } from '@/stores/walkStore';
 
-const LOCATION_INTERVAL_MS = 15_000;
+const SYNC_INTERVAL_MS = 2_000;
 
 export async function getCurrentCoordinates(): Promise<{
   latitude: number;
@@ -38,98 +48,91 @@ async function applyWeatherForCoords(
   };
 
   useWalkStore.getState().updateActiveWalkWeather(payload);
+
+  const persisted = await loadPersistedWalkState();
+  if (persisted?.activeWalk.walkId === walkId) {
+    await savePersistedWalkState({
+      ...persisted,
+      activeWalk: {
+        ...persisted.activeWalk,
+        weatherCondition: payload.weatherCondition,
+        weatherTemp: payload.weatherTemp,
+        weatherIcon: payload.weatherIcon,
+      },
+    });
+  }
+
   await updateWalkWeather(walkId, payload).catch(() => {});
 }
 
+async function syncWalkStateFromStorage(): Promise<void> {
+  const persisted = await loadPersistedWalkState();
+  if (!persisted?.activeWalk) return;
+  useWalkStore.getState().hydrateFromPersisted(persisted);
+  await flushAllPendingDbLocations();
+}
+
 export function useWalkTracker() {
-  const {
-    activeWalk,
-    elapsedSec,
-    distanceMeter,
-    tickElapsed,
-    addDistance,
-    addLocation,
-    flushLocationBuffer,
-  } = useWalkStore();
-
-  const lastCoords = useRef<{ latitude: number; longitude: number } | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const locationRef = useRef<Location.LocationSubscription | null>(null);
+  const activeWalk = useWalkStore((s) => s.activeWalk);
+  const distanceMeter = useWalkStore((s) => s.distanceMeter);
+  const frozenElapsedSec = useWalkStore((s) => s.frozenElapsedSec);
+  const liveElapsedSec = useElapsedSec(
+    frozenElapsedSec != null ? null : activeWalk?.startedAt,
+  );
+  const elapsedSec = frozenElapsedSec ?? liveElapsedSec;
   const weatherFetchedRef = useRef(false);
-
-  useEffect(() => {
-    if (!activeWalk) return;
-
-    timerRef.current = setInterval(tickElapsed, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [activeWalk, tickElapsed]);
 
   useEffect(() => {
     weatherFetchedRef.current = false;
   }, [activeWalk?.walkId]);
 
   useEffect(() => {
-    if (!activeWalk) return;
+    if (!activeWalk || frozenElapsedSec != null) return;
 
     let cancelled = false;
 
     (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted' || cancelled) return;
+      await syncWalkStateFromStorage();
 
-      locationRef.current = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.Balanced,
-          timeInterval: LOCATION_INTERVAL_MS,
-          distanceInterval: 10,
-        },
-        (loc) => {
-          const { latitude, longitude } = loc.coords;
-          addLocation(latitude, longitude);
+      const granted = await requestWalkLocationPermissions();
+      if (!granted || cancelled) return;
 
-          if (!weatherFetchedRef.current && activeWalk.weatherTemp == null) {
+      await startWalkTracking(activeWalk);
+
+      if (activeWalk.weatherTemp == null) {
+        try {
+          const coords = await getCurrentCoordinates();
+          if (coords && !cancelled && !weatherFetchedRef.current) {
             weatherFetchedRef.current = true;
-            applyWeatherForCoords(activeWalk.walkId, latitude, longitude).catch(() => {
-              weatherFetchedRef.current = false;
-            });
-          }
-
-          if (lastCoords.current) {
-            const delta = haversineDistance(
-              lastCoords.current.latitude,
-              lastCoords.current.longitude,
-              latitude,
-              longitude,
+            await applyWeatherForCoords(
+              activeWalk.walkId,
+              coords.latitude,
+              coords.longitude,
             );
-            if (delta > 2 && delta < 100) {
-              addDistance(delta);
-            }
+            await syncWalkStateFromStorage();
           }
-          lastCoords.current = { latitude, longitude };
-        },
-      );
+        } catch {
+          weatherFetchedRef.current = false;
+        }
+      }
     })();
+
+    const syncInterval = setInterval(() => {
+      syncWalkStateFromStorage().catch(() => {});
+    }, SYNC_INTERVAL_MS);
+
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        syncWalkStateFromStorage().catch(() => {});
+      }
+    });
 
     return () => {
       cancelled = true;
-      locationRef.current?.remove();
+      clearInterval(syncInterval);
+      subscription.remove();
     };
-  }, [activeWalk, addLocation, addDistance]);
-
-  useEffect(() => {
-    if (!activeWalk) return;
-
-    const syncInterval = setInterval(async () => {
-      const buffer = flushLocationBuffer();
-      for (const loc of buffer) {
-        await saveWalkLocation(activeWalk.walkId, loc.latitude, loc.longitude).catch(() => {});
-      }
-    }, LOCATION_INTERVAL_MS);
-
-    return () => clearInterval(syncInterval);
-  }, [activeWalk, flushLocationBuffer]);
+  }, [activeWalk?.walkId, frozenElapsedSec]);
 
   return {
     activeWalk,
@@ -139,6 +142,8 @@ export function useWalkTracker() {
 }
 
 export async function requestLocationPermission(): Promise<boolean> {
-  const { status } = await Location.requestForegroundPermissionsAsync();
-  return status === 'granted';
+  return requestWalkLocationPermissions();
 }
+
+export { startWalkTracking, stopWalkTracking, pauseWalkLocationUpdates } from '@/lib/walk/walkLocationService';
+export { freezeWalkSession } from '@/lib/walk/freezeWalkSession';

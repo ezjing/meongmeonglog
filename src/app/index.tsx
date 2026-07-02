@@ -6,7 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/constants/theme";
 import { loadAuthSession } from "@/lib/authStorage";
 import { resolveOnboardingRoute } from "@/lib/onboardingRoute";
-import { useAuthStore } from "@/stores/walkStore";
+import { loadPersistedWalkState } from "@/lib/walk/walkSessionStorage";
+import { useAuthStore, useWalkStore } from "@/stores/walkStore";
 
 export default function Index() {
   const userId = useAuthStore((s) => s.userId);
@@ -18,8 +19,17 @@ export default function Index() {
     loadAuthSession().then(async (stored) => {
       if (stored) {
         setSession(stored.userId, stored.provider);
-        const nextRoute = await resolveOnboardingRoute(stored.userId);
-        setRoute(nextRoute);
+
+        const persistedWalk = await loadPersistedWalkState();
+        if (persistedWalk?.activeWalk && !persistedWalk.activeWalk.endedAt) {
+          useWalkStore.getState().hydrateFromPersisted(persistedWalk);
+          setRoute(
+            persistedWalk.frozenElapsedSec != null ? "/walk/finish" : "/walk/active",
+          );
+        } else {
+          const nextRoute = await resolveOnboardingRoute(stored.userId);
+          setRoute(nextRoute);
+        }
       }
       setReady(true);
     });

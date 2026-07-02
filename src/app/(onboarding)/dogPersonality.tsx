@@ -2,9 +2,9 @@ import { router } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { DogAvatar } from "@/components/dog/DogAvatar";
-import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
+import { PawProgress } from "@/components/ui/PawProgress";
 import { DEFAULT_DOG_NAME } from "@/constants/dog";
 import {
   personalityOptions,
@@ -26,7 +26,9 @@ export default function DogPersonalityScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <OnboardingHeader currentStep={3} />
+      <View style={styles.progressWrap}>
+        <PawProgress currentStep={3} />
+      </View>
 
       <DogAvatar imageUri={profileImageUri} size={64} style={styles.avatar} />
 
@@ -67,12 +69,20 @@ export default function DogPersonalityScreen() {
         </Text>
       </View>
 
-      <Button
-        label="다음"
-        disabled={personality.length === 0}
-        onPress={() => router.push("/(onboarding)/welcome")}
-        style={styles.nextBtn}
-      />
+      <View style={styles.btnRow}>
+        <Button
+          label="이전"
+          variant="soft"
+          onPress={() => router.back()}
+          style={styles.prevBtn}
+        />
+        <Button
+          label="다음"
+          disabled={personality.length === 0}
+          onPress={() => router.push("/(onboarding)/welcome")}
+          style={styles.nextBtn}
+        />
+      </View>
     </ScrollView>
   );
 }
@@ -80,6 +90,7 @@ export default function DogPersonalityScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
+  progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
   avatar: { alignSelf: "center", marginVertical: spacing.sm },
   title: {
     fontSize: 18,
@@ -103,5 +114,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   bubbleText: { fontSize: 12, color: "#5b5b66" },
-  nextBtn: { marginTop: spacing.sm },
+  btnRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  prevBtn: { flex: 1 },
+  nextBtn: { flex: 2 },
 });

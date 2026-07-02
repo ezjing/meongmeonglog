@@ -1,55 +1,55 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { router, useLocalSearchParams } from "expo-router";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 
-import { WalkPhotoCarousel } from '@/components/diary/WalkPhotoCarousel';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { QuoteCard } from '@/components/ui/ScreenContainer';
-import { useDiary } from '@/hooks/useDiaries';
-import { useDiaryDogName } from '@/hooks/useDogName';
-import { useDiaryWalkPhotos } from '@/hooks/useWalkPhotos';
-import { formatDate, formatDistance, formatDuration } from '@/lib/utils/formatDistance';
-import { colors, spacing } from '@/constants/theme';
+import { WalkPhotoCarousel } from "@/components/diary/WalkPhotoCarousel";
+import { Card } from "@/components/ui/Card";
+import { QuoteCard } from "@/components/ui/ScreenContainer";
+import { StackAppBar } from "@/components/ui/StackAppBar";
+import { colors, spacing } from "@/constants/theme";
+import { useDiary } from "@/hooks/useDiaries";
+import { useDiaryDogName } from "@/hooks/useDogName";
+import { useDiaryWalkPhotos } from "@/hooks/useWalkPhotos";
+import {
+  formatDate,
+  formatDistance,
+  formatDuration,
+} from "@/lib/utils/formatDistance";
 
 export default function DiaryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: diary, isLoading } = useDiary(id ?? '');
+  const { data: diary, isLoading } = useDiary(id ?? "");
   const dogName = useDiaryDogName(diary?.dogName);
   const photos = useDiaryWalkPhotos(diary?.walkId, diary?.thumbnailUrl);
-  const { width } = useWindowDimensions();
-  const heroWidth = width - spacing.md * 2;
+  const { width, height: screenHeight } = useWindowDimensions();
+  const photoHeight = Math.round(screenHeight * 0.3);
 
   if (isLoading || !diary) {
     return (
       <View style={styles.center}>
-        <Text style={styles.loading}>{isLoading ? '불러오는 중...' : '일기를 찾을 수 없어요'}</Text>
+        <Text style={styles.loading}>
+          {isLoading ? "불러오는 중..." : "일기를 찾을 수 없어요"}
+        </Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.heroWrap}>
-        <WalkPhotoCarousel
-          photos={photos}
-          width={heroWidth}
-          height={140}
-          borderRadius={14}
-        >
-          <Button
-            label="←"
-            variant="soft"
-            onPress={() => router.back()}
-            style={styles.backBtn}
-          />
-          <Button
-            label="↗"
-            variant="soft"
-            onPress={() => router.push(`/share/${diary.diaryId}`)}
-            style={styles.shareBtn}
-          />
-        </WalkPhotoCarousel>
-      </View>
+    <View style={styles.screen}>
+      <StackAppBar
+        title={formatDate(diary.createdAt)}
+        onBackPress={() => router.back()}
+        onSharePress={() => router.push(`/share/${diary.diaryId}`)}
+      />
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <View style={styles.heroWrap}>
+          <WalkPhotoCarousel photos={photos} width={width} height={photoHeight} />
+        </View>
 
       <Card>
         <Text style={styles.title}>
@@ -62,7 +62,9 @@ export default function DiaryDetailScreen() {
 
       <View style={styles.metaRow}>
         {diary.distanceMeter ? (
-          <Text style={styles.meta}>🚶 {formatDistance(diary.distanceMeter)}</Text>
+          <Text style={styles.meta}>
+            🚶 {formatDistance(diary.distanceMeter)}
+          </Text>
         ) : null}
         {diary.durationSec ? (
           <Text style={styles.meta}>⏱ {formatDuration(diary.durationSec)}</Text>
@@ -71,35 +73,34 @@ export default function DiaryDetailScreen() {
           <Text style={styles.meta}>📷 {photos.length}장</Text>
         ) : null}
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
   loading: { color: colors.grey },
-  heroWrap: { marginBottom: spacing.md },
-  backBtn: {
-    position: 'absolute',
-    top: spacing.sm,
-    left: spacing.sm,
-    width: 36,
-    paddingVertical: 6,
-    zIndex: 1,
+  heroWrap: {
+    marginHorizontal: -spacing.md,
+    marginBottom: spacing.md,
   },
-  shareBtn: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    width: 36,
-    paddingVertical: 6,
-    zIndex: 1,
+  title: {
+    fontWeight: "800",
+    fontSize: 14,
+    color: colors.ink,
+    marginBottom: spacing.sm,
   },
-  title: { fontWeight: '800', fontSize: 14, color: colors.ink, marginBottom: spacing.sm },
   body: { fontSize: 13, lineHeight: 22, color: colors.ink },
-  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
+  metaRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
   meta: {
     fontSize: 11,
     backgroundColor: colors.white,

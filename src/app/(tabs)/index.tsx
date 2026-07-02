@@ -6,15 +6,67 @@ import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
 import { DogAvatar } from '@/components/dog/DogAvatar';
 import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
 import { Card } from '@/components/ui/Card';
+import { TabAppBar } from '@/components/ui/TabAppBar';
 import { useDogs } from '@/hooks/useAuthSession';
 import { useDiaryList } from '@/hooks/useDiaries';
 import { useStartWalk } from '@/hooks/useWalkMutations';
 import { fetchCurrentWeather } from '@/lib/api/weatherApi';
-import { getCurrentCoordinates, requestLocationPermission } from '@/hooks/useWalkTracker';
-import { formatDate } from '@/lib/utils/formatDistance';
-import { calculateAge } from '@/lib/utils/formatDistance';
+import {
+  getCurrentCoordinates,
+  requestLocationPermission,
+  stopWalkTracking,
+} from '@/hooks/useWalkTracker';
+import { formatDate, formatDistance, calculateAge } from '@/lib/utils/formatDistance';
 import { colors, spacing } from '@/constants/theme';
 import { useWalkStore } from '@/stores/walkStore';
+import type { DiaryListItem } from '@/types/domain';
+
+function getLocalDateKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function isDiaryToday(diary: DiaryListItem) {
+  const created = new Date(diary.createdAt);
+  return getLocalDateKey(created) === getLocalDateKey();
+}
+
+function getTodayWalkStatus(
+  activeWalk: ReturnType<typeof useWalkStore.getState>['activeWalk'],
+  todayDiaries: DiaryListItem[],
+) {
+  if (activeWalk && !activeWalk.endedAt) {
+    return {
+      title: '산책 진행 중이에요',
+      subtitle: '탭하면 이어서 기록할 수 있어요',
+      emoji: '🐾',
+      onPress: () => router.push('/walk/active'),
+    };
+  }
+
+  const count = todayDiaries.length;
+  const totalDistance = todayDiaries.reduce(
+    (sum, diary) => sum + (diary.distanceMeter ?? 0),
+    0,
+  );
+
+  if (count === 0) {
+    return {
+      title: '오늘은 아직 산책 전이에요',
+      subtitle: null,
+      emoji: '🐾',
+      onPress: undefined,
+    };
+  }
+
+  const title =
+    count === 1
+      ? '오늘 산책 1번 다녀왔어요'
+      : `오늘 산책 ${count}번 다녀왔어요`;
+  const subtitle =
+    totalDistance > 0 ? `총 ${formatDistance(totalDistance)} 걸었어요` : null;
+
+  return { title, subtitle, emoji: '✨', onPress: undefined };
+}
 
 export default function HomeScreen() {
   const { data: dogs } = useDogs();
@@ -22,6 +74,7 @@ export default function HomeScreen() {
   const startWalk = useStartWalk();
   const setActiveWalk = useWalkStore((s) => s.setActiveWalk);
   const resetWalk = useWalkStore((s) => s.reset);
+  const activeWalk = useWalkStore((s) => s.activeWalk);
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
   const [drawerVisible, setDrawerVisible] = useState(false);
 
@@ -29,10 +82,13 @@ export default function HomeScreen() {
   const sortedDiaries = [...(diaries ?? [])].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
+  const todayDiaries = sortedDiaries.filter(isDiaryToday);
+  const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries);
 
   const handleStartWalk = async () => {
     if (!dog) return;
     await requestLocationPermission();
+    await stopWalkTracking();
     resetWalk();
 
     let weather: { weatherCondition: string; weatherTemp: number; weatherIcon: string } | undefined;
@@ -59,7 +115,7 @@ export default function HomeScreen() {
     <>
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {dog ? (
-        <View style={styles.header}>
+        <TabAppBar onMenuPress={() => setDrawerVisible(true)}>
           <Pressable style={styles.headerMain} onPress={() => setDrawerVisible(true)}>
             <DogAvatar imageUri={dog.profileImageUrl} />
             <View>
@@ -69,15 +125,20 @@ export default function HomeScreen() {
               </Text>
             </View>
           </Pressable>
-          <Pressable style={styles.menuBtn} onPress={() => setDrawerVisible(true)}>
-            <Text style={styles.menuBtnText}>☰</Text>
-          </Pressable>
-        </View>
+        </TabAppBar>
       ) : null}
 
-      <Card style={styles.statusCard}>
-        <Text style={styles.statusText}>오늘은 아직 산책 전이에요</Text>
-        <Text>🐾</Text>
+      <Card
+        style={styles.statusCard}
+        onTouchEnd={walkStatus.onPress}
+      >
+        <View style={styles.statusBody}>
+          <Text style={styles.statusText}>{walkStatus.title}</Text>
+          {walkStatus.subtitle ? (
+            <Text style={styles.statusSubtext}>{walkStatus.subtitle}</Text>
+          ) : null}
+        </View>
+        <Text>{walkStatus.emoji}</Text>
       </Card>
 
       <Pressable style={styles.walkCta} onPress={handleStartWalk} disabled={!dog}>
@@ -118,25 +179,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm + 2,
-    marginBottom: spacing.md,
-  },
-  headerMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + 2, flex: 1 },
-  menuBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.line,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  menuBtnText: { fontSize: 16, color: colors.ink },
+  headerMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + 2 },
   dogName: { fontSize: 15, fontWeight: '800', color: colors.ink },
   dogBreed: { fontSize: 11, color: colors.grey },
   statusCard: {
@@ -145,7 +188,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
   },
+  statusBody: { flex: 1, marginRight: spacing.sm },
   statusText: { fontSize: 12, color: '#5b5b66' },
+  statusSubtext: { fontSize: 11, color: colors.grey, marginTop: 2 },
   walkCta: {
     width: 118,
     height: 118,

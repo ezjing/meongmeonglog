@@ -240,6 +240,23 @@ export async function fetchWalkPhotos(walkId: string): Promise<WalkPhoto[]> {
   }));
 }
 
+export async function fetchWalk(walkId: string): Promise<WalkSession | null> {
+  if (!isSupabaseConfigured) {
+    return getMockWalk(walkId) ?? null;
+  }
+
+  const { data, error } = await supabase
+    .from('walks')
+    .select('*')
+    .eq('id', walkId)
+    .maybeSingle();
+
+  if (error) throw new AppError('fetch_walk_failed', error.message);
+  if (!data) return null;
+
+  return toWalkSession(data as WalkRow);
+}
+
 export function getMockWalk(walkId: string): WalkSession | undefined {
   return mockWalks.get(walkId);
 }

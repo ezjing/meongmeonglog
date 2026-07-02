@@ -118,6 +118,7 @@ export function SettingsDrawer({ visible, onClose }: SettingsDrawerProps) {
       profileName={profileName}
       profileSubtitle={profileSubtitle}
       profileEmoji={guardianTitle ? "🙂" : "🐶"}
+      profileImageUri={guardianProfile?.guardianProfileImageUrl}
       items={items}
     />
   );

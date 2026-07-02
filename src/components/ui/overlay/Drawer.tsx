@@ -1,3 +1,4 @@
+import { Image } from "expo-image";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -18,6 +19,7 @@ interface DrawerProps {
   profileName: string;
   profileSubtitle?: string;
   profileEmoji?: string;
+  profileImageUri?: string | null;
   items: DrawerItem[];
 }
 
@@ -27,6 +29,7 @@ export function Drawer({
   profileName,
   profileSubtitle,
   profileEmoji = "🐶",
+  profileImageUri,
   items,
 }: DrawerProps) {
   const insets = useSafeAreaInsets();
@@ -56,7 +59,15 @@ export function Drawer({
 
           <View style={styles.profile}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarEmoji}>{profileEmoji}</Text>
+              {profileImageUri ? (
+                <Image
+                  source={{ uri: profileImageUri }}
+                  style={styles.avatarImage}
+                  contentFit="cover"
+                />
+              ) : (
+                <Text style={styles.avatarEmoji}>{profileEmoji}</Text>
+              )}
             </View>
             <View style={styles.profileText}>
               <Text style={styles.profileName}>{profileName}</Text>
@@ -141,6 +152,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.apricot,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
   },
   avatarEmoji: {
     fontSize: 22,

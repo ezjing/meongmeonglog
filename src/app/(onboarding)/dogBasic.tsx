@@ -11,8 +11,8 @@ import {
 } from "react-native";
 
 import { BreedPicker } from "@/components/onboarding/BreedPicker";
-import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { Button } from "@/components/ui/Button";
+import { PawProgress } from "@/components/ui/PawProgress";
 import { BottomSheet } from "@/components/ui/overlay";
 import { DEFAULT_DOG_NAME } from "@/constants/dog";
 import { colors, radius, spacing } from "@/constants/theme";
@@ -32,10 +32,6 @@ export default function DogBasicScreen() {
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
 
   const canNext = name.trim().length > 0;
-
-  const handleCancelRegistration = async () => {
-    router.back();
-  };
 
   const handlePickFromLibrary = async () => {
     const uris = await pickImageFromLibrary({
@@ -63,7 +59,9 @@ export default function DogBasicScreen() {
         style={styles.container}
         contentContainerStyle={styles.content}
       >
-        <OnboardingHeader currentStep={2} onBack={handleCancelRegistration} />
+        <View style={styles.progressWrap}>
+          <PawProgress currentStep={2} />
+        </View>
 
         <Text style={styles.title}>우리 아이를 소개해주세요</Text>
         <Text style={styles.subtitle}>
@@ -146,12 +144,20 @@ export default function DogBasicScreen() {
           ))}
         </View>
 
-        <Button
-          label="다음"
-          disabled={!canNext}
-          onPress={() => router.push("/(onboarding)/dogPersonality")}
-          style={styles.nextBtn}
-        />
+        <View style={styles.btnRow}>
+          <Button
+            label="이전"
+            variant="soft"
+            onPress={() => router.back()}
+            style={styles.prevBtn}
+          />
+          <Button
+            label="다음"
+            disabled={!canNext}
+            onPress={() => router.push("/(onboarding)/dogPersonality")}
+            style={styles.nextBtn}
+          />
+        </View>
       </ScrollView>
 
       <BottomSheet
@@ -175,6 +181,7 @@ export default function DogBasicScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
+  progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
   title: {
     fontSize: 18,
     fontWeight: "800",
@@ -248,5 +255,11 @@ const styles = StyleSheet.create({
   genderBtnActive: { backgroundColor: colors.ink, borderColor: colors.ink },
   genderText: { fontSize: 13, fontWeight: "700", color: "#5b5b66" },
   genderTextActive: { color: colors.white },
-  nextBtn: { marginTop: spacing.sm },
+  btnRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  prevBtn: { flex: 1 },
+  nextBtn: { flex: 2 },
 });

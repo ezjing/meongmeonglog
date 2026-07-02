@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import {
   startWalk,
@@ -6,6 +6,7 @@ import {
   cancelWalk,
   saveWalkEvent,
   uploadWalkPhotos,
+  fetchWalk,
   fetchWalkPhotos,
   type WalkWeatherPayload,
 } from '@/lib/api/walkApi';
@@ -14,8 +15,17 @@ import type { WalkEvent } from '@/types/domain';
 
 export const walkKeys = {
   all: ['walks'] as const,
+  detail: (walkId: string) => [...walkKeys.all, walkId] as const,
   photos: (walkId: string) => [...walkKeys.all, walkId, 'photos'] as const,
 };
+
+export function useWalk(walkId: string | undefined) {
+  return useQuery({
+    queryKey: walkKeys.detail(walkId ?? ''),
+    queryFn: () => fetchWalk(walkId!),
+    enabled: !!walkId,
+  });
+}
 
 export function useStartWalk() {
   return useMutation({

@@ -1,5 +1,6 @@
 import { getEdgeFunctionErrorMessage } from "@/lib/api/edgeFunctions";
-import { fetchWalkPhotos } from "@/lib/api/walkApi";
+import { fetchWalkPhotos, getMockWalk } from "@/lib/api/walkApi";
+import { DEFAULT_DOG_NAME } from "@/constants/dog";
 import { AppError } from "@/lib/AppError";
 import { toDiary } from "@/lib/mappers/diaryMappers";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
@@ -154,6 +155,7 @@ export async function fetchCalendar(
 export async function generateDiary(walkId: string): Promise<Diary> {
   if (!isSupabaseConfigured) {
     const photos = await fetchWalkPhotos(walkId);
+    const walk = getMockWalk(walkId);
     const diary: DiaryListItem = {
       diaryId: `diary-${Date.now()}`,
       walkId,
@@ -165,8 +167,8 @@ export async function generateDiary(walkId: string): Promise<Diary> {
       generatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       dogName: DEFAULT_DOG_NAME,
-      distanceMeter: 1200,
-      durationSec: 1080,
+      distanceMeter: walk?.distanceMeter ?? null,
+      durationSec: walk?.durationSec ?? null,
       thumbnailUrl: photos[0]?.imageUrl ?? null,
     };
     mockDiaries.unshift(diary);

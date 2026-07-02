@@ -10,8 +10,8 @@ import {
 } from "react-native";
 
 import { GuardianProfileFields } from "@/components/guardian/GuardianProfileFields";
-import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { Button } from "@/components/ui/Button";
+import { PawProgress } from "@/components/ui/PawProgress";
 import { BottomSheet, useOverlay } from "@/components/ui/overlay";
 import { colors, spacing } from "@/constants/theme";
 import { useUpdateGuardianProfile } from "@/hooks/useGuardianProfile";
@@ -91,7 +91,9 @@ export default function GuardianBasicScreen() {
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          <OnboardingHeader currentStep={1} onBack={handleCancel} />
+          <View style={styles.progressWrap}>
+            <PawProgress currentStep={1} />
+          </View>
 
           <Text style={styles.title}>먼저, 보호자님을 알려주세요</Text>
           <Text style={styles.subtitle}>
@@ -125,11 +127,20 @@ export default function GuardianBasicScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <Button
-            label="다음"
-            disabled={!canNext || updateProfile.isPending}
-            onPress={handleNext}
-          />
+          <View style={styles.btnRow}>
+            <Button
+              label="이전"
+              variant="soft"
+              onPress={handleCancel}
+              style={styles.prevBtn}
+            />
+            <Button
+              label="다음"
+              disabled={!canNext || updateProfile.isPending}
+              onPress={handleNext}
+              style={styles.nextBtn}
+            />
+          </View>
         </View>
       </View>
 
@@ -163,6 +174,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: spacing.md,
   },
+  progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
   title: {
     fontSize: 18,
     fontWeight: "700",
@@ -221,4 +233,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     backgroundColor: colors.background,
   },
+  btnRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  prevBtn: { flex: 1 },
+  nextBtn: { flex: 2 },
 });
