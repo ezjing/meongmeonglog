@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -12,14 +12,21 @@ import {
 
 import { BreedPicker } from "@/components/onboarding/BreedPicker";
 import { Button } from "@/components/ui/Button";
+import { LoadingPaws } from "@/components/ui/LoadingPaws";
 import { PawProgress } from "@/components/ui/PawProgress";
+import { StackAppBar } from "@/components/ui/StackAppBar";
 import { BottomSheet } from "@/components/ui/overlay";
 import { DEFAULT_DOG_NAME } from "@/constants/dog";
 import { colors, radius, spacing } from "@/constants/theme";
+import { useDogs } from "@/hooks/useAuthSession";
 import { pickImageFromCamera, pickImageFromLibrary } from "@/lib/pickImage";
 import { useOnboardingStore } from "@/stores/walkStore";
 
 export default function DogBasicScreen() {
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const isEditMode = mode === "edit";
+  const { data: dogs, isLoading: isDogsLoading } = useDogs();
+  const dog = dogs?.[0];
   const {
     name,
     breed,
@@ -28,8 +35,27 @@ export default function DogBasicScreen() {
     weightKg,
     profileImageUri,
     setBasic,
+    setPersonality,
   } = useOnboardingStore();
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(!isEditMode);
+
+  useEffect(() => {
+    if (!isEditMode || !dog) return;
+    setBasic({
+      name: dog.name,
+      breed: dog.breed,
+      birthDate: dog.birthDate,
+      gender: dog.gender,
+      weightKg: dog.weightKg != null ? String(dog.weightKg) : "",
+      profileImageUri: dog.profileImageUrl,
+    });
+    setPersonality({
+      personality: dog.personality,
+      speechStyle: dog.speechStyle ?? "기본",
+    });
+    setIsHydrated(true);
+  }, [isEditMode, dog, setBasic, setPersonality]);
 
   const canNext = name.trim().length > 0;
 
@@ -53,20 +79,56 @@ export default function DogBasicScreen() {
     }
   };
 
+  if (isEditMode && (isDogsLoading || !isHydrated)) {
+    return (
+      <View style={styles.screen}>
+        <StackAppBar
+          title="강아지 정보 관리"
+          onBackPress={() => router.back()}
+        />
+        <LoadingPaws message="강아지 정보를 불러오는 중" />
+      </View>
+    );
+  }
+
+  if (isEditMode && !dog) {
+    return (
+      <View style={styles.screen}>
+        <StackAppBar
+          title="강아지 정보 관리"
+          onBackPress={() => router.back()}
+        />
+        <LoadingPaws message="등록된 강아지가 없어요" />
+      </View>
+    );
+  }
+
   return (
     <>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-      >
-        <View style={styles.progressWrap}>
-          <PawProgress currentStep={2} />
-        </View>
-
-        <Text style={styles.title}>우리 아이를 소개해주세요</Text>
-        <Text style={styles.subtitle}>
-          기본 정보를 입력하면 등록이 완료돼요
-        </Text>
+      <View style={styles.screen}>
+        {isEditMode ? (
+          <StackAppBar
+            title="강아지 정보 관리"
+            onBackPress={() => router.back()}
+          />
+        ) : null}
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.content}
+        >
+        {!isEditMode ? (
+          <>
+            <View style={styles.progressWrap}>
+              <PawProgress currentStep={2} />
+            </View>
+            <Text style={styles.title}>우리 아이를 소개해주세요</Text>
+            <Text style={styles.subtitle}>
+              기본 정보를 입력하면 등록이 완료돼요
+            </Text>
+          </>
+        ) : (
+          <Text style={styles.editSubtitle}>기본 정보를 수정할 수 있어요</Text>
+        )}
 
         <Pressable
           style={styles.avatarWrap}
@@ -145,20 +207,28 @@ export default function DogBasicScreen() {
         </View>
 
         <View style={styles.btnRow}>
-          <Button
-            label="이전"
-            variant="soft"
-            onPress={() => router.back()}
-            style={styles.prevBtn}
-          />
+          {!isEditMode ? (
+            <Button
+              label="이전"
+              variant="soft"
+              onPress={() => router.back()}
+              style={styles.prevBtn}
+            />
+          ) : null}
           <Button
             label="다음"
             disabled={!canNext}
-            onPress={() => router.push("/(onboarding)/dogPersonality")}
-            style={styles.nextBtn}
+            onPress={() =>
+              router.push({
+                pathname: "/(onboarding)/dogPersonality",
+                params: isEditMode ? { mode: "edit" } : undefined,
+              })
+            }
+            style={isEditMode ? styles.singleBtn : styles.nextBtn}
           />
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       <BottomSheet
         visible={photoSheetVisible}
@@ -179,6 +249,7 @@ export default function DogBasicScreen() {
 }
 
 const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
@@ -189,6 +260,12 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   subtitle: { fontSize: 12, color: colors.grey, marginBottom: spacing.md },
+  editSubtitle: {
+    fontSize: 12,
+    color: colors.grey,
+    marginBottom: spacing.md,
+    marginTop: spacing.xs,
+  },
   avatarWrap: {
     alignSelf: "center",
     marginBottom: spacing.md,
@@ -262,4 +339,5 @@ const styles = StyleSheet.create({
   },
   prevBtn: { flex: 1 },
   nextBtn: { flex: 2 },
+  singleBtn: { flex: 1 },
 });

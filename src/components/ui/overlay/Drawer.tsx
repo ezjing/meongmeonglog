@@ -1,7 +1,9 @@
 import { Image } from "expo-image";
+import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal";
 import { colors } from "@/constants/theme";
 
 import { OverlayBackdrop } from "./OverlayBackdrop";
@@ -33,8 +35,10 @@ export function Drawer({
   items,
 }: DrawerProps) {
   const insets = useSafeAreaInsets();
+  const [profilePreviewVisible, setProfilePreviewVisible] = useState(false);
 
   return (
+    <>
     <Modal
       visible={visible}
       transparent
@@ -58,7 +62,10 @@ export function Drawer({
           </Pressable>
 
           <View style={styles.profile}>
-            <View style={styles.avatar}>
+            <Pressable
+              style={styles.avatar}
+              onPress={() => setProfilePreviewVisible(true)}
+            >
               {profileImageUri ? (
                 <Image
                   source={{ uri: profileImageUri }}
@@ -68,7 +75,7 @@ export function Drawer({
               ) : (
                 <Text style={styles.avatarEmoji}>{profileEmoji}</Text>
               )}
-            </View>
+            </Pressable>
             <View style={styles.profileText}>
               <Text style={styles.profileName}>{profileName}</Text>
               {profileSubtitle ? (
@@ -100,6 +107,14 @@ export function Drawer({
         </Pressable>
       </OverlayBackdrop>
     </Modal>
+
+    <ImagePreviewModal
+      visible={profilePreviewVisible}
+      imageUri={profileImageUri}
+      placeholderEmoji={profileEmoji}
+      onClose={() => setProfilePreviewVisible(false)}
+    />
+    </>
   );
 }
 

@@ -11,7 +11,7 @@
       "bundleIdentifier": "com.ezjing.meongmeonglog",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "산책 경로와 거리를 기록하기 위해 위치 정보가 필요합니다.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "산책 중 백그라운드에서 경로를 기록하기 위해 위치 정보가 필요합니다.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "산책 중 화면이 꺼져도 경로와 거리를 기록하기 위해 위치 정보가 필요합니다.",
         "NSPhotoLibraryUsageDescription": "강아지 프로필 사진과 산책 사진을 등록하기 위해 사진 접근이 필요합니다.",
         "NSCameraUsageDescription": "강아지 프로필 사진과 산책 사진을 촬영하기 위해 카메라 접근이 필요합니다."
       }
@@ -28,9 +28,9 @@
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION",
         "FOREGROUND_SERVICE",
         "FOREGROUND_SERVICE_LOCATION",
+        "POST_NOTIFICATIONS",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "CAMERA"
@@ -57,10 +57,11 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "산책 경로와 거리를 기록하기 위해 위치 정보가 필요합니다.",
           "locationWhenInUsePermission": "산책 경로와 거리를 기록하기 위해 위치 정보가 필요합니다.",
+          "locationAlwaysAndWhenInUsePermission": "산책 중 화면이 꺼져도 경로와 거리를 기록하기 위해 위치 정보가 필요합니다.",
           "isIosBackgroundLocationEnabled": true,
-          "isAndroidBackgroundLocationEnabled": true
+          "isAndroidBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": true
         }
       ],
       [

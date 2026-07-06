@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/overlay';
-import { filterBreeds, type DogBreedOption } from '@/lib/api/breedApi';
+import { filterDogBreeds, type DogBreedOption } from '@/constants/dogBreedLabels';
 import { useDogBreeds } from '@/hooks/useDogBreeds';
 import { colors, radius, spacing } from '@/constants/theme';
 
@@ -24,7 +24,7 @@ export function BreedPicker({ value, onSelect }: BreedPickerProps) {
   const [query, setQuery] = useState('');
   const { data: breeds = [], isLoading, isError } = useDogBreeds();
 
-  const filtered = useMemo(() => filterBreeds(breeds, query), [breeds, query]);
+  const filtered = useMemo(() => filterDogBreeds(breeds, query), [breeds, query]);
 
   const selectedLabel =
     breeds.find((b) => b.label === value)?.label ?? (value || '품종을 선택해주세요');

@@ -50,11 +50,13 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "expo start",
-    "build": "expo prebuild --clean",
-    "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "start": "expo start --dev-client",
+    "prebuild": "expo prebuild",
+    "prebuild:clean": "expo prebuild --clean",
+    "ios": "expo run:ios --device",
+    "android": "expo run:android --device",
+    "ios:release": "expo run:ios --device --configuration Release",
+    "android:release": "expo run:android --device --variant release",
     "web": "expo start --web",
     "lint": "expo lint"
   },

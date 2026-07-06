@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchDogBreeds } from '@/lib/api/breedApi';
+import { dogBreedOptions } from '@/constants/dogBreedLabels';
 
 export const breedKeys = {
   all: ['dogBreeds'] as const,
@@ -10,7 +10,8 @@ export const breedKeys = {
 export function useDogBreeds() {
   return useQuery({
     queryKey: breedKeys.list(),
-    queryFn: fetchDogBreeds,
-    staleTime: 1000 * 60 * 60 * 24,
+    queryFn: async () => dogBreedOptions,
+    staleTime: Number.POSITIVE_INFINITY,
+    initialData: dogBreedOptions,
   });
 }

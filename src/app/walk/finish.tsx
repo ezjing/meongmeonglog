@@ -12,6 +12,7 @@ import {
 
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
+import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal";
 import { LoadingOverlayScreen } from "@/components/ui/LoadingOverlay";
 import { BottomSheet, useOverlay } from "@/components/ui/overlay";
 import { colors, radius, spacing } from "@/constants/theme";
@@ -53,6 +54,7 @@ export default function WalkFinishScreen() {
   const { showAlert, showToast } = useOverlay();
   const dogName = useDogDisplayName();
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const backHandlerRef = useRef<() => void | Promise<void>>(() => {});
 
@@ -230,11 +232,17 @@ export default function WalkFinishScreen() {
         <View style={styles.photoGrid}>
           {form.photoUris.map((uri, i) => (
             <View key={`${uri}-${i}`} style={styles.photo}>
-              <Image
-                source={{ uri }}
-                style={styles.photoImage}
-                contentFit="cover"
-              />
+              <Pressable
+                style={styles.photoTap}
+                onPress={() => setPreviewIndex(i)}
+                accessibilityLabel="사진 크게 보기"
+              >
+                <Image
+                  source={{ uri }}
+                  style={styles.photoImage}
+                  contentFit="cover"
+                />
+              </Pressable>
               <Pressable
                 style={styles.photoRemove}
                 onPress={() => handleRemovePhoto(i)}
@@ -326,6 +334,13 @@ export default function WalkFinishScreen() {
         ]}
       />
 
+      <ImagePreviewModal
+        visible={previewIndex != null}
+        imageUris={form.photoUris}
+        initialIndex={previewIndex ?? 0}
+        onClose={() => setPreviewIndex(null)}
+      />
+
     </LoadingOverlayScreen>
   );
 }
@@ -358,6 +373,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
   },
+  photoTap: { width: "100%", height: "100%" },
   photoImage: { width: "100%", height: "100%" },
   photoRemove: {
     position: "absolute",

@@ -1,25 +1,27 @@
 import { Image } from "expo-image";
-import { router } from "expo-router";
-import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { GuardianProfileFields } from "@/components/guardian/GuardianProfileFields";
 import { Button } from "@/components/ui/Button";
+import { LoadingPaws } from "@/components/ui/LoadingPaws";
 import { PawProgress } from "@/components/ui/PawProgress";
+import { StackAppBar } from "@/components/ui/StackAppBar";
 import { BottomSheet, useOverlay } from "@/components/ui/overlay";
 import { colors, spacing } from "@/constants/theme";
-import { useUpdateGuardianProfile } from "@/hooks/useGuardianProfile";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import {
+  useGuardianProfile,
+  useUpdateGuardianProfile,
+} from "@/hooks/useGuardianProfile";
 import { pickImageFromCamera, pickImageFromLibrary } from "@/lib/pickImage";
 
 export default function GuardianBasicScreen() {
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const isEditMode = mode === "edit";
   const { logout } = useAuthSession();
+  const { data: profile, isLoading: isProfileLoading } = useGuardianProfile();
   const updateProfile = useUpdateGuardianProfile();
   const { showAlert, showToast } = useOverlay();
   const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
@@ -30,9 +32,24 @@ export default function GuardianBasicScreen() {
     currentConcern: "",
   });
 
+  useEffect(() => {
+    if (!isEditMode || !profile) return;
+    setValues({
+      guardianTitle: profile.guardianTitle ?? "",
+      parentingStyle: profile.parentingStyle ?? "",
+      currentConcern: profile.currentConcern ?? "",
+    });
+    setProfileImageUri(profile.guardianProfileImageUrl);
+  }, [isEditMode, profile]);
+
   const canNext = values.guardianTitle.trim().length > 0;
 
   const handleCancel = async () => {
+    if (isEditMode) {
+      router.back();
+      return;
+    }
+
     const confirmed = await showAlert({
       icon: "🐾",
       title: "등록을 취소할까요?",
@@ -72,8 +89,17 @@ export default function GuardianBasicScreen() {
         guardianTitle: values.guardianTitle,
         parentingStyle: values.parentingStyle,
         currentConcern: values.currentConcern,
-        profileImageUri: profileImageUri ?? undefined,
+        profileImageUri:
+          profileImageUri &&
+          profileImageUri !== profile?.guardianProfileImageUrl
+            ? profileImageUri
+            : undefined,
       });
+      if (isEditMode) {
+        showToast({ message: "보호자 정보를 저장했어요", variant: "success" });
+        router.back();
+        return;
+      }
       router.push("/(onboarding)/dogBasic");
     } catch {
       showToast({
@@ -83,22 +109,50 @@ export default function GuardianBasicScreen() {
     }
   };
 
+  if (isEditMode && isProfileLoading) {
+    return (
+      <View style={styles.screen}>
+        <StackAppBar
+          title="보호자 정보 관리"
+          onBackPress={() => router.back()}
+        />
+        <LoadingPaws message="보호자 정보를 불러오는 중" />
+      </View>
+    );
+  }
+
   return (
     <>
       <View style={styles.screen}>
+        {isEditMode ? (
+          <StackAppBar
+            title="보호자 정보 관리"
+            onBackPress={() => router.back()}
+          />
+        ) : null}
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.progressWrap}>
-            <PawProgress currentStep={1} />
-          </View>
+          {!isEditMode ? (
+            <View style={styles.progressWrap}>
+              <PawProgress currentStep={1} />
+            </View>
+          ) : null}
 
-          <Text style={styles.title}>먼저, 보호자님을 알려주세요</Text>
-          <Text style={styles.subtitle}>
-            AI 일기에서 보호자님을 부르는 호칭이에요
-          </Text>
+          {!isEditMode ? (
+            <>
+              <Text style={styles.title}>먼저, 보호자님을 알려주세요</Text>
+              <Text style={styles.subtitle}>
+                AI 일기에서 보호자님을 부르는 호칭이에요
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.editSubtitle}>
+              AI 일기에 반영되는 호칭과 양육 정보를 수정할 수 있어요
+            </Text>
+          )}
 
           <Pressable
             style={styles.avatarWrap}
@@ -128,17 +182,19 @@ export default function GuardianBasicScreen() {
 
         <View style={styles.footer}>
           <View style={styles.btnRow}>
+            {!isEditMode ? (
+              <Button
+                label="이전"
+                variant="soft"
+                onPress={handleCancel}
+                style={styles.prevBtn}
+              />
+            ) : null}
             <Button
-              label="이전"
-              variant="soft"
-              onPress={handleCancel}
-              style={styles.prevBtn}
-            />
-            <Button
-              label="다음"
+              label={isEditMode ? "저장" : "다음"}
               disabled={!canNext || updateProfile.isPending}
               onPress={handleNext}
-              style={styles.nextBtn}
+              style={isEditMode ? styles.singleBtn : styles.nextBtn}
             />
           </View>
         </View>
@@ -186,6 +242,12 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     color: colors.grey,
     marginBottom: 14,
+  },
+  editSubtitle: {
+    fontSize: 11.5,
+    color: colors.grey,
+    marginBottom: 14,
+    marginTop: spacing.xs,
   },
   avatarWrap: {
     alignSelf: "center",
@@ -239,4 +301,5 @@ const styles = StyleSheet.create({
   },
   prevBtn: { flex: 1 },
   nextBtn: { flex: 2 },
+  singleBtn: { flex: 1 },
 });

@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { WalkMap } from "@/components/walk/WalkMap";
@@ -13,7 +13,7 @@ import { formatDistance, formatDuration } from "@/lib/utils/formatDistance";
 import { useWalkStore } from "@/stores/walkStore";
 
 export default function WalkActiveScreen() {
-  const { activeWalk, elapsedSec, distanceMeter } = useWalkTracker();
+  const { activeWalk, elapsedSec, distanceMeter, trackingError } = useWalkTracker();
   const walkPath = useWalkStore((s) => s.walkPath);
   const reset = useWalkStore((s) => s.reset);
   const { showAlert, showToast } = useOverlay();
@@ -24,6 +24,14 @@ export default function WalkActiveScreen() {
     () => backHandlerRef.current(),
     !!activeWalk,
   );
+
+  useEffect(() => {
+    if (!trackingError) return;
+    showToast({
+      message: `⚠️ ${trackingError}`,
+      variant: "warning",
+    });
+  }, [trackingError, showToast]);
 
   const weatherIcon = activeWalk?.weatherIcon ?? "🌡️";
   const weatherLabel =

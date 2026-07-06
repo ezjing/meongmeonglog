@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useState, type ReactNode } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { colors, spacing } from '@/constants/theme';
 import type { WalkPhoto } from '@/types/domain';
@@ -11,6 +11,7 @@ interface WalkPhotoCarouselProps {
   height: number;
   borderRadius?: number;
   showDots?: boolean;
+  onPhotoPress?: (photo: WalkPhoto, index: number) => void;
   children?: ReactNode;
 }
 
@@ -20,6 +21,7 @@ export function WalkPhotoCarousel({
   height,
   borderRadius = 0,
   showDots = true,
+  onPhotoPress,
   children,
 }: WalkPhotoCarouselProps) {
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -42,13 +44,19 @@ export function WalkPhotoCarousel({
             setPhotoIndex(Math.round(e.nativeEvent.contentOffset.x / width));
           }}
         >
-          {photos.map((photo) => (
-            <Image
+          {photos.map((photo, index) => (
+            <Pressable
               key={photo.id}
-              source={{ uri: photo.imageUrl }}
               style={{ width, height }}
-              contentFit="cover"
-            />
+              onPress={() => onPhotoPress?.(photo, index)}
+              disabled={!onPhotoPress}
+            >
+              <Image
+                source={{ uri: photo.imageUrl }}
+                style={{ width, height }}
+                contentFit="cover"
+              />
+            </Pressable>
           ))}
         </ScrollView>
       ) : null}

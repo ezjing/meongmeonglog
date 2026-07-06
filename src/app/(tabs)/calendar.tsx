@@ -1,6 +1,13 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import { DiaryThumbnail } from "@/components/diary/DiaryThumbnail";
 import { SettingsDrawer } from "@/components/settings/SettingsDrawer";
@@ -140,9 +147,13 @@ export default function CalendarScreen() {
           isDayDiariesLoading ? (
             <Text style={styles.noDiary}>불러오는 중...</Text>
           ) : dayDiaries?.length ? (
-            <View style={styles.sheetList}>
+            <ScrollView
+              style={styles.sheetListScroll}
+              contentContainerStyle={styles.sheetList}
+              showsVerticalScrollIndicator={false}
+            >
               {dayDiaries.map(renderDiaryCard)}
-            </View>
+            </ScrollView>
           ) : (
             <Text style={styles.noDiary}>이 날짜에는 산책 기록이 없어요</Text>
           )
@@ -191,7 +202,8 @@ const styles = StyleSheet.create({
   cellText: { fontSize: 11, color: "#5b5b66" },
   todayText: { color: colors.white, fontWeight: "800" },
   paw: { fontSize: 7, marginTop: 1 },
-  sheetList: { marginTop: spacing.md, gap: spacing.sm },
+  sheetListScroll: { flex: 1, marginTop: spacing.md },
+  sheetList: { gap: spacing.sm, paddingBottom: spacing.md },
   sheet: { flexDirection: "row", gap: spacing.sm, alignItems: "center" },
   sheetBody: { flex: 1 },
   sheetMeta: { fontSize: 10, color: colors.grey, marginBottom: 3 },

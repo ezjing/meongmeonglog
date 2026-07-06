@@ -1,68 +1,88 @@
-export const popularBreedsKo: { key: string; label: string }[] = [
-  { key: 'pomeranian', label: '포메라니안' },
-  { key: 'maltese', label: '말티즈' },
-  { key: 'poodle/standard', label: '푸들' },
-  { key: 'chihuahua', label: '치와와' },
-  { key: 'shiba', label: '시바견' },
-  { key: 'retriever/golden', label: '골든 리트리버' },
-  { key: 'beagle', label: '비글' },
-  { key: '믹스견', label: '믹스견' },
-  { key: '기타', label: '기타' },
+export type DogBreedDefinition = {
+  key: string;
+  label: string;
+  englishName?: string;
+};
+
+/** docs/dogbreed.json 기반 품종 목록 */
+export const dogBreeds: DogBreedDefinition[] = [
+  { key: "golden-retriever", label: "골든 리트리버", englishName: "Golden Retriever" },
+  { key: "goldendoodle", label: "골든두들", englishName: "Goldendoodle" },
+  { key: "greyhound", label: "그레이하운드", englishName: "Greyhound" },
+  { key: "coton-de-tulear", label: "꼬동 드 툴레아", englishName: "Coton de Tulear" },
+  { key: "dachshund", label: "닥스훈트", englishName: "Dachshund" },
+  { key: "dalmatian", label: "달마시안", englishName: "Dalmatian" },
+  { key: "doberman-pinscher", label: "도베르만 핀셔", englishName: "Doberman Pinscher" },
+  { key: "labrador-retriever", label: "래브라도 리트리버", englishName: "Labrador Retriever" },
+  { key: "maltese", label: "말티즈", englishName: "Maltese" },
+  { key: "maltipoo", label: "말티푸", englishName: "Maltipoo" },
+  { key: "manchester-terrier", label: "맨체스터 테리어", englishName: "Manchester Terrier" },
+  { key: "miniature-pinscher", label: "미니추어 핀셔 (미니핀)", englishName: "Miniature Pinscher" },
+  { key: "mixed-breed", label: "믹스견", englishName: "Mixed Breed" },
+  { key: "bedlington-terrier", label: "베들링턴 테리어", englishName: "Bedlington Terrier" },
+  { key: "border-collie", label: "보더 콜리", englishName: "Border Collie" },
+  { key: "boston-terrier", label: "보스턴 테리어", englishName: "Boston Terrier" },
+  { key: "volpino-italiano", label: "볼피노", englishName: "Volpino Italiano" },
+  { key: "bulldog", label: "불독", englishName: "Bulldog" },
+  { key: "beagle", label: "비글", englishName: "Beagle" },
+  { key: "bichon-frise", label: "비숑 프리제", englishName: "Bichon Frise" },
+  { key: "papillon", label: "빠삐용", englishName: "Papillon" },
+  { key: "samoyed", label: "사모예드", englishName: "Samoyed" },
+  { key: "sapsali", label: "삽살개", englishName: "Sapsali" },
+  { key: "shar-pei", label: "샤페이", englishName: "Shar Pei" },
+  { key: "shetland-sheepdog", label: "셰틀랜드 쉽독 (셀티)", englishName: "Shetland Sheepdog" },
+  { key: "miniature-schnauzer", label: "슈나우저", englishName: "Miniature Schnauzer" },
+  { key: "japanese-spitz", label: "스피츠", englishName: "Japanese Spitz" },
+  { key: "shiba-inu", label: "시바이누 (시바견)", englishName: "Shiba Inu" },
+  { key: "siberian-husky", label: "시베리안 허스키", englishName: "Siberian Husky" },
+  { key: "shih-poo", label: "시치푸", englishName: "Shih-Poo" },
+  { key: "shih-tzu", label: "시츄", englishName: "Shih Tzu" },
+  { key: "american-cocker-spaniel", label: "아메리칸 코카 스파니엘", englishName: "American Cocker Spaniel" },
+  { key: "irish-setter", label: "아이리시 세터", englishName: "Irish Setter" },
+  { key: "akita", label: "아키타견", englishName: "Akita" },
+  { key: "alaskan-malamute", label: "알래스칸 말라뮤트", englishName: "Alaskan Malamute" },
+  { key: "chow-chow", label: "양갱이 (차우차우)", englishName: "Chow Chow" },
+  { key: "airedale-terrier", label: "에어데일 테리어", englishName: "Airedale Terrier" },
+  { key: "welsh-corgi", label: "웰시 코기", englishName: "Welsh Corgi" },
+  { key: "yorkshire-terrier", label: "요크셔 테리어", englishName: "Yorkshire Terrier" },
+  { key: "italian-greyhound", label: "이탈리안 그레이하운드", englishName: "Italian Greyhound" },
+  { key: "jack-russell-terrier", label: "재크 러셀 테리어", englishName: "Jack Russell Terrier" },
+  { key: "jindo", label: "진돗개", englishName: "Jindo" },
+  { key: "chihuahua", label: "치와와", englishName: "Chihuahua" },
+  { key: "cavalier-king-charles-spaniel", label: "카발리에 킹 찰스 스패니얼", englishName: "Cavalier King Charles Spaniel" },
+  { key: "pug", label: "퍼그", englishName: "Pug" },
+  { key: "pekingese", label: "페키니즈", englishName: "Pekingese" },
+  { key: "pomeranian", label: "포메라니안", englishName: "Pomeranian" },
+  { key: "pomsky", label: "포마스키", englishName: "Pomsky" },
+  { key: "poodle", label: "푸들", englishName: "Poodle" },
+  { key: "french-bulldog", label: "프렌치 불독", englishName: "French Bulldog" },
 ];
 
-export const dogBreedLabelsKo: Record<string, string> = {
-  pomeranian: '포메라니안',
-  maltese: '말티즈',
-  'poodle/standard': '푸들',
-  'poodle/toy': '토이 푸들',
-  'poodle/miniature': '미니어처 푸들',
-  chihuahua: '치와와',
-  shiba: '시바견',
-  'retriever/golden': '골든 리트리버',
-  'retriever/chesapeake': '체서피크 베이 리트리버',
-  'retriever/flatcoated': '플랫코티드 리트리버',
-  'retriever/curly': '컬리코티드 리트리버',
-  beagle: '비글',
-  'bulldog/french': '프렌치 불독',
-  'bulldog/english': '잉글리시 불독',
-  'bulldog/boston': '보스턴 테리어',
-  dachshund: '닥스훈트',
-  corgi: '코기',
-  'corgi/cardigan': '카디건 웰시 코기',
-  'corgi/pembroke': '펨브로크 웰시 코기',
-  husky: '허스키',
-  'terrier/yorkshire': '요크셔 테리어',
-  'terrier/westhighland': '웨스트 하이랜드 화이트 테리어',
-  'terrier/scottish': '스코티시 테리어',
-  'terrier/border': '보더 콜리',
-  collie: '콜리',
-  'collie/border': '보더 콜리',
-  dalmatian: '달마시안',
-  doberman: '도베르만',
-  'german/shepherd': '독일 셰퍼드',
-  akita: '아키타',
-  'spaniel/cocker': '코커 스파니엘',
-  'spaniel/brittany': '브리타니 스파니엘',
-  pug: '퍼그',
-  samoyed: '사모예드',
-  'pointer/german': '저먼 포인터',
-  whippet: '휘핏',
-  greyhound: '그레이하운드',
-  'hound/blood': '블러드하운드',
-  'hound/basset': '바셋하운드',
-  'hound/afghan': '아프간 하운드',
-  'hound/ibizan': '이비잔 하운드',
-  'hound/plott': '플롯 하운드',
-  'hound/walker': '워커 하운드',
-  'spitz/japanese': '재패니즈 스피츠',
-  'spitz/indian': '인디언 스피츠',
-  'sheepdog/shetland': '셰틀랜드 쉽독',
-  'sheepdog/english': '잉글리시 쉽독',
-  'sheepdog/australian': '오스트레일리안 쉽독',
-  'sheepdog/border': '보더 콜리',
-  'sheepdog/oldenglish': '올드 잉글리시 쉽독',
-  'sheepdog/scottish': '스코티시 쉽독',
-  'labrador/retriever': '래브라도 리트리버',
-  '믹스견': '믹스견',
-  '기타': '기타',
-};
+export type DogBreedOption = Pick<DogBreedDefinition, "key" | "label">;
+
+export const dogBreedOptions: DogBreedOption[] = dogBreeds
+  .map(({ key, label }) => ({ key, label }))
+  .sort((a, b) => a.label.localeCompare(b.label, "ko"));
+
+export function filterDogBreeds(
+  breeds: DogBreedOption[],
+  query: string,
+): DogBreedOption[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return breeds;
+  return breeds.filter(
+    (b) => b.label.toLowerCase().includes(q) || b.key.toLowerCase().includes(q),
+  );
+}
+
+export const dogBreedLabelByKey = Object.fromEntries(
+  dogBreeds.map((breed) => [breed.key, breed.label]),
+) as Record<string, string>;
+
+export const englishNameToBreedKey = Object.fromEntries(
+  dogBreeds
+    .filter((breed): breed is DogBreedDefinition & { englishName: string } =>
+      Boolean(breed.englishName),
+    )
+    .map((breed) => [breed.englishName, breed.key]),
+) as Record<string, string>;

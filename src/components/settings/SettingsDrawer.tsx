@@ -24,12 +24,20 @@ export function SettingsDrawer({ visible, onClose }: SettingsDrawerProps) {
       {
         icon: "🙂",
         label: "보호자 정보 관리",
-        onPress: () => router.push("/guardian/edit"),
+        onPress: () =>
+          router.push({
+            pathname: "/(onboarding)/guardianBasic",
+            params: { mode: "edit" },
+          }),
       },
       {
         icon: "🐶",
         label: "강아지 정보 관리",
-        onPress: () => router.push("/(tabs)/settings"),
+        onPress: () =>
+          router.push({
+            pathname: "/(onboarding)/dogBasic",
+            params: { mode: "edit" },
+          }),
       },
       {
         icon: "🔔",

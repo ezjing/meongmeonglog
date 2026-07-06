@@ -1,12 +1,14 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
 import { DogAvatar } from '@/components/dog/DogAvatar';
 import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
 import { Card } from '@/components/ui/Card';
+import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
 import { TabAppBar } from '@/components/ui/TabAppBar';
+import { useOverlay } from '@/components/ui/overlay';
 import { useDogs } from '@/hooks/useAuthSession';
 import { useDiaryList } from '@/hooks/useDiaries';
 import { useStartWalk } from '@/hooks/useWalkMutations';
@@ -77,6 +79,8 @@ export default function HomeScreen() {
   const activeWalk = useWalkStore((s) => s.activeWalk);
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [profilePreviewVisible, setProfilePreviewVisible] = useState(false);
+  const { showToast } = useOverlay();
 
   const dog = dogs?.[0];
   const sortedDiaries = [...(diaries ?? [])].sort(
@@ -87,7 +91,19 @@ export default function HomeScreen() {
 
   const handleStartWalk = async () => {
     if (!dog) return;
-    await requestLocationPermission();
+
+    const granted = await requestLocationPermission();
+    if (!granted) {
+      showToast({
+        message:
+          Platform.OS === 'ios'
+            ? '⚠️ 산책 기록을 위해 위치 "항상 허용"이 필요해요. 설정에서 권한을 확인해 주세요.'
+            : '⚠️ 산책 기록을 위해 위치(앱 사용 중)와 알림 권한을 허용해 주세요.',
+        variant: 'warning',
+      });
+      return;
+    }
+
     await stopWalkTracking();
     resetWalk();
 
@@ -116,15 +132,17 @@ export default function HomeScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {dog ? (
         <TabAppBar onMenuPress={() => setDrawerVisible(true)}>
-          <Pressable style={styles.headerMain} onPress={() => setDrawerVisible(true)}>
-            <DogAvatar imageUri={dog.profileImageUrl} />
+          <View style={styles.headerMain}>
+            <Pressable onPress={() => setProfilePreviewVisible(true)}>
+              <DogAvatar imageUri={dog.profileImageUrl} />
+            </Pressable>
             <View>
               <Text style={styles.dogName}>{dog.name}</Text>
               <Text style={styles.dogBreed}>
                 {dog.breed} · {calculateAge(dog.birthDate)}살
               </Text>
             </View>
-          </Pressable>
+          </View>
         </TabAppBar>
       ) : null}
 
@@ -172,6 +190,11 @@ export default function HomeScreen() {
     </ScrollView>
 
     <SettingsDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
+    <ImagePreviewModal
+      visible={profilePreviewVisible}
+      imageUri={dog?.profileImageUrl}
+      onClose={() => setProfilePreviewVisible(false)}
+    />
     </>
   );
 }

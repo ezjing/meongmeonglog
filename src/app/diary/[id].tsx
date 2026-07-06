@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -9,6 +10,7 @@ import {
 
 import { WalkPhotoCarousel } from "@/components/diary/WalkPhotoCarousel";
 import { Card } from "@/components/ui/Card";
+import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal";
 import { QuoteCard } from "@/components/ui/ScreenContainer";
 import { StackAppBar } from "@/components/ui/StackAppBar";
 import { colors, spacing } from "@/constants/theme";
@@ -28,6 +30,7 @@ export default function DiaryDetailScreen() {
   const photos = useDiaryWalkPhotos(diary?.walkId, diary?.thumbnailUrl);
   const { width, height: screenHeight } = useWindowDimensions();
   const photoHeight = Math.round(screenHeight * 0.3);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   if (isLoading || !diary) {
     return (
@@ -48,7 +51,12 @@ export default function DiaryDetailScreen() {
       />
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <View style={styles.heroWrap}>
-          <WalkPhotoCarousel photos={photos} width={width} height={photoHeight} />
+          <WalkPhotoCarousel
+            photos={photos}
+            width={width}
+            height={photoHeight}
+            onPhotoPress={(_, index) => setPreviewIndex(index)}
+          />
         </View>
 
       <Card>
@@ -74,6 +82,13 @@ export default function DiaryDetailScreen() {
         ) : null}
       </View>
       </ScrollView>
+
+      <ImagePreviewModal
+        visible={previewIndex != null}
+        imageUris={photos.map((photo) => photo.imageUrl)}
+        initialIndex={previewIndex ?? 0}
+        onClose={() => setPreviewIndex(null)}
+      />
     </View>
   );
 }

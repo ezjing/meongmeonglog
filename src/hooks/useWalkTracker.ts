@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { AppState } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { AppState, Platform } from 'react-native';
 import * as Location from 'expo-location';
 
 import { useElapsedSec } from '@/hooks/useElapsedSec';
@@ -81,9 +81,11 @@ export function useWalkTracker() {
   );
   const elapsedSec = frozenElapsedSec ?? liveElapsedSec;
   const weatherFetchedRef = useRef(false);
+  const [trackingError, setTrackingError] = useState<string | null>(null);
 
   useEffect(() => {
     weatherFetchedRef.current = false;
+    setTrackingError(null);
   }, [activeWalk?.walkId]);
 
   useEffect(() => {
@@ -95,9 +97,29 @@ export function useWalkTracker() {
       await syncWalkStateFromStorage();
 
       const granted = await requestWalkLocationPermissions();
-      if (!granted || cancelled) return;
+      if (!granted || cancelled) {
+        if (!cancelled && !granted) {
+          setTrackingError(
+            Platform.OS === 'android'
+              ? '위치·알림 권한을 허용해야 산책을 기록할 수 있어요.'
+              : '위치 "항상 허용" 권한이 필요해요.',
+          );
+        }
+        return;
+      }
 
-      await startWalkTracking(activeWalk);
+      try {
+        await startWalkTracking(activeWalk);
+      } catch (error) {
+        if (!cancelled) {
+          setTrackingError(
+            error instanceof Error
+              ? error.message
+              : '산책 위치 추적을 시작하지 못했어요.',
+          );
+        }
+        return;
+      }
 
       if (activeWalk.weatherTemp == null) {
         try {
@@ -138,6 +160,7 @@ export function useWalkTracker() {
     activeWalk,
     elapsedSec,
     distanceMeter,
+    trackingError,
   };
 }
 

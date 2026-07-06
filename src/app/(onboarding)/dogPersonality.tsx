@@ -1,21 +1,49 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { DogAvatar } from "@/components/dog/DogAvatar";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { PawProgress } from "@/components/ui/PawProgress";
+import { StackAppBar } from "@/components/ui/StackAppBar";
+import { useOverlay } from "@/components/ui/overlay";
 import { DEFAULT_DOG_NAME } from "@/constants/dog";
 import {
   personalityOptions,
   speechStyleOptions,
 } from "@/constants/personalityOptions";
 import { colors, radius, spacing } from "@/constants/theme";
-import { useOnboardingStore } from "@/stores/walkStore";
+import { useDogs, useUpdateDog } from "@/hooks/useAuthSession";
+import { uploadDogProfileImage } from "@/lib/api/dogApi";
+import { useAuthStore, useOnboardingStore } from "@/stores/walkStore";
+
+function parseWeightKg(value: string): number | null {
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return parsed;
+}
 
 export default function DogPersonalityScreen() {
-  const { name, personality, speechStyle, profileImageUri, setPersonality } =
-    useOnboardingStore();
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const isEditMode = mode === "edit";
+  const userId = useAuthStore((s) => s.userId);
+  const { data: dogs } = useDogs();
+  const dog = dogs?.[0];
+  const updateDog = useUpdateDog();
+  const { showToast } = useOverlay();
+  const store = useOnboardingStore();
+  const {
+    name,
+    breed,
+    birthDate,
+    gender,
+    weightKg,
+    personality,
+    speechStyle,
+    profileImageUri,
+    setPersonality,
+    reset,
+  } = store;
 
   const togglePersonality = (item: string) => {
     const next = personality.includes(item)
@@ -24,11 +52,58 @@ export default function DogPersonalityScreen() {
     setPersonality({ personality: next });
   };
 
+  const handleNext = async () => {
+    if (!isEditMode) {
+      router.push("/(onboarding)/welcome");
+      return;
+    }
+
+    if (!dog || !userId) return;
+
+    try {
+      let profileImageUrl = dog.profileImageUrl ?? undefined;
+      if (profileImageUri && profileImageUri !== dog.profileImageUrl) {
+        profileImageUrl = await uploadDogProfileImage(userId, profileImageUri);
+      }
+
+      await updateDog.mutateAsync({
+        dogId: dog.dogId,
+        input: {
+          name,
+          breed,
+          birthDate,
+          gender,
+          personality,
+          speechStyle,
+          weightKg: parseWeightKg(weightKg),
+          profileImageUrl,
+        },
+      });
+      reset();
+      showToast({ message: "강아지 정보를 저장했어요", variant: "success" });
+      router.replace("/(tabs)");
+    } catch {
+      showToast({
+        message: "⚠️ 강아지 정보 저장에 실패했어요",
+        variant: "warning",
+      });
+    }
+  };
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.progressWrap}>
-        <PawProgress currentStep={3} />
-      </View>
+    <View style={styles.screen}>
+      {isEditMode ? (
+        <StackAppBar
+          title="강아지 정보 관리"
+          onBackPress={() => router.back()}
+        />
+      ) : null}
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {!isEditMode ? (
+        <View style={styles.progressWrap}>
+          <PawProgress currentStep={3} />
+        </View>
+      ) : null}
 
       <DogAvatar imageUri={profileImageUri} size={64} style={styles.avatar} />
 
@@ -77,17 +152,19 @@ export default function DogPersonalityScreen() {
           style={styles.prevBtn}
         />
         <Button
-          label="다음"
-          disabled={personality.length === 0}
-          onPress={() => router.push("/(onboarding)/welcome")}
+          label={isEditMode ? "저장" : "다음"}
+          disabled={personality.length === 0 || updateDog.isPending}
+          onPress={handleNext}
           style={styles.nextBtn}
         />
       </View>
     </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },

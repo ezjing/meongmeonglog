@@ -8,14 +8,13 @@ import { Card } from "@/components/ui/Card";
 import { TabAppBar } from "@/components/ui/TabAppBar";
 import { useOverlay } from "@/components/ui/overlay";
 import { colors, spacing } from "@/constants/theme";
-import { useAuthSession, useDogs, useUpdateDog } from "@/hooks/useAuthSession";
+import { useAuthSession, useDogs } from "@/hooks/useAuthSession";
 import { useGuardianProfile } from "@/hooks/useGuardianProfile";
 import { requestLocationPermission } from "@/hooks/useWalkTracker";
 
 export default function SettingsScreen() {
   const { logout } = useAuthSession();
   const { data: dogs } = useDogs();
-  const updateDog = useUpdateDog();
   const { showAlert, showToast } = useOverlay();
   const { data: guardianProfile } = useGuardianProfile();
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -76,7 +75,12 @@ export default function SettingsScreen() {
           <Button
             label="보호자 정보 수정"
             variant="soft"
-            onPress={() => router.push("/guardian/edit")}
+            onPress={() =>
+              router.push({
+                pathname: "/(onboarding)/guardianBasic",
+                params: { mode: "edit" },
+              })
+            }
             style={styles.btn}
           />
         </Card>
@@ -89,12 +93,12 @@ export default function SettingsScreen() {
                 {dog.name} · {dog.breed}
               </Text>
               <Button
-                label="프로필 수정 (이름)"
+                label="프로필 수정"
                 variant="soft"
                 onPress={() =>
-                  updateDog.mutate({
-                    dogId: dog.dogId,
-                    input: { name: dog.name },
+                  router.push({
+                    pathname: "/(onboarding)/dogBasic",
+                    params: { mode: "edit" },
                   })
                 }
                 style={styles.btn}
