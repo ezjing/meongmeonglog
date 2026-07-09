@@ -1,27 +1,22 @@
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import { WalkPhotoCarousel } from "@/components/diary/WalkPhotoCarousel";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { LoadingOverlayScreen } from "@/components/ui/LoadingOverlay";
-import { QuoteCard } from "@/components/ui/ScreenContainer";
-import { useOverlay } from "@/components/ui/overlay";
-import { colors, spacing } from "@/constants/theme";
-import { useGenerateDiary } from "@/hooks/useDiaries";
-import { useDogDisplayName } from "@/hooks/useDogName";
-import { useWalk } from "@/hooks/useWalkMutations";
-import { useWalkPhotos } from "@/hooks/useWalkPhotos";
-import { formatDistance, formatDuration } from "@/lib/utils/formatDistance";
-import { useFinishWalkStore, useWalkStore } from "@/stores/walkStore";
-import type { Diary } from "@/types/domain";
+import { WalkPhotoCarousel } from '@/components/diary/WalkPhotoCarousel';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
+import { LoadingOverlayScreen } from '@/components/ui/LoadingOverlay';
+import { useOverlay } from '@/components/ui/overlay';
+import { QuoteCard } from '@/components/ui/ScreenContainer';
+import { colors, spacing } from '@/constants/theme';
+import { useGenerateDiary } from '@/hooks/useDiaries';
+import { useDogDisplayName } from '@/hooks/useDogName';
+import { useWalk } from '@/hooks/useWalkMutations';
+import { useWalkPhotos } from '@/hooks/useWalkPhotos';
+import { formatDistance, formatDuration } from '@/lib/utils/formatDistance';
+import { useFinishWalkStore, useWalkStore } from '@/stores/walkStore';
+import type { Diary } from '@/types/domain';
 
 export default function DiaryGenerateScreen() {
   const { walkId } = useLocalSearchParams<{ walkId: string }>();
@@ -35,6 +30,7 @@ export default function DiaryGenerateScreen() {
   const { width, height: screenHeight } = useWindowDimensions();
   const photoHeight = Math.round(screenHeight * 0.3);
   const [diary, setDiary] = useState<Diary | null>(null);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const isGenerating = generateDiary.isPending || !diary;
 
@@ -57,16 +53,11 @@ export default function DiaryGenerateScreen() {
 
   if (generateDiary.isError) {
     const message =
-      generateDiary.error instanceof Error
-        ? generateDiary.error.message
-        : "일기 생성에 실패했어요";
+      generateDiary.error instanceof Error ? generateDiary.error.message : '일기 생성에 실패했어요';
     return (
       <View style={styles.center}>
         <Text style={styles.error}>{message}</Text>
-        <Button
-          label="다시 시도"
-          onPress={() => walkId && generateDiary.mutate(walkId)}
-        />
+        <Button label="다시 시도" onPress={() => walkId && generateDiary.mutate(walkId)} />
       </View>
     );
   }
@@ -77,23 +68,19 @@ export default function DiaryGenerateScreen() {
       title={`${dogName}의 일기를 쓰고 있어요`}
       subtitle="성격·말투와 산책 기록을 반영하는 중"
     >
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-      >
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <View style={styles.heroWrap}>
           <WalkPhotoCarousel
             photos={photos}
             width={width}
             height={photoHeight}
+            onPhotoPress={(_, index) => setPreviewIndex(index)}
           />
         </View>
 
         <Card>
           <Text style={styles.diaryTitle}>{dogName}의 일기</Text>
-          {!isGenerating && diary ? (
-            <Text style={styles.diaryBody}>{diary.content}</Text>
-          ) : null}
+          {!isGenerating && diary ? <Text style={styles.diaryBody}>{diary.content}</Text> : null}
         </Card>
 
         {!isGenerating && diary ? (
@@ -102,18 +89,14 @@ export default function DiaryGenerateScreen() {
 
             <View style={styles.chips}>
               {walk?.distanceMeter != null ? (
-                <Text style={styles.chip}>
-                  🚶 {formatDistance(walk.distanceMeter)}
-                </Text>
+                <Text style={styles.chip}>🚶 {formatDistance(walk.distanceMeter)}</Text>
               ) : null}
               {walk?.durationSec != null ? (
-                <Text style={styles.chip}>
-                  ⏱ {formatDuration(walk.durationSec)}
-                </Text>
+                <Text style={styles.chip}>⏱ {formatDuration(walk.durationSec)}</Text>
               ) : null}
               {walk?.weatherTemp != null ? (
                 <Text style={styles.chip}>
-                  {walk.weatherIcon ?? "🌡️"} {walk.weatherTemp}°C
+                  {walk.weatherIcon ?? '🌡️'} {walk.weatherTemp}°C
                 </Text>
               ) : null}
             </View>
@@ -125,10 +108,10 @@ export default function DiaryGenerateScreen() {
                 style={styles.actionBtn}
                 onPress={() => {
                   showToast({
-                    message: "🐾 일기가 저장되었어요",
-                    variant: "success",
+                    message: '🐾 일기가 저장되었어요',
+                    variant: 'success',
                   });
-                  router.replace("/(tabs)");
+                  router.replace('/(tabs)');
                 }}
               />
               <Button
@@ -140,6 +123,13 @@ export default function DiaryGenerateScreen() {
           </>
         ) : null}
       </ScrollView>
+
+      <ImagePreviewModal
+        visible={previewIndex != null}
+        imageUris={photos.map((photo) => photo.imageUrl)}
+        initialIndex={previewIndex ?? 0}
+        onClose={() => setPreviewIndex(null)}
+      />
     </LoadingOverlayScreen>
   );
 }
@@ -149,8 +139,8 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   center: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: spacing.lg,
     backgroundColor: colors.background,
   },
@@ -160,22 +150,22 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   diaryTitle: {
-    fontWeight: "800",
+    fontWeight: '800',
     fontSize: 14,
     color: colors.ink,
     marginBottom: spacing.sm,
   },
   diaryBody: { fontSize: 13, lineHeight: 22, color: colors.ink },
-  chips: { flexDirection: "row", gap: spacing.sm, marginVertical: spacing.sm },
+  chips: { flexDirection: 'row', gap: spacing.sm, marginVertical: spacing.sm },
   chip: {
     fontSize: 11,
     backgroundColor: colors.white,
     paddingHorizontal: spacing.sm + 2,
     paddingVertical: spacing.xs,
     borderRadius: 999,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
-  actions: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.md },
+  actions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
   actionBtn: { flex: 1 },
   actionBtnWide: { flex: 1.3 },
 });

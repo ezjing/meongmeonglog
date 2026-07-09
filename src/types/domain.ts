@@ -1,4 +1,4 @@
-import type { AuthProvider, DogGender, DogMeetingLevel } from "./database";
+import type { AuthProvider, DogGender, DogMeetingLevel } from './database';
 
 export interface DogProfile {
   dogId: string;

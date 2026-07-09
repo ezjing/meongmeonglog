@@ -1,18 +1,17 @@
-import { AppError } from "@/lib/AppError";
-import { uploadStorageImage } from "@/lib/storageUpload";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
-import type { UserRow } from "@/types/database";
-import type { GuardianProfile, UpdateGuardianProfileInput } from "@/types/domain";
+import { AppError } from '@/lib/AppError';
+import { uploadStorageImage } from '@/lib/storageUpload';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import type { UserRow } from '@/types/database';
+import type { GuardianProfile, UpdateGuardianProfileInput } from '@/types/domain';
 
 const mockProfiles = new Map<string, GuardianProfile>();
 
-function toGuardianProfile(row: Pick<
-  UserRow,
-  | "guardian_title"
-  | "parenting_style"
-  | "current_concern"
-  | "guardian_profile_image"
->): GuardianProfile {
+function toGuardianProfile(
+  row: Pick<
+    UserRow,
+    'guardian_title' | 'parenting_style' | 'current_concern' | 'guardian_profile_image'
+  >,
+): GuardianProfile {
   return {
     guardianTitle: row.guardian_title,
     parentingStyle: row.parenting_style,
@@ -25,9 +24,7 @@ export function isGuardianProfileComplete(profile: GuardianProfile): boolean {
   return !!profile.guardianTitle?.trim();
 }
 
-export async function fetchGuardianProfile(
-  userId: string,
-): Promise<GuardianProfile> {
+export async function fetchGuardianProfile(userId: string): Promise<GuardianProfile> {
   if (!isSupabaseConfigured) {
     return (
       mockProfiles.get(userId) ?? {
@@ -40,14 +37,12 @@ export async function fetchGuardianProfile(
   }
 
   const { data, error } = await supabase
-    .from("users")
-    .select(
-      "guardian_title, parenting_style, current_concern, guardian_profile_image",
-    )
-    .eq("id", userId)
+    .from('users')
+    .select('guardian_title, parenting_style, current_concern, guardian_profile_image')
+    .eq('id', userId)
     .maybeSingle();
 
-  if (error) throw new AppError("fetch_guardian_profile_failed", error.message);
+  if (error) throw new AppError('fetch_guardian_profile_failed', error.message);
   if (!data) {
     return {
       guardianTitle: null,
@@ -60,12 +55,9 @@ export async function fetchGuardianProfile(
   return toGuardianProfile(data as UserRow);
 }
 
-export async function uploadGuardianProfileImage(
-  userId: string,
-  uri: string,
-): Promise<string> {
+export async function uploadGuardianProfileImage(userId: string, uri: string): Promise<string> {
   const path = `${userId}/guardian-${Date.now()}.jpg`;
-  return uploadStorageImage("dog-profiles", path, uri);
+  return uploadStorageImage('dog-profiles', path, uri);
 }
 
 export async function updateGuardianProfile(
@@ -80,10 +72,7 @@ export async function updateGuardianProfile(
       : existing.guardianProfileImageUrl;
 
   if (input.profileImageUri) {
-    guardianProfileImageUrl = await uploadGuardianProfileImage(
-      userId,
-      input.profileImageUri,
-    );
+    guardianProfileImageUrl = await uploadGuardianProfileImage(userId, input.profileImageUri);
   }
 
   const profile: GuardianProfile = {
@@ -99,19 +88,17 @@ export async function updateGuardianProfile(
   }
 
   const { data, error } = await supabase
-    .from("users")
+    .from('users')
     .update({
       guardian_title: profile.guardianTitle,
       parenting_style: profile.parentingStyle,
       current_concern: profile.currentConcern,
       guardian_profile_image: profile.guardianProfileImageUrl,
     })
-    .eq("id", userId)
-    .select(
-      "guardian_title, parenting_style, current_concern, guardian_profile_image",
-    )
+    .eq('id', userId)
+    .select('guardian_title, parenting_style, current_concern, guardian_profile_image')
     .single();
 
-  if (error) throw new AppError("update_guardian_profile_failed", error.message);
+  if (error) throw new AppError('update_guardian_profile_failed', error.message);
   return toGuardianProfile(data as UserRow);
 }

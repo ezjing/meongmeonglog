@@ -11,10 +11,7 @@ interface ToastViewProps extends ToastOptions {
   onHide: () => void;
 }
 
-const variantStyles: Record<
-  ToastVariant,
-  { container: object; text: object; chip?: boolean }
-> = {
+const variantStyles: Record<ToastVariant, { container: object; text: object; chip?: boolean }> = {
   default: {
     container: { backgroundColor: colors.ink },
     text: { color: colors.white },

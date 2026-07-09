@@ -1,19 +1,13 @@
+import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Platform } from 'react-native';
-import * as Location from 'expo-location';
 
 import { useElapsedSec } from '@/hooks/useElapsedSec';
-import { fetchCurrentWeather } from '@/lib/api/weatherApi';
 import { updateWalkWeather } from '@/lib/api/walkApi';
+import { fetchCurrentWeather } from '@/lib/api/weatherApi';
 import { flushAllPendingDbLocations } from '@/lib/walk/walkLocationProcessor';
-import {
-  loadPersistedWalkState,
-  savePersistedWalkState,
-} from '@/lib/walk/walkSessionStorage';
-import {
-  requestWalkLocationPermissions,
-  startWalkTracking,
-} from '@/lib/walk/walkLocationService';
+import { requestWalkLocationPermissions, startWalkTracking } from '@/lib/walk/walkLocationService';
+import { loadPersistedWalkState, savePersistedWalkState } from '@/lib/walk/walkSessionStorage';
 import { useWalkStore } from '@/stores/walkStore';
 
 const SYNC_INTERVAL_MS = 2_000;
@@ -76,9 +70,7 @@ export function useWalkTracker() {
   const activeWalk = useWalkStore((s) => s.activeWalk);
   const distanceMeter = useWalkStore((s) => s.distanceMeter);
   const frozenElapsedSec = useWalkStore((s) => s.frozenElapsedSec);
-  const liveElapsedSec = useElapsedSec(
-    frozenElapsedSec != null ? null : activeWalk?.startedAt,
-  );
+  const liveElapsedSec = useElapsedSec(frozenElapsedSec != null ? null : activeWalk?.startedAt);
   const elapsedSec = frozenElapsedSec ?? liveElapsedSec;
   const weatherFetchedRef = useRef(false);
   const [trackingError, setTrackingError] = useState<string | null>(null);
@@ -113,9 +105,7 @@ export function useWalkTracker() {
       } catch (error) {
         if (!cancelled) {
           setTrackingError(
-            error instanceof Error
-              ? error.message
-              : '산책 위치 추적을 시작하지 못했어요.',
+            error instanceof Error ? error.message : '산책 위치 추적을 시작하지 못했어요.',
           );
         }
         return;
@@ -126,11 +116,7 @@ export function useWalkTracker() {
           const coords = await getCurrentCoordinates();
           if (coords && !cancelled && !weatherFetchedRef.current) {
             weatherFetchedRef.current = true;
-            await applyWeatherForCoords(
-              activeWalk.walkId,
-              coords.latitude,
-              coords.longitude,
-            );
+            await applyWeatherForCoords(activeWalk.walkId, coords.latitude, coords.longitude);
             await syncWalkStateFromStorage();
           }
         } catch {
@@ -168,5 +154,9 @@ export async function requestLocationPermission(): Promise<boolean> {
   return requestWalkLocationPermissions();
 }
 
-export { startWalkTracking, stopWalkTracking, pauseWalkLocationUpdates } from '@/lib/walk/walkLocationService';
+export {
+  startWalkTracking,
+  stopWalkTracking,
+  pauseWalkLocationUpdates,
+} from '@/lib/walk/walkLocationService';
 export { freezeWalkSession } from '@/lib/walk/freezeWalkSession';

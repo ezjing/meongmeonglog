@@ -10,10 +10,7 @@ interface ChipProps {
 
 export function Chip({ label, selected = false, onPress }: ChipProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.chip, selected && styles.selected]}
-    >
+    <Pressable onPress={onPress} style={[styles.chip, selected && styles.selected]}>
       <Text style={[styles.label, selected && styles.selectedLabel]}>{label}</Text>
     </Pressable>
   );

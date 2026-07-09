@@ -7,8 +7,7 @@ interface PickImageOptions {
   selectionLimit?: number;
 }
 
-const iosCompatibleAssetMode =
-  ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible;
+const iosCompatibleAssetMode = ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible;
 
 export async function pickImageFromLibrary(options: PickImageOptions = {}) {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();

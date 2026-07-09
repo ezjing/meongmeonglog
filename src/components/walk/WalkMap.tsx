@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
+import { useEffect, useRef, useState } from 'react';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { colors, spacing } from "@/constants/theme";
+import { colors, spacing } from '@/constants/theme';
 
 interface MapCoordinate {
   latitude: number;
@@ -74,7 +74,7 @@ export function WalkMap({ routePath }: WalkMapProps) {
               }
             : DEFAULT_REGION
         }
-        provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         showsUserLocation
         showsMyLocationButton={false}
         scrollEnabled
@@ -89,11 +89,7 @@ export function WalkMap({ routePath }: WalkMapProps) {
         }}
       >
         {routePath.length > 1 && (
-          <Polyline
-            coordinates={routePath}
-            strokeColor={colors.apricot}
-            strokeWidth={3}
-          />
+          <Polyline coordinates={routePath} strokeColor={colors.apricot} strokeWidth={3} />
         )}
         {lastPoint && <Marker coordinate={lastPoint} />}
       </MapView>
@@ -116,15 +112,15 @@ const styles = StyleSheet.create({
   wrap: { flex: 1 },
   map: { flex: 1, backgroundColor: colors.background },
   recenterBtn: {
-    position: "absolute",
+    position: 'absolute',
     right: spacing.sm + 2,
     bottom: spacing.sm + 2,
     backgroundColor: colors.white,
     borderRadius: 999,
     width: 36,
     height: 36,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: colors.ink,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.12,

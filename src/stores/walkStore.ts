@@ -1,8 +1,8 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 import type { PersistedWalkState } from '@/lib/walk/walkSessionStorage';
-import type { DogGender, DogMeetingLevel } from "@/types/database";
-import type { WalkPhoto, WalkSession } from "@/types/domain";
+import type { DogGender, DogMeetingLevel } from '@/types/database';
+import type { WalkPhoto, WalkSession } from '@/types/domain';
 
 interface WalkStore {
   activeWalk: WalkSession | null;
@@ -105,12 +105,7 @@ interface OnboardingStore {
     data: Partial<
       Pick<
         OnboardingStore,
-        | "name"
-        | "breed"
-        | "birthDate"
-        | "gender"
-        | "weightKg"
-        | "profileImageUri"
+        'name' | 'breed' | 'birthDate' | 'gender' | 'weightKg' | 'profileImageUri'
       >
     >,
   ) => void;
@@ -118,10 +113,7 @@ interface OnboardingStore {
     data: Partial<
       Pick<
         OnboardingStore,
-        | "personality"
-        | "speechStyle"
-        | "customPersonality"
-        | "customSpeechStyle"
+        'personality' | 'speechStyle' | 'customPersonality' | 'customSpeechStyle'
       >
     >,
   ) => void;
@@ -129,15 +121,15 @@ interface OnboardingStore {
 }
 
 const defaultOnboarding = {
-  name: "",
-  breed: "포메라니안",
-  birthDate: "2023-05-12",
-  gender: "MALE" as DogGender,
-  weightKg: "",
+  name: '',
+  breed: '포메라니안',
+  birthDate: '2023-05-12',
+  gender: 'MALE' as DogGender,
+  weightKg: '',
   personality: [] as string[],
-  speechStyle: "기본",
-  customPersonality: "",
-  customSpeechStyle: "",
+  speechStyle: '기본',
+  customPersonality: '',
+  customSpeechStyle: '',
   profileImageUri: null as string | null,
 };
 
@@ -150,8 +142,8 @@ export const useOnboardingStore = create<OnboardingStore>((set) => ({
 
 interface AuthStore {
   userId: string | null;
-  provider: "kakao" | "naver" | null;
-  setSession: (userId: string, provider: "kakao" | "naver") => void;
+  provider: 'kakao' | 'naver' | null;
+  setSession: (userId: string, provider: 'kakao' | 'naver') => void;
   clearSession: () => void;
 }
 
@@ -184,19 +176,16 @@ const defaultFinishForm: FinishWalkForm = {
   photoUris: [],
   peeSelected: false,
   poopSelected: false,
-  dogMeetingLevel: "NONE",
-  memo: "",
+  dogMeetingLevel: 'NONE',
+  memo: '',
 };
 
 export const useFinishWalkStore = create<FinishWalkStore>((set, get) => ({
   form: defaultFinishForm,
   setPhotoUris: (uris) => set({ form: { ...get().form, photoUris: uris } }),
-  togglePee: () =>
-    set({ form: { ...get().form, peeSelected: !get().form.peeSelected } }),
-  togglePoop: () =>
-    set({ form: { ...get().form, poopSelected: !get().form.poopSelected } }),
-  setDogMeetingLevel: (level) =>
-    set({ form: { ...get().form, dogMeetingLevel: level } }),
+  togglePee: () => set({ form: { ...get().form, peeSelected: !get().form.peeSelected } }),
+  togglePoop: () => set({ form: { ...get().form, poopSelected: !get().form.poopSelected } }),
+  setDogMeetingLevel: (level) => set({ form: { ...get().form, dogMeetingLevel: level } }),
   setMemo: (memo) => set({ form: { ...get().form, memo } }),
   reset: () => set({ form: defaultFinishForm }),
 }));

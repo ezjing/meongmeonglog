@@ -1,7 +1,8 @@
-const { withDangerousMod } = require('expo/config-plugins');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+
+const { withDangerousMod } = require('expo/config-plugins');
 
 function expandHome(value) {
   if (!value) return value;
@@ -12,9 +13,7 @@ function expandHome(value) {
 
 function resolveAndroidSdkPath() {
   const fromEnv = expandHome(
-    process.env.ANDROID_SDK_PATH ??
-      process.env.ANDROID_HOME ??
-      process.env.ANDROID_SDK_ROOT,
+    process.env.ANDROID_SDK_PATH ?? process.env.ANDROID_HOME ?? process.env.ANDROID_SDK_ROOT,
   );
   if (fromEnv) return fromEnv;
 

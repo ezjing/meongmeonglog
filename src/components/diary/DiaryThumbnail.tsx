@@ -3,8 +3,7 @@ import { StyleSheet, View, type ViewStyle } from 'react-native';
 
 import { colors, radius } from '@/constants/theme';
 import { resolveDiaryThumbnail } from '@/lib/utils/diaryThumbnail';
-import type { DiaryListItem } from '@/types/domain';
-import type { WalkPhoto } from '@/types/domain';
+import type { DiaryListItem, WalkPhoto } from '@/types/domain';
 
 interface DiaryThumbnailProps {
   diary: Pick<DiaryListItem, 'walkId' | 'thumbnailUrl'>;
@@ -22,13 +21,7 @@ export function DiaryThumbnail({
   const thumbUrl = resolveDiaryThumbnail(diary, pendingPhotosByWalkId);
 
   return (
-    <View
-      style={[
-        styles.thumb,
-        { width: size, height: size, borderRadius: radius.sm },
-        style,
-      ]}
-    >
+    <View style={[styles.thumb, { width: size, height: size, borderRadius: radius.sm }, style]}>
       {thumbUrl ? (
         <Image
           source={{ uri: thumbUrl }}

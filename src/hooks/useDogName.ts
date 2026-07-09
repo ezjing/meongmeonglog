@@ -1,9 +1,7 @@
 import { DEFAULT_DOG_NAME } from '@/constants/dog';
 import { useDogs } from '@/hooks/useAuthSession';
 
-export function resolveDogDisplayName(
-  ...candidates: (string | null | undefined)[]
-): string {
+export function resolveDogDisplayName(...candidates: (string | null | undefined)[]): string {
   for (const name of candidates) {
     const trimmed = name?.trim();
     if (trimmed) return trimmed;

@@ -1,13 +1,13 @@
-import { Redirect, type Href } from "expo-router";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Redirect, type Href } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors } from "@/constants/theme";
-import { loadAuthSession } from "@/lib/authStorage";
-import { resolveOnboardingRoute } from "@/lib/onboardingRoute";
-import { loadPersistedWalkState } from "@/lib/walk/walkSessionStorage";
-import { useAuthStore, useWalkStore } from "@/stores/walkStore";
+import { colors } from '@/constants/theme';
+import { loadAuthSession } from '@/lib/authStorage';
+import { resolveOnboardingRoute } from '@/lib/onboardingRoute';
+import { loadPersistedWalkState } from '@/lib/walk/walkSessionStorage';
+import { useAuthStore, useWalkStore } from '@/stores/walkStore';
 
 export default function Index() {
   const userId = useAuthStore((s) => s.userId);
@@ -23,9 +23,7 @@ export default function Index() {
         const persistedWalk = await loadPersistedWalkState();
         if (persistedWalk?.activeWalk && !persistedWalk.activeWalk.endedAt) {
           useWalkStore.getState().hydrateFromPersisted(persistedWalk);
-          setRoute(
-            persistedWalk.frozenElapsedSec != null ? "/walk/finish" : "/walk/active",
-          );
+          setRoute(persistedWalk.frozenElapsedSec != null ? '/walk/finish' : '/walk/active');
         } else {
           const nextRoute = await resolveOnboardingRoute(stored.userId);
           setRoute(nextRoute);
@@ -47,14 +45,14 @@ export default function Index() {
     return <Redirect href="/(auth)/login" />;
   }
 
-  return <Redirect href={route ?? "/(tabs)"} />;
+  return <Redirect href={route ?? '/(tabs)'} />;
 }
 
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.background,
   },
 });

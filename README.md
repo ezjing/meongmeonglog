@@ -16,15 +16,15 @@ npm start
 
 이 프로젝트는 **Expo Go가 아닌 Dev Client** + 네이티브 모듈(카카오, 네이버, 지도)을 사용합니다. `android/`, `ios/` 폴더는 git에 없고 `prebuild`로 생성됩니다.
 
-| 명령어 | 하는 일 | 언제 쓰나 |
-| --- | --- | --- |
-| `npm start` | Metro 개발 서버 실행 (`--dev-client`) | **평소 개발** — JS/화면만 수정할 때 |
-| `npm run prebuild` | `android/`, `ios/` 네이티브 폴더 생성 | 네이티브 패키지·플러그인·`.env` 키 변경 시 |
-| `npm run prebuild:clean` | 네이티브 폴더를 지우고 다시 생성 | 앱이 완전히 꼬였을 때만 |
-| `npm run android` | Android 앱 **빌드 + 실기기 설치** | Dev Client 최초 설치, 네이티브 변경 후 |
-| `npm run ios` | iOS 앱 **빌드 + 실기기 설치** | Dev Client 최초 설치, 네이티브 변경 후 |
-| `npm run android:release` | Android Release 빌드·설치 | 성능/배포 테스트 (가끔) |
-| `npm run ios:release` | iOS Release 빌드·설치 | 성능/배포 테스트 (가끔) |
+| 명령어                    | 하는 일                               | 언제 쓰나                                  |
+| ------------------------- | ------------------------------------- | ------------------------------------------ |
+| `npm start`               | Metro 개발 서버 실행 (`--dev-client`) | **평소 개발** — JS/화면만 수정할 때        |
+| `npm run prebuild`        | `android/`, `ios/` 네이티브 폴더 생성 | 네이티브 패키지·플러그인·`.env` 키 변경 시 |
+| `npm run prebuild:clean`  | 네이티브 폴더를 지우고 다시 생성      | 앱이 완전히 꼬였을 때만                    |
+| `npm run android`         | Android 앱 **빌드 + 실기기 설치**     | Dev Client 최초 설치, 네이티브 변경 후     |
+| `npm run ios`             | iOS 앱 **빌드 + 실기기 설치**         | Dev Client 최초 설치, 네이티브 변경 후     |
+| `npm run android:release` | Android Release 빌드·설치             | 성능/배포 테스트 (가끔)                    |
+| `npm run ios:release`     | iOS Release 빌드·설치                 | 성능/배포 테스트 (가끔)                    |
 
 ### 평소 개발 (90%)
 

@@ -11,7 +11,7 @@ export const colors = {
   moss: '#6B8F71',
   clay: '#E8B4A0',
   kakao: '#FEE500',
-  kakaoText: '#3C1E1E',
+  kakaoText: 'rgba(0, 0, 0, 0.85)',
   naver: '#03C75A',
   quoteBg: '#FFE9DC',
   danger: '#D9534F',
@@ -28,6 +28,7 @@ export const spacing = {
 
 export const radius = {
   sm: 10,
+  social: 12,
   md: 14,
   lg: 16,
   xl: 18,

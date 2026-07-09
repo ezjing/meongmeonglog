@@ -1,25 +1,22 @@
-import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image } from 'expo-image';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { GuardianProfileFields } from "@/components/guardian/GuardianProfileFields";
-import { Button } from "@/components/ui/Button";
-import { LoadingPaws } from "@/components/ui/LoadingPaws";
-import { PawProgress } from "@/components/ui/PawProgress";
-import { StackAppBar } from "@/components/ui/StackAppBar";
-import { BottomSheet, useOverlay } from "@/components/ui/overlay";
-import { colors, spacing } from "@/constants/theme";
-import { useAuthSession } from "@/hooks/useAuthSession";
-import {
-  useGuardianProfile,
-  useUpdateGuardianProfile,
-} from "@/hooks/useGuardianProfile";
-import { pickImageFromCamera, pickImageFromLibrary } from "@/lib/pickImage";
+import { GuardianProfileFields } from '@/components/guardian/GuardianProfileFields';
+import { Button } from '@/components/ui/Button';
+import { LoadingPaws } from '@/components/ui/LoadingPaws';
+import { BottomSheet, useOverlay } from '@/components/ui/overlay';
+import { PawProgress } from '@/components/ui/PawProgress';
+import { StackAppBar } from '@/components/ui/StackAppBar';
+import { colors, spacing } from '@/constants/theme';
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { useGuardianProfile, useUpdateGuardianProfile } from '@/hooks/useGuardianProfile';
+import { pickImageFromCamera, pickImageFromLibrary } from '@/lib/pickImage';
 
 export default function GuardianBasicScreen() {
   const { mode } = useLocalSearchParams<{ mode?: string }>();
-  const isEditMode = mode === "edit";
+  const isEditMode = mode === 'edit';
   const { logout } = useAuthSession();
   const { data: profile, isLoading: isProfileLoading } = useGuardianProfile();
   const updateProfile = useUpdateGuardianProfile();
@@ -27,17 +24,17 @@ export default function GuardianBasicScreen() {
   const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
   const [values, setValues] = useState({
-    guardianTitle: "",
-    parentingStyle: "",
-    currentConcern: "",
+    guardianTitle: '',
+    parentingStyle: '',
+    currentConcern: '',
   });
 
   useEffect(() => {
     if (!isEditMode || !profile) return;
     setValues({
-      guardianTitle: profile.guardianTitle ?? "",
-      parentingStyle: profile.parentingStyle ?? "",
-      currentConcern: profile.currentConcern ?? "",
+      guardianTitle: profile.guardianTitle ?? '',
+      parentingStyle: profile.parentingStyle ?? '',
+      currentConcern: profile.currentConcern ?? '',
     });
     setProfileImageUri(profile.guardianProfileImageUrl);
   }, [isEditMode, profile]);
@@ -51,16 +48,16 @@ export default function GuardianBasicScreen() {
     }
 
     const confirmed = await showAlert({
-      icon: "🐾",
-      title: "등록을 취소할까요?",
-      message: "입력한 내용은 저장되지 않아요.",
-      cancelLabel: "계속 등록",
-      confirmLabel: "취소하기",
+      icon: '🐾',
+      title: '등록을 취소할까요?',
+      message: '입력한 내용은 저장되지 않아요.',
+      cancelLabel: '계속 등록',
+      confirmLabel: '취소하기',
       destructive: true,
     });
     if (!confirmed) return;
     await logout();
-    router.replace("/(auth)/login");
+    router.replace('/(auth)/login');
   };
 
   const handlePickFromLibrary = async () => {
@@ -90,21 +87,20 @@ export default function GuardianBasicScreen() {
         parentingStyle: values.parentingStyle,
         currentConcern: values.currentConcern,
         profileImageUri:
-          profileImageUri &&
-          profileImageUri !== profile?.guardianProfileImageUrl
+          profileImageUri && profileImageUri !== profile?.guardianProfileImageUrl
             ? profileImageUri
             : undefined,
       });
       if (isEditMode) {
-        showToast({ message: "보호자 정보를 저장했어요", variant: "success" });
+        showToast({ message: '보호자 정보를 저장했어요', variant: 'success' });
         router.back();
         return;
       }
-      router.push("/(onboarding)/dogBasic");
+      router.push('/(onboarding)/dogBasic');
     } catch {
       showToast({
-        message: "⚠️ 보호자 정보 저장에 실패했어요",
-        variant: "warning",
+        message: '⚠️ 보호자 정보 저장에 실패했어요',
+        variant: 'warning',
       });
     }
   };
@@ -112,10 +108,7 @@ export default function GuardianBasicScreen() {
   if (isEditMode && isProfileLoading) {
     return (
       <View style={styles.screen}>
-        <StackAppBar
-          title="보호자 정보 관리"
-          onBackPress={() => router.back()}
-        />
+        <StackAppBar title="보호자 정보 관리" onBackPress={() => router.back()} />
         <LoadingPaws message="보호자 정보를 불러오는 중" />
       </View>
     );
@@ -125,10 +118,7 @@ export default function GuardianBasicScreen() {
     <>
       <View style={styles.screen}>
         {isEditMode ? (
-          <StackAppBar
-            title="보호자 정보 관리"
-            onBackPress={() => router.back()}
-          />
+          <StackAppBar title="보호자 정보 관리" onBackPress={() => router.back()} />
         ) : null}
         <ScrollView
           style={styles.container}
@@ -144,9 +134,7 @@ export default function GuardianBasicScreen() {
           {!isEditMode ? (
             <>
               <Text style={styles.title}>먼저, 보호자님을 알려주세요</Text>
-              <Text style={styles.subtitle}>
-                AI 일기에서 보호자님을 부르는 호칭이에요
-              </Text>
+              <Text style={styles.subtitle}>AI 일기에서 보호자님을 부르는 호칭이에요</Text>
             </>
           ) : (
             <Text style={styles.editSubtitle}>
@@ -154,10 +142,7 @@ export default function GuardianBasicScreen() {
             </Text>
           )}
 
-          <Pressable
-            style={styles.avatarWrap}
-            onPress={() => setPhotoSheetVisible(true)}
-          >
+          <Pressable style={styles.avatarWrap} onPress={() => setPhotoSheetVisible(true)}>
             <View style={styles.avatar}>
               {profileImageUri ? (
                 <Image
@@ -183,15 +168,10 @@ export default function GuardianBasicScreen() {
         <View style={styles.footer}>
           <View style={styles.btnRow}>
             {!isEditMode ? (
-              <Button
-                label="이전"
-                variant="soft"
-                onPress={handleCancel}
-                style={styles.prevBtn}
-              />
+              <Button label="이전" variant="soft" onPress={handleCancel} style={styles.prevBtn} />
             ) : null}
             <Button
-              label={isEditMode ? "저장" : "다음"}
+              label={isEditMode ? '저장' : '다음'}
               disabled={!canNext || updateProfile.isPending}
               onPress={handleNext}
               style={isEditMode ? styles.singleBtn : styles.nextBtn}
@@ -206,10 +186,10 @@ export default function GuardianBasicScreen() {
         title="프로필 사진 추가"
         subtitle="보호자 프로필 사진을 등록해주세요"
         options={[
-          { icon: "📷", label: "카메라로 촬영", onPress: handlePickFromCamera },
+          { icon: '📷', label: '카메라로 촬영', onPress: handlePickFromCamera },
           {
-            icon: "🖼️",
-            label: "갤러리에서 선택",
+            icon: '🖼️',
+            label: '갤러리에서 선택',
             onPress: handlePickFromLibrary,
           },
         ]}
@@ -233,7 +213,7 @@ const styles = StyleSheet.create({
   progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
   title: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: '700',
     color: colors.ink,
     marginTop: spacing.sm,
     marginBottom: 4,
@@ -250,40 +230,40 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   avatarWrap: {
-    alignSelf: "center",
+    alignSelf: 'center',
     marginTop: 8,
     marginBottom: 16,
-    position: "relative",
+    position: 'relative',
   },
   avatar: {
     width: 84,
     height: 84,
     borderRadius: 42,
     backgroundColor: colors.clay,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 3,
     borderColor: colors.white,
-    borderStyle: "dashed",
-    overflow: "hidden",
+    borderStyle: 'dashed',
+    overflow: 'hidden',
   },
   avatarImage: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   avatarEmoji: {
     fontSize: 30,
   },
   camBadge: {
-    position: "absolute",
+    position: 'absolute',
     right: -2,
     bottom: -2,
     width: 26,
     height: 26,
     borderRadius: 13,
     backgroundColor: colors.ink,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: colors.background,
   },
@@ -296,7 +276,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   btnRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: spacing.sm,
   },
   prevBtn: { flex: 1 },

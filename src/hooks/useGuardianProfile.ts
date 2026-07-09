@@ -1,14 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import {
-  fetchGuardianProfile,
-  updateGuardianProfile,
-} from "@/lib/api/userApi";
-import type { UpdateGuardianProfileInput } from "@/types/domain";
-import { useAuthStore } from "@/stores/walkStore";
+import { fetchGuardianProfile, updateGuardianProfile } from '@/lib/api/userApi';
+import { useAuthStore } from '@/stores/walkStore';
+import type { UpdateGuardianProfileInput } from '@/types/domain';
 
 export const guardianKeys = {
-  all: ["guardian"] as const,
+  all: ['guardian'] as const,
   profile: (userId: string) => [...guardianKeys.all, userId] as const,
 };
 
@@ -16,7 +13,7 @@ export function useGuardianProfile() {
   const userId = useAuthStore((s) => s.userId);
 
   return useQuery({
-    queryKey: guardianKeys.profile(userId ?? ""),
+    queryKey: guardianKeys.profile(userId ?? ''),
     queryFn: () => fetchGuardianProfile(userId!),
     enabled: !!userId,
   });
@@ -27,8 +24,7 @@ export function useUpdateGuardianProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: UpdateGuardianProfileInput) =>
-      updateGuardianProfile(userId!, input),
+    mutationFn: (input: UpdateGuardianProfileInput) => updateGuardianProfile(userId!, input),
     onSuccess: () => {
       if (userId) {
         queryClient.invalidateQueries({

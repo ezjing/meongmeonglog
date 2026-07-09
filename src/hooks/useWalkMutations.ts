@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
+import { AnalyticsEvents, trackEvent } from '@/lib/analytics';
 import {
   startWalk,
   finishWalk,
@@ -10,7 +11,6 @@ import {
   fetchWalkPhotos,
   type WalkWeatherPayload,
 } from '@/lib/api/walkApi';
-import { AnalyticsEvents, trackEvent } from '@/lib/analytics';
 import type { WalkEvent } from '@/types/domain';
 
 export const walkKeys = {
@@ -29,13 +29,8 @@ export function useWalk(walkId: string | undefined) {
 
 export function useStartWalk() {
   return useMutation({
-    mutationFn: ({
-      dogId,
-      weather,
-    }: {
-      dogId: string;
-      weather?: WalkWeatherPayload;
-    }) => startWalk(dogId, weather),
+    mutationFn: ({ dogId, weather }: { dogId: string; weather?: WalkWeatherPayload }) =>
+      startWalk(dogId, weather),
     onSuccess: () => trackEvent(AnalyticsEvents.walkStarted),
   });
 }

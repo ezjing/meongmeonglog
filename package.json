@@ -39,6 +39,7 @@
     "react-native-reanimated": "4.3.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "4.25.2",
+    "react-native-svg": "^15.15.5",
     "react-native-view-shot": "5.1.0",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.8.3",
@@ -47,6 +48,12 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eslint": "^9.39.4",
+    "eslint-config-expo": "~56.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import": "^2.32.0",
+    "prettier": "^3.9.4",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -58,7 +65,10 @@
     "ios:release": "expo run:ios --device --configuration Release",
     "android:release": "expo run:android --device --variant release",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"*.{ts,js}\" \"plugins/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"*.{ts,js}\" \"plugins/**/*.js\""
   },
   "private": true
 }

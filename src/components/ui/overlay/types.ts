@@ -1,3 +1,5 @@
+import type React from 'react';
+
 export type ToastVariant = 'default' | 'success' | 'warning';
 
 export interface AlertDialogOptions {
@@ -16,7 +18,8 @@ export interface ToastOptions {
 }
 
 export interface BottomSheetOption {
-  icon: string;
+  icon?: React.ReactNode;
+  iconBg?: string;
   label: string;
   onPress: () => void;
 }

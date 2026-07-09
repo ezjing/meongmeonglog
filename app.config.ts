@@ -7,7 +7,7 @@ const naverUrlScheme = naverClientId ? `naver${naverClientId}` : '';
 const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
 export default (): ExpoConfig => ({
-  ...appJson.expo,
+  ...(appJson.expo as ExpoConfig),
   plugins: [
     ...(appJson.expo.plugins ?? []),
     'expo-dev-client',
@@ -28,12 +28,7 @@ export default (): ExpoConfig => ({
     './plugins/withKakaoMaven.js',
     './plugins/withAndroidLocalProperties.js',
     ...(googleMapsApiKey
-      ? ([
-          [
-            'react-native-maps',
-            { androidGoogleMapsApiKey: googleMapsApiKey },
-          ],
-        ] as NonNullable<ExpoConfig['plugins']>)
+      ? [['react-native-maps', { androidGoogleMapsApiKey: googleMapsApiKey }]]
       : []),
-  ],
+  ] as NonNullable<ExpoConfig['plugins']>,
 });

@@ -1,5 +1,5 @@
-import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { File } from 'expo-file-system';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
 import { AppError } from '@/lib/AppError';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
@@ -9,11 +9,10 @@ const MAX_GROQ_IMAGE_EDGE = 2048;
 async function normalizeImageForUpload(
   uri: string,
 ): Promise<{ uri: string; contentType: string; ext: string }> {
-  const result = await manipulateAsync(
-    uri,
-    [{ resize: { width: MAX_GROQ_IMAGE_EDGE } }],
-    { compress: 0.8, format: SaveFormat.JPEG },
-  );
+  const result = await manipulateAsync(uri, [{ resize: { width: MAX_GROQ_IMAGE_EDGE } }], {
+    compress: 0.8,
+    format: SaveFormat.JPEG,
+  });
 
   return {
     uri: result.uri,

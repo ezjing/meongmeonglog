@@ -72,7 +72,11 @@ export async function updateDog(
   if (!isSupabaseConfigured) {
     const idx = mockDogs.findIndex((d) => d.dogId === dogId);
     if (idx === -1) throw new AppError('dog_not_found', '강아지를 찾을 수 없습니다.');
-    mockDogs[idx] = { ...mockDogs[idx], ...input, speechStyle: input.speechStyle ?? mockDogs[idx].speechStyle };
+    mockDogs[idx] = {
+      ...mockDogs[idx],
+      ...input,
+      speechStyle: input.speechStyle ?? mockDogs[idx].speechStyle,
+    };
     return mockDogs[idx];
   }
 

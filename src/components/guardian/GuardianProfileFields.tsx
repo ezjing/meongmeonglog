@@ -1,6 +1,6 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { colors, radius, spacing } from "@/constants/theme";
+import { colors, radius, spacing } from '@/constants/theme';
 
 export interface GuardianProfileFormValues {
   guardianTitle: string;
@@ -13,11 +13,8 @@ interface GuardianProfileFieldsProps {
   onChange: (values: Partial<GuardianProfileFormValues>) => void;
 }
 
-export function GuardianProfileFields({
-  values,
-  onChange,
-}: GuardianProfileFieldsProps) {
-  const displayTitle = values.guardianTitle.trim() || "엄마";
+export function GuardianProfileFields({ values, onChange }: GuardianProfileFieldsProps) {
+  const displayTitle = values.guardianTitle.trim() || '엄마';
 
   return (
     <>
@@ -57,8 +54,8 @@ export function GuardianProfileFields({
 
       <View style={styles.relationNote}>
         <Text style={styles.relationNoteText}>
-          🐾 &quot;오늘은 {displayTitle}랑 공원에 다녀왔어!&quot; — 입력한
-          호칭이 일기 속에 그대로 등장해요
+          🐾 &quot;오늘은 {displayTitle}랑 공원에 다녀왔어!&quot; — 입력한 호칭이 일기 속에 그대로
+          등장해요
         </Text>
       </View>
     </>
@@ -71,8 +68,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 11,
-    fontWeight: "700",
-    color: "#5b5b66",
+    fontWeight: '700',
+    color: '#5b5b66',
     marginBottom: 5,
   },
   input: {
@@ -87,7 +84,7 @@ const styles = StyleSheet.create({
   },
   multilineInput: {
     minHeight: 72,
-    textAlignVertical: "top",
+    textAlignVertical: 'top',
   },
   relationNote: {
     backgroundColor: colors.quoteBg,

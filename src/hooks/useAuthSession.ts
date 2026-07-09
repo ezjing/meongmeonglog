@@ -2,23 +2,28 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { signInWithProvider, signOut, getCurrentUserId } from '@/lib/api/authApi';
 import { fetchDogs, createDog, updateDog } from '@/lib/api/dogApi';
+import { useAuthStore } from '@/stores/walkStore';
 import type { AuthProvider } from '@/types/database';
 import type { CreateDogInput } from '@/types/domain';
-import { useAuthStore } from '@/stores/walkStore';
 
 export function useAuthSession() {
+  const queryClient = useQueryClient();
   const { userId, provider, setSession, clearSession } = useAuthStore();
 
   const loginMutation = useMutation({
     mutationFn: ({ provider, accessToken }: { provider: AuthProvider; accessToken: string }) =>
       signInWithProvider(provider, accessToken),
-    onSuccess: (session) => setSession(session.userId, session.provider),
+    onSuccess: (session) => {
+      queryClient.clear();
+      setSession(session.userId, session.provider);
+    },
   });
 
   const logoutMutation = useMutation({
     mutationFn: signOut,
     onSuccess: () => {
       clearSession();
+      queryClient.clear();
     },
   });
 

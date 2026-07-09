@@ -1,30 +1,19 @@
-import { router } from "expo-router";
-import { useState } from "react";
-import {
-  Dimensions,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { DiaryThumbnail } from "@/components/diary/DiaryThumbnail";
-import { SettingsDrawer } from "@/components/settings/SettingsDrawer";
-import { Card } from "@/components/ui/Card";
-import { TabAppBar } from "@/components/ui/TabAppBar";
-import { colors, spacing } from "@/constants/theme";
-import { useCalendar, useDiaryList } from "@/hooks/useDiaries";
-import {
-  formatDate,
-  formatDistance,
-  formatDuration,
-} from "@/lib/utils/formatDistance";
-import { useWalkStore } from "@/stores/walkStore";
-import type { DiaryListItem } from "@/types/domain";
+import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
+import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
+import { Card } from '@/components/ui/Card';
+import { TabAppBar } from '@/components/ui/TabAppBar';
+import { colors, spacing } from '@/constants/theme';
+import { useCalendar, useDiaryList } from '@/hooks/useDiaries';
+import { formatDate, formatDistance, formatDuration } from '@/lib/utils/formatDistance';
+import { useWalkStore } from '@/stores/walkStore';
+import type { DiaryListItem } from '@/types/domain';
 
-const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
-const CELL_SIZE = (Dimensions.get("window").width - 32) / 7;
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+const CELL_SIZE = (Dimensions.get('window').width - 32) / 7;
 
 export default function CalendarScreen() {
   const now = new Date();
@@ -37,9 +26,7 @@ export default function CalendarScreen() {
   const { data: dayDiaries, isLoading: isDayDiariesLoading } = useDiaryList(
     selectedDate ?? undefined,
   );
-  const pendingPhotosByWalkId = useWalkStore(
-    (s) => s.pendingWalkPhotosByWalkId,
-  );
+  const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
 
   const firstDay = new Date(year, month - 1, 1).getDay();
   const today = now.toISOString().slice(0, 10);
@@ -58,17 +45,12 @@ export default function CalendarScreen() {
       style={styles.sheet}
       onTouchEnd={() => router.push(`/diary/${diary.diaryId}`)}
     >
-      <DiaryThumbnail
-        diary={diary}
-        pendingPhotosByWalkId={pendingPhotosByWalkId}
-      />
+      <DiaryThumbnail diary={diary} pendingPhotosByWalkId={pendingPhotosByWalkId} />
       <View style={styles.sheetBody}>
         <Text style={styles.sheetMeta}>
           {formatDate(diary.createdAt)}
-          {diary.durationSec ? ` · ${formatDuration(diary.durationSec)}` : ""}
-          {diary.distanceMeter
-            ? ` · ${formatDistance(diary.distanceMeter)}`
-            : ""}
+          {diary.durationSec ? ` · ${formatDuration(diary.durationSec)}` : ''}
+          {diary.distanceMeter ? ` · ${formatDistance(diary.distanceMeter)}` : ''}
         </Text>
         <Text style={styles.sheetQuote} numberOfLines={1}>
           {diary.dailyQuote}
@@ -84,11 +66,7 @@ export default function CalendarScreen() {
 
         <View style={styles.monthNav}>
           <Pressable
-            onPress={() =>
-              month === 1
-                ? (setYear(year - 1), setMonth(12))
-                : setMonth(month - 1)
-            }
+            onPress={() => (month === 1 ? (setYear(year - 1), setMonth(12)) : setMonth(month - 1))}
           >
             <Text style={styles.nav}>‹</Text>
           </Pressable>
@@ -96,11 +74,7 @@ export default function CalendarScreen() {
             {year}년 {month}월
           </Text>
           <Pressable
-            onPress={() =>
-              month === 12
-                ? (setYear(year + 1), setMonth(1))
-                : setMonth(month + 1)
-            }
+            onPress={() => (month === 12 ? (setYear(year + 1), setMonth(1)) : setMonth(month + 1))}
           >
             <Text style={styles.nav}>›</Text>
           </Pressable>
@@ -160,10 +134,7 @@ export default function CalendarScreen() {
         ) : null}
       </View>
 
-      <SettingsDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-      />
+      <SettingsDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
     </>
   );
 }
@@ -175,16 +146,16 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   monthNav: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: spacing.sm,
   },
   nav: { fontSize: 20, color: colors.ink, padding: spacing.sm },
-  monthTitle: { fontSize: 15, fontWeight: "700", color: colors.ink },
-  weekRow: { flexDirection: "row", marginBottom: spacing.xs },
-  weekday: { flex: 1, textAlign: "center", fontSize: 10, color: colors.grey },
-  grid: { flexDirection: "row", flexWrap: "wrap" },
+  monthTitle: { fontSize: 15, fontWeight: '700', color: colors.ink },
+  weekRow: { flexDirection: 'row', marginBottom: spacing.xs },
+  weekday: { flex: 1, textAlign: 'center', fontSize: 10, color: colors.grey },
+  grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: {
     width: CELL_SIZE,
     height: CELL_SIZE,
@@ -192,24 +163,24 @@ const styles = StyleSheet.create({
   },
   cellInner: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 8,
   },
   todayCell: { backgroundColor: colors.apricot },
   diaryCell: { backgroundColor: colors.white },
   selectedCell: { borderWidth: 2, borderColor: colors.apricotDark },
-  cellText: { fontSize: 11, color: "#5b5b66" },
-  todayText: { color: colors.white, fontWeight: "800" },
+  cellText: { fontSize: 11, color: '#5b5b66' },
+  todayText: { color: colors.white, fontWeight: '800' },
   paw: { fontSize: 7, marginTop: 1 },
   sheetListScroll: { flex: 1, marginTop: spacing.md },
   sheetList: { gap: spacing.sm, paddingBottom: spacing.md },
-  sheet: { flexDirection: "row", gap: spacing.sm, alignItems: "center" },
+  sheet: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center' },
   sheetBody: { flex: 1 },
   sheetMeta: { fontSize: 10, color: colors.grey, marginBottom: 3 },
-  sheetQuote: { fontSize: 12, fontWeight: "600", color: colors.ink },
+  sheetQuote: { fontSize: 12, fontWeight: '600', color: colors.ink },
   noDiary: {
-    textAlign: "center",
+    textAlign: 'center',
     color: colors.grey,
     marginTop: spacing.lg,
     fontSize: 12,

@@ -34,9 +34,7 @@ export function useDiaryWalkPhotos(
 }
 
 export function useWalkPhotos(walkId: string | undefined): WalkPhoto[] {
-  const pending = useWalkStore((s) =>
-    walkId ? s.pendingWalkPhotosByWalkId[walkId] : undefined,
-  );
+  const pending = useWalkStore((s) => (walkId ? s.pendingWalkPhotosByWalkId[walkId] : undefined));
   const photoUris = useFinishWalkStore((s) => s.form.photoUris);
   const [photos, setPhotos] = useState<WalkPhoto[]>([]);
 
@@ -47,9 +45,7 @@ export function useWalkPhotos(walkId: string | undefined): WalkPhoto[] {
     }
 
     const localPhotos =
-      pending && pending.length > 0
-        ? pending
-        : localPhotosFromUris(walkId, photoUris);
+      pending && pending.length > 0 ? pending : localPhotosFromUris(walkId, photoUris);
 
     if (localPhotos.length > 0) {
       setPhotos(localPhotos);

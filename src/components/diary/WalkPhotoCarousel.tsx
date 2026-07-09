@@ -27,12 +27,7 @@ export function WalkPhotoCarousel({
   const [photoIndex, setPhotoIndex] = useState(0);
 
   return (
-    <View
-      style={[
-        styles.container,
-        { width, height, borderRadius, backgroundColor: colors.clay },
-      ]}
-    >
+    <View style={[styles.container, { width, height, borderRadius, backgroundColor: colors.clay }]}>
       {photos.length > 0 ? (
         <ScrollView
           horizontal
@@ -70,10 +65,7 @@ export function WalkPhotoCarousel({
       {showDots && photos.length > 1 ? (
         <View style={styles.dots} pointerEvents="none">
           {photos.map((photo, i) => (
-            <View
-              key={photo.id}
-              style={[styles.dot, i === photoIndex && styles.dotActive]}
-            />
+            <View key={photo.id} style={[styles.dot, i === photoIndex && styles.dotActive]} />
           ))}
         </View>
       ) : null}

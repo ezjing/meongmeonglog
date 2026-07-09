@@ -1,8 +1,8 @@
-export type AuthProvider = "kakao" | "naver";
+export type AuthProvider = 'kakao' | 'naver';
 
-export type DogGender = "MALE" | "FEMALE";
+export type DogGender = 'MALE' | 'FEMALE';
 
-export type DogMeetingLevel = "NONE" | "ONE_TO_TWO" | "THREE_OR_MORE";
+export type DogMeetingLevel = 'NONE' | 'ONE_TO_TWO' | 'THREE_OR_MORE';
 
 export interface UserRow {
   id: string;

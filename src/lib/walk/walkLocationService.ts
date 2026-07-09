@@ -1,10 +1,7 @@
 import * as Location from 'expo-location';
 import { PermissionsAndroid, Platform } from 'react-native';
 
-import {
-  BACKGROUND_WALK_TASK,
-  isBackgroundWalkTaskRunning,
-} from '@/lib/walk/backgroundWalkTask';
+import { BACKGROUND_WALK_TASK, isBackgroundWalkTaskRunning } from '@/lib/walk/backgroundWalkTask';
 import {
   clearPersistedWalkState,
   createInitialWalkState,
@@ -18,9 +15,7 @@ const LOCATION_INTERVAL_MS = 15_000;
 async function requestAndroidNotificationPermission(): Promise<boolean> {
   if (Platform.OS !== 'android' || Platform.Version < 33) return true;
 
-  const current = await PermissionsAndroid.check(
-    PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-  );
+  const current = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
   if (current) return true;
 
   const result = await PermissionsAndroid.request(
@@ -81,8 +76,7 @@ export async function startWalkTracking(activeWalk: WalkSession): Promise<void> 
       showsBackgroundLocationIndicator: true,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : '위치 추적을 시작하지 못했어요';
+    const message = error instanceof Error ? error.message : '위치 추적을 시작하지 못했어요';
     throw new Error(message);
   }
 }

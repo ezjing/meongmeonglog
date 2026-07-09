@@ -7,19 +7,19 @@ import { DogAvatar } from '@/components/dog/DogAvatar';
 import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
 import { Card } from '@/components/ui/Card';
 import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
-import { TabAppBar } from '@/components/ui/TabAppBar';
 import { useOverlay } from '@/components/ui/overlay';
+import { TabAppBar } from '@/components/ui/TabAppBar';
+import { colors, spacing } from '@/constants/theme';
 import { useDogs } from '@/hooks/useAuthSession';
 import { useDiaryList } from '@/hooks/useDiaries';
 import { useStartWalk } from '@/hooks/useWalkMutations';
-import { fetchCurrentWeather } from '@/lib/api/weatherApi';
 import {
   getCurrentCoordinates,
   requestLocationPermission,
   stopWalkTracking,
 } from '@/hooks/useWalkTracker';
+import { fetchCurrentWeather } from '@/lib/api/weatherApi';
 import { formatDate, formatDistance, calculateAge } from '@/lib/utils/formatDistance';
-import { colors, spacing } from '@/constants/theme';
 import { useWalkStore } from '@/stores/walkStore';
 import type { DiaryListItem } from '@/types/domain';
 
@@ -46,10 +46,7 @@ function getTodayWalkStatus(
   }
 
   const count = todayDiaries.length;
-  const totalDistance = todayDiaries.reduce(
-    (sum, diary) => sum + (diary.distanceMeter ?? 0),
-    0,
-  );
+  const totalDistance = todayDiaries.reduce((sum, diary) => sum + (diary.distanceMeter ?? 0), 0);
 
   if (count === 0) {
     return {
@@ -60,12 +57,8 @@ function getTodayWalkStatus(
     };
   }
 
-  const title =
-    count === 1
-      ? '오늘 산책 1번 다녀왔어요'
-      : `오늘 산책 ${count}번 다녀왔어요`;
-  const subtitle =
-    totalDistance > 0 ? `총 ${formatDistance(totalDistance)} 걸었어요` : null;
+  const title = count === 1 ? '오늘 산책 1번 다녀왔어요' : `오늘 산책 ${count}번 다녀왔어요`;
+  const subtitle = totalDistance > 0 ? `총 ${formatDistance(totalDistance)} 걸었어요` : null;
 
   return { title, subtitle, emoji: '✨', onPress: undefined };
 }
@@ -87,6 +80,7 @@ export default function HomeScreen() {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
   const todayDiaries = sortedDiaries.filter(isDiaryToday);
+  const recentDiaries = sortedDiaries.slice(0, 5);
   const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries);
 
   const handleStartWalk = async () => {
@@ -129,72 +123,66 @@ export default function HomeScreen() {
 
   return (
     <>
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {dog ? (
-        <TabAppBar onMenuPress={() => setDrawerVisible(true)}>
-          <View style={styles.headerMain}>
-            <Pressable onPress={() => setProfilePreviewVisible(true)}>
-              <DogAvatar imageUri={dog.profileImageUrl} />
-            </Pressable>
-            <View>
-              <Text style={styles.dogName}>{dog.name}</Text>
-              <Text style={styles.dogBreed}>
-                {dog.breed} · {calculateAge(dog.birthDate)}살
-              </Text>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        {dog ? (
+          <TabAppBar onMenuPress={() => setDrawerVisible(true)}>
+            <View style={styles.headerMain}>
+              <Pressable onPress={() => setProfilePreviewVisible(true)}>
+                <DogAvatar imageUri={dog.profileImageUrl} />
+              </Pressable>
+              <View>
+                <Text style={styles.dogName}>{dog.name}</Text>
+                <Text style={styles.dogBreed}>
+                  {dog.breed} · {calculateAge(dog.birthDate)}살
+                </Text>
+              </View>
             </View>
+          </TabAppBar>
+        ) : null}
+
+        <Card style={styles.statusCard} onTouchEnd={walkStatus.onPress}>
+          <View style={styles.statusBody}>
+            <Text style={styles.statusText}>{walkStatus.title}</Text>
+            {walkStatus.subtitle ? (
+              <Text style={styles.statusSubtext}>{walkStatus.subtitle}</Text>
+            ) : null}
           </View>
-        </TabAppBar>
-      ) : null}
+          <Text>{walkStatus.emoji}</Text>
+        </Card>
 
-      <Card
-        style={styles.statusCard}
-        onTouchEnd={walkStatus.onPress}
-      >
-        <View style={styles.statusBody}>
-          <Text style={styles.statusText}>{walkStatus.title}</Text>
-          {walkStatus.subtitle ? (
-            <Text style={styles.statusSubtext}>{walkStatus.subtitle}</Text>
-          ) : null}
-        </View>
-        <Text>{walkStatus.emoji}</Text>
-      </Card>
+        <Pressable style={styles.walkCta} onPress={handleStartWalk} disabled={!dog}>
+          <Text style={styles.walkCtaEmoji}>🐾</Text>
+          <Text style={styles.walkCtaLabel}>산책 시작</Text>
+        </Pressable>
 
-      <Pressable style={styles.walkCta} onPress={handleStartWalk} disabled={!dog}>
-        <Text style={styles.walkCtaEmoji}>🐾</Text>
-        <Text style={styles.walkCtaLabel}>산책 시작</Text>
-      </Pressable>
+        <Text style={styles.sectionTitle}>최근 일기</Text>
+        {recentDiaries.length > 0 ? (
+          recentDiaries.map((diary) => (
+            <Card
+              key={diary.diaryId}
+              style={styles.recentCard}
+              onTouchEnd={() => router.push(`/diary/${diary.diaryId}`)}
+            >
+              <DiaryThumbnail diary={diary} pendingPhotosByWalkId={pendingPhotosByWalkId} />
+              <View style={styles.recentBody}>
+                <Text style={styles.recentDate}>{formatDate(diary.createdAt)}</Text>
+                <Text style={styles.recentQuote} numberOfLines={1}>
+                  {diary.dailyQuote}
+                </Text>
+              </View>
+            </Card>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>아직 작성된 일기가 없어요</Text>
+        )}
+      </ScrollView>
 
-      <Text style={styles.sectionTitle}>최근 일기</Text>
-      {sortedDiaries.length > 0 ? (
-        sortedDiaries.map((diary) => (
-          <Card
-            key={diary.diaryId}
-            style={styles.recentCard}
-            onTouchEnd={() => router.push(`/diary/${diary.diaryId}`)}
-          >
-            <DiaryThumbnail
-              diary={diary}
-              pendingPhotosByWalkId={pendingPhotosByWalkId}
-            />
-            <View style={styles.recentBody}>
-              <Text style={styles.recentDate}>{formatDate(diary.createdAt)}</Text>
-              <Text style={styles.recentQuote} numberOfLines={1}>
-                {diary.dailyQuote}
-              </Text>
-            </View>
-          </Card>
-        ))
-      ) : (
-        <Text style={styles.emptyText}>아직 작성된 일기가 없어요</Text>
-      )}
-    </ScrollView>
-
-    <SettingsDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
-    <ImagePreviewModal
-      visible={profilePreviewVisible}
-      imageUri={dog?.profileImageUrl}
-      onClose={() => setProfilePreviewVisible(false)}
-    />
+      <SettingsDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
+      <ImagePreviewModal
+        visible={profilePreviewVisible}
+        imageUri={dog?.profileImageUrl}
+        onClose={() => setProfilePreviewVisible(false)}
+      />
     </>
   );
 }

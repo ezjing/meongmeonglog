@@ -1,9 +1,6 @@
 import { getElapsedSecFromStartedAt } from '@/hooks/useElapsedSec';
-import {
-  loadPersistedWalkState,
-  savePersistedWalkState,
-} from '@/lib/walk/walkSessionStorage';
 import { pauseWalkLocationUpdates } from '@/lib/walk/walkLocationService';
+import { loadPersistedWalkState, savePersistedWalkState } from '@/lib/walk/walkSessionStorage';
 import { useWalkStore } from '@/stores/walkStore';
 
 export async function freezeWalkSession(): Promise<number> {

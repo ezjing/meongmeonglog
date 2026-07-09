@@ -8,13 +8,7 @@ export const personalityOptions = [
   '기타',
 ] as const;
 
-export const speechStyleOptions = [
-  '기본',
-  '아기말투',
-  '반말',
-  '존댓말',
-  '기타',
-] as const;
+export const speechStyleOptions = ['기본', '아기말투', '반말', '존댓말', '기타'] as const;
 
 export type PersonalityOption = (typeof personalityOptions)[number];
 export type SpeechStyleOption = (typeof speechStyleOptions)[number];

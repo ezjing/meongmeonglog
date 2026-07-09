@@ -1,5 +1,9 @@
 import { initializeKakaoSDK } from '@react-native-kakao/core';
-import { isKakaoTalkLoginAvailable, login as kakaoLogin } from '@react-native-kakao/user';
+import {
+  isKakaoTalkLoginAvailable,
+  login as kakaoLogin,
+  logout as kakaoLogout,
+} from '@react-native-kakao/user';
 import { Platform } from 'react-native';
 
 const DEV_AUTH = process.env.EXPO_PUBLIC_DEV_AUTH === 'true';
@@ -21,7 +25,16 @@ export function initKakaoSdk() {
   sdkInitialized = true;
 }
 
-export async function getKakaoAccessToken(): Promise<string> {
+interface KakaoAccessTokenOptions {
+  forceAccountPicker?: boolean;
+}
+
+function isKakaoLoginCancelled(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  return /cancel/i.test(error.message);
+}
+
+export async function getKakaoAccessToken(options: KakaoAccessTokenOptions = {}): Promise<string> {
   if (DEV_AUTH) return 'dev';
 
   if (Platform.OS === 'web') {
@@ -32,10 +45,25 @@ export async function getKakaoAccessToken(): Promise<string> {
   initKakaoSdk();
 
   try {
-    const canUseKakaoTalk = await isKakaoTalkLoginAvailable();
-    const result = canUseKakaoTalk
-      ? await kakaoLogin()
-      : await kakaoLogin({ useKakaoAccountLogin: true });
+    let result;
+
+    if (options.forceAccountPicker) {
+      try {
+        await kakaoLogout();
+      } catch {
+        // SDK에 로그인 상태가 없을 수 있음
+      }
+
+      result = await kakaoLogin({
+        useKakaoAccountLogin: true,
+        ...(Platform.OS === 'android' ? { prompts: ['SelectAccount'] } : {}),
+      });
+    } else {
+      const canUseKakaoTalk = await isKakaoTalkLoginAvailable();
+      result = canUseKakaoTalk
+        ? await kakaoLogin()
+        : await kakaoLogin({ useKakaoAccountLogin: true });
+    }
 
     if (!result.accessToken) {
       throw new Error('카카오 accessToken을 받지 못했습니다.');
@@ -45,6 +73,9 @@ export async function getKakaoAccessToken(): Promise<string> {
   } catch (error) {
     if (error instanceof Error && error.message.includes("doesn't seem to be linked")) {
       throw new Error('Dev Client로 앱을 빌드해주세요. (npx expo run:ios 또는 run:android)');
+    }
+    if (isKakaoLoginCancelled(error)) {
+      throw new Error('로그인이 취소되었습니다.');
     }
     throw error;
   }

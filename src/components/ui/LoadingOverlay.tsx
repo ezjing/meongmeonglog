@@ -129,12 +129,7 @@ interface LoadingOverlayProps {
   style?: StyleProp<ViewStyle>;
 }
 
-export function LoadingOverlay({
-  title,
-  subtitle,
-  visible = true,
-  style,
-}: LoadingOverlayProps) {
+export function LoadingOverlay({ title, subtitle, visible = true, style }: LoadingOverlayProps) {
   if (!visible) return null;
 
   return (

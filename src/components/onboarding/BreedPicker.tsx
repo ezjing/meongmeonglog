@@ -11,8 +11,8 @@ import {
 
 import { BottomSheet } from '@/components/ui/overlay';
 import { filterDogBreeds, type DogBreedOption } from '@/constants/dogBreedLabels';
-import { useDogBreeds } from '@/hooks/useDogBreeds';
 import { colors, radius, spacing } from '@/constants/theme';
+import { useDogBreeds } from '@/hooks/useDogBreeds';
 
 interface BreedPickerProps {
   value: string;
@@ -47,7 +47,12 @@ export function BreedPicker({ value, onSelect }: BreedPickerProps) {
         <Text style={styles.chevron}>⌄</Text>
       </Pressable>
 
-      <BottomSheet visible={visible} onClose={closeSheet} title="품종 선택" subtitle="품종을 검색하거나 선택해주세요">
+      <BottomSheet
+        visible={visible}
+        onClose={closeSheet}
+        title="품종 선택"
+        subtitle="품종을 검색하거나 선택해주세요"
+      >
         <TextInput
           style={styles.search}
           value={query}

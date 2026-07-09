@@ -12,12 +12,7 @@ interface StackAppBarProps {
 
 const sideSize = 36;
 
-export function StackAppBar({
-  title,
-  onBackPress,
-  onSharePress,
-  style,
-}: StackAppBarProps) {
+export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAppBarProps) {
   return (
     <View style={[styles.bar, style]}>
       <Pressable
@@ -35,11 +30,7 @@ export function StackAppBar({
 
       {onSharePress ? (
         <Pressable
-          style={({ pressed }) => [
-            styles.circleBtn,
-            styles.rightAction,
-            pressed && styles.pressed,
-          ]}
+          style={({ pressed }) => [styles.circleBtn, styles.rightAction, pressed && styles.pressed]}
           onPress={onSharePress}
           accessibilityRole="button"
           accessibilityLabel="공유"

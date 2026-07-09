@@ -1,24 +1,17 @@
-import { Tabs } from "expo-router";
-import { StyleSheet, Text } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { Tabs } from 'expo-router';
+import { StyleSheet, Text } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors } from "@/constants/theme";
+import { colors } from '@/constants/theme';
 
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   const icons: Record<string, string> = {
-    index: "🏠",
-    calendar: "📅",
-    list: "📋",
-    settings: "⚙️",
+    index: '🏠',
+    calendar: '📅',
+    list: '📋',
+    settings: '⚙️',
   };
-  return (
-    <Text style={{ fontSize: 16, opacity: focused ? 1 : 0.5 }}>
-      {icons[label] ?? "•"}
-    </Text>
-  );
+  return <Text style={{ fontSize: 16, opacity: focused ? 1 : 0.5 }}>{icons[label] ?? '•'}</Text>;
 }
 
 const TAB_BAR_HEIGHT = 56;
@@ -27,7 +20,7 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -44,37 +37,29 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "홈",
-            tabBarIcon: ({ focused }) => (
-              <TabIcon label="index" focused={focused} />
-            ),
+            title: '홈',
+            tabBarIcon: ({ focused }) => <TabIcon label="index" focused={focused} />,
           }}
         />
         <Tabs.Screen
           name="calendar"
           options={{
-            title: "캘린더",
-            tabBarIcon: ({ focused }) => (
-              <TabIcon label="calendar" focused={focused} />
-            ),
+            title: '캘린더',
+            tabBarIcon: ({ focused }) => <TabIcon label="calendar" focused={focused} />,
           }}
         />
         <Tabs.Screen
           name="list"
           options={{
-            title: "리스트",
-            tabBarIcon: ({ focused }) => (
-              <TabIcon label="list" focused={focused} />
-            ),
+            title: '리스트',
+            tabBarIcon: ({ focused }) => <TabIcon label="list" focused={focused} />,
           }}
         />
         <Tabs.Screen
           name="settings"
           options={{
-            title: "설정",
-            tabBarIcon: ({ focused }) => (
-              <TabIcon label="settings" focused={focused} />
-            ),
+            title: '설정',
+            tabBarIcon: ({ focused }) => <TabIcon label="settings" focused={focused} />,
           }}
         />
       </Tabs>
@@ -93,6 +78,6 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 10,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });

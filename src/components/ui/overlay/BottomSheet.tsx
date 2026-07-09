@@ -1,7 +1,7 @@
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius, spacing } from '@/constants/theme';
+import { colors, radius } from '@/constants/theme';
 
 import { OverlayBackdrop } from './OverlayBackdrop';
 import type { BottomSheetOption } from './types';
@@ -44,9 +44,16 @@ export function BottomSheet({
                   option.onPress();
                 }}
               >
-                <View style={styles.optionIcon}>
-                  <Text style={styles.optionIconText}>{option.icon}</Text>
-                </View>
+                {option.icon ? (
+                  <View
+                    style={[
+                      styles.optionIcon,
+                      option.iconBg ? { backgroundColor: option.iconBg } : undefined,
+                    ]}
+                  >
+                    {option.icon}
+                  </View>
+                ) : null}
                 <Text style={styles.optionLabel}>{option.label}</Text>
               </Pressable>
             ))}
@@ -114,9 +121,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  optionIconText: {
-    fontSize: 14,
+    overflow: 'hidden',
   },
   optionLabel: {
     fontSize: 12.5,

@@ -1,12 +1,12 @@
 import type { LocationObject } from 'expo-location';
 
 import { saveWalkLocation } from '@/lib/api/walkApi';
+import { haversineDistance } from '@/lib/utils/formatDistance';
 import {
   loadPersistedWalkState,
   savePersistedWalkState,
   type WalkCoord,
 } from '@/lib/walk/walkSessionStorage';
-import { haversineDistance } from '@/lib/utils/formatDistance';
 
 function applyLocationDelta(
   lastLatitude: number | null,
@@ -52,14 +52,8 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
   const state = await loadPersistedWalkState();
   if (!state?.activeWalk) return;
 
-  let {
-    distanceMeter,
-    walkPath,
-    lastLatitude,
-    lastLongitude,
-    pendingDbLocations,
-    activeWalk,
-  } = state;
+  let { distanceMeter, walkPath, lastLatitude, lastLongitude, pendingDbLocations, activeWalk } =
+    state;
 
   for (const location of locations) {
     const { latitude, longitude } = location.coords;
@@ -83,6 +77,7 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
   pendingDbLocations = await flushPendingDbLocations(activeWalk.walkId, pendingDbLocations);
 
   await savePersistedWalkState({
+    ...state,
     activeWalk,
     distanceMeter,
     walkPath,

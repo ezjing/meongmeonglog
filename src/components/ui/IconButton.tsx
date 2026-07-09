@@ -25,10 +25,7 @@ export function IconButton({ icon, style, ...props }: IconButtonProps) {
   const name = iconNames[icon];
 
   return (
-    <Pressable
-      style={({ pressed }) => [styles.base, pressed && styles.pressed, style]}
-      {...props}
-    >
+    <Pressable style={({ pressed }) => [styles.base, pressed && styles.pressed, style]} {...props}>
       <SymbolView name={name} size={18} tintColor={colors.ink} />
     </Pressable>
   );

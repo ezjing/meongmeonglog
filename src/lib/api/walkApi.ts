@@ -15,10 +15,7 @@ export interface WalkWeatherPayload {
   weatherIcon: string;
 }
 
-export async function startWalk(
-  dogId: string,
-  weather?: WalkWeatherPayload,
-): Promise<WalkSession> {
+export async function startWalk(dogId: string, weather?: WalkWeatherPayload): Promise<WalkSession> {
   if (!isSupabaseConfigured) {
     const walk: WalkSession = {
       walkId: `walk-${Date.now()}`,
@@ -172,10 +169,7 @@ export async function saveWalkEvent(walkId: string, event: WalkEvent): Promise<v
   if (error) throw new AppError('event_save_failed', error.message);
 }
 
-export async function uploadWalkPhotos(
-  walkId: string,
-  uris: string[],
-): Promise<WalkPhoto[]> {
+export async function uploadWalkPhotos(walkId: string, uris: string[]): Promise<WalkPhoto[]> {
   if (!isSupabaseConfigured) {
     const photos = uris.map((uri, i) => ({
       id: `photo-${walkId}-${i}`,
@@ -245,11 +239,7 @@ export async function fetchWalk(walkId: string): Promise<WalkSession | null> {
     return getMockWalk(walkId) ?? null;
   }
 
-  const { data, error } = await supabase
-    .from('walks')
-    .select('*')
-    .eq('id', walkId)
-    .maybeSingle();
+  const { data, error } = await supabase.from('walks').select('*').eq('id', walkId).maybeSingle();
 
   if (error) throw new AppError('fetch_walk_failed', error.message);
   if (!data) return null;

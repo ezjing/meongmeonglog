@@ -24,9 +24,7 @@ export async function fetchCurrentWeather(
     timezone: 'auto',
   });
 
-  const response = await fetch(
-    `https://api.open-meteo.com/v1/forecast?${params.toString()}`,
-  );
+  const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
 
   if (!response.ok) {
     throw new Error(`weather_fetch_failed: ${response.status}`);

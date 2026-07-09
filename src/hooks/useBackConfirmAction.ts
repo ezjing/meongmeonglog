@@ -1,47 +1,41 @@
-import { useFocusEffect, useNavigation } from "expo-router";
-import { useCallback, useRef } from "react";
-import { BackHandler } from "react-native";
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { useCallback, useRef } from 'react';
+import { BackHandler } from 'react-native';
 
-export function useBackConfirmAction(
-  onBack: () => void | Promise<void>,
-  enabled = true,
-) {
+export function useBackConfirmAction(onBack: () => void | Promise<void>, enabled = true) {
   const navigation = useNavigation();
   const allowLeaveRef = useRef(false);
   const onBackRef = useRef(onBack);
+  const enabledRef = useRef(enabled);
   onBackRef.current = onBack;
+  enabledRef.current = enabled;
 
   useFocusEffect(
     useCallback(() => {
       allowLeaveRef.current = false;
-      if (!enabled) return;
 
       const runBackAction = () => {
+        if (!enabledRef.current) return;
         void onBackRef.current();
       };
 
-      const backSubscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        () => {
-          runBackAction();
-          return true;
-        },
-      );
+      const backSubscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        runBackAction();
+        return true;
+      });
 
-      const unsubscribeBeforeRemove = navigation.addListener(
-        "beforeRemove",
-        (event) => {
-          if (allowLeaveRef.current) return;
-          event.preventDefault();
-          runBackAction();
-        },
-      );
+      const unsubscribeBeforeRemove = navigation.addListener('beforeRemove', (event) => {
+        if (allowLeaveRef.current) return;
+        if (!enabledRef.current) return;
+        event.preventDefault();
+        runBackAction();
+      });
 
       return () => {
         backSubscription.remove();
         unsubscribeBeforeRemove();
       };
-    }, [enabled, navigation]),
+    }, [navigation]),
   );
 
   const allowLeave = useCallback(() => {

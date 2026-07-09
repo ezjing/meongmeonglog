@@ -7,7 +7,11 @@ const DEV_AUTH = process.env.EXPO_PUBLIC_DEV_AUTH === 'true';
 const NAVER_CLIENT_ID = process.env.EXPO_PUBLIC_NAVER_CLIENT_ID ?? '';
 const NAVER_CLIENT_SECRET = process.env.EXPO_PUBLIC_NAVER_CLIENT_SECRET ?? '';
 
-let sdkInitialized = false;
+interface NaverInitOptions {
+  disableNaverAppAuthIOS?: boolean;
+}
+
+let lastDisableNaverAppAuthIOS: boolean | null = null;
 
 function assertNaverConfig() {
   if (!NAVER_CLIENT_ID || NAVER_CLIENT_ID === 'your-naver-client-id') {
@@ -21,21 +25,42 @@ function assertNaverConfig() {
   }
 }
 
-export function initNaverSdk() {
-  if (sdkInitialized || Platform.OS === 'web') return;
+export function initNaverSdk(options: NaverInitOptions = {}) {
+  if (Platform.OS === 'web') return;
   if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return;
+
+  const disableNaverAppAuthIOS = options.disableNaverAppAuthIOS ?? false;
+  if (lastDisableNaverAppAuthIOS === disableNaverAppAuthIOS) return;
 
   NaverLogin.initialize({
     appName: '멍멍로그',
     consumerKey: NAVER_CLIENT_ID,
     consumerSecret: NAVER_CLIENT_SECRET,
     serviceUrlSchemeIOS: NAVER_URL_SCHEME,
-    disableNaverAppAuthIOS: false,
+    disableNaverAppAuthIOS,
   });
-  sdkInitialized = true;
+  lastDisableNaverAppAuthIOS = disableNaverAppAuthIOS;
 }
 
-export async function getNaverAccessToken(): Promise<string> {
+async function clearNaverSdkSession() {
+  try {
+    await NaverLogin.deleteToken();
+  } catch {
+    // 저장된 토큰이 없거나 이미 해제된 경우
+  }
+
+  try {
+    await NaverLogin.logout();
+  } catch {
+    // SDK에 로그인 상태가 없을 수 있음
+  }
+}
+
+interface NaverAccessTokenOptions {
+  forceAccountPicker?: boolean;
+}
+
+export async function getNaverAccessToken(options: NaverAccessTokenOptions = {}): Promise<string> {
   if (DEV_AUTH) return 'dev';
 
   if (Platform.OS === 'web') {
@@ -43,7 +68,14 @@ export async function getNaverAccessToken(): Promise<string> {
   }
 
   assertNaverConfig();
-  initNaverSdk();
+
+  const useWebAuthForAccountPicker = options.forceAccountPicker && Platform.OS === 'ios';
+
+  initNaverSdk({ disableNaverAppAuthIOS: useWebAuthForAccountPicker });
+
+  if (options.forceAccountPicker) {
+    await clearNaverSdkSession();
+  }
 
   try {
     const { isSuccess, successResponse, failureResponse } = await NaverLogin.login();
@@ -61,5 +93,9 @@ export async function getNaverAccessToken(): Promise<string> {
       throw new Error('Dev Client로 앱을 빌드해주세요. (npx expo run:ios 또는 run:android)');
     }
     throw error;
+  } finally {
+    if (useWebAuthForAccountPicker) {
+      initNaverSdk({ disableNaverAppAuthIOS: false });
+    }
   }
 }

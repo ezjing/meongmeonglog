@@ -1,12 +1,12 @@
-import { Image } from "expo-image";
-import { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from 'expo-image';
+import { useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal";
-import { colors } from "@/constants/theme";
+import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
+import { colors } from '@/constants/theme';
 
-import { OverlayBackdrop } from "./OverlayBackdrop";
+import { OverlayBackdrop } from './OverlayBackdrop';
 
 export interface DrawerItem {
   icon: string;
@@ -30,7 +30,7 @@ export function Drawer({
   onClose,
   profileName,
   profileSubtitle,
-  profileEmoji = "🐶",
+  profileEmoji = '🐶',
   profileImageUri,
   items,
 }: DrawerProps) {
@@ -39,120 +39,105 @@ export function Drawer({
 
   return (
     <>
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <OverlayBackdrop onPress={onClose} style={styles.backdrop}>
-        <Pressable
-          style={[
-            styles.drawer,
-            { paddingTop: insets.top + 36, paddingBottom: insets.bottom + 20 },
-          ]}
-          onPress={(event) => event.stopPropagation()}
-        >
+      <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <OverlayBackdrop onPress={onClose} style={styles.backdrop}>
           <Pressable
-            style={[styles.closeBtn, { top: insets.top + 14 }]}
-            onPress={onClose}
-            hitSlop={8}
+            style={[
+              styles.drawer,
+              { paddingTop: insets.top + 36, paddingBottom: insets.bottom + 20 },
+            ]}
+            onPress={(event) => event.stopPropagation()}
           >
-            <Text style={styles.closeText}>✕</Text>
-          </Pressable>
-
-          <View style={styles.profile}>
             <Pressable
-              style={styles.avatar}
-              onPress={() => setProfilePreviewVisible(true)}
+              style={[styles.closeBtn, { top: insets.top + 14 }]}
+              onPress={onClose}
+              hitSlop={8}
             >
-              {profileImageUri ? (
-                <Image
-                  source={{ uri: profileImageUri }}
-                  style={styles.avatarImage}
-                  contentFit="cover"
-                />
-              ) : (
-                <Text style={styles.avatarEmoji}>{profileEmoji}</Text>
-              )}
+              <Text style={styles.closeText}>✕</Text>
             </Pressable>
-            <View style={styles.profileText}>
-              <Text style={styles.profileName}>{profileName}</Text>
-              {profileSubtitle ? (
-                <Text style={styles.profileSub}>{profileSubtitle}</Text>
-              ) : null}
+
+            <View style={styles.profile}>
+              <Pressable style={styles.avatar} onPress={() => setProfilePreviewVisible(true)}>
+                {profileImageUri ? (
+                  <Image
+                    source={{ uri: profileImageUri }}
+                    style={styles.avatarImage}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <Text style={styles.avatarEmoji}>{profileEmoji}</Text>
+                )}
+              </Pressable>
+              <View style={styles.profileText}>
+                <Text style={styles.profileName}>{profileName}</Text>
+                {profileSubtitle ? <Text style={styles.profileSub}>{profileSubtitle}</Text> : null}
+              </View>
             </View>
-          </View>
 
-          {items.map((item) => (
-            <Pressable
-              key={item.label}
-              style={[styles.item, item.danger && styles.itemDanger]}
-              onPress={() => {
-                onClose();
-                item.onPress();
-              }}
-            >
-              <Text style={styles.itemIcon}>{item.icon}</Text>
-              <Text
-                style={[
-                  styles.itemLabel,
-                  item.danger && styles.itemLabelDanger,
-                ]}
+            {items.map((item) => (
+              <Pressable
+                key={item.label}
+                style={[styles.item, item.danger && styles.itemDanger]}
+                onPress={() => {
+                  onClose();
+                  item.onPress();
+                }}
               >
-                {item.label}
-              </Text>
-            </Pressable>
-          ))}
-        </Pressable>
-      </OverlayBackdrop>
-    </Modal>
+                <Text style={styles.itemIcon}>{item.icon}</Text>
+                <Text style={[styles.itemLabel, item.danger && styles.itemLabelDanger]}>
+                  {item.label}
+                </Text>
+              </Pressable>
+            ))}
+          </Pressable>
+        </OverlayBackdrop>
+      </Modal>
 
-    <ImagePreviewModal
-      visible={profilePreviewVisible}
-      imageUri={profileImageUri}
-      placeholderEmoji={profileEmoji}
-      onClose={() => setProfilePreviewVisible(false)}
-    />
+      <ImagePreviewModal
+        visible={profilePreviewVisible}
+        imageUri={profileImageUri}
+        placeholderEmoji={profileEmoji}
+        onClose={() => setProfilePreviewVisible(false)}
+      />
     </>
   );
 }
 
 const styles = StyleSheet.create({
   backdrop: {
-    justifyContent: "flex-start",
+    justifyContent: 'flex-start',
   },
   drawer: {
-    width: "76%",
-    height: "100%",
+    width: '76%',
+    height: '100%',
     backgroundColor: colors.white,
     paddingHorizontal: 18,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 10, height: 0 },
     shadowOpacity: 0.28,
     shadowRadius: 15,
     elevation: 12,
   },
   closeBtn: {
-    position: "absolute",
+    position: 'absolute',
     top: 14,
     right: 14,
     width: 26,
     height: 26,
     borderRadius: 13,
     backgroundColor: colors.background,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 1,
   },
   closeText: {
     fontSize: 12,
     color: colors.ink,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   profile: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 11,
     paddingBottom: 16,
     marginBottom: 8,
@@ -165,9 +150,9 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: 23,
     backgroundColor: colors.apricot,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   avatarImage: {
     width: 46,
@@ -182,7 +167,7 @@ const styles = StyleSheet.create({
   },
   profileName: {
     fontSize: 13.5,
-    fontWeight: "800",
+    fontWeight: '800',
     color: colors.ink,
   },
   profileSub: {
@@ -191,8 +176,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   item: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
     paddingVertical: 13,
     paddingHorizontal: 4,
@@ -206,11 +191,11 @@ const styles = StyleSheet.create({
   itemIcon: {
     fontSize: 15,
     width: 20,
-    textAlign: "center",
+    textAlign: 'center',
   },
   itemLabel: {
     fontSize: 12.5,
-    fontWeight: "700",
+    fontWeight: '700',
     color: colors.ink,
   },
   itemLabelDanger: {
