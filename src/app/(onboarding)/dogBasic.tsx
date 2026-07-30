@@ -23,7 +23,6 @@ export default function DogBasicScreen() {
   const { name, breed, birthDate, gender, weightKg, profileImageUri, setBasic, setPersonality } =
     useOnboardingStore();
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(!isEditMode);
 
   useEffect(() => {
     if (!isEditMode || !dog) return;
@@ -39,8 +38,10 @@ export default function DogBasicScreen() {
       personality: dog.personality,
       speechStyle: dog.speechStyle ?? '기본',
     });
-    setIsHydrated(true);
   }, [isEditMode, dog, setBasic, setPersonality]);
+
+  const isStoreSyncedWithDog =
+    !isEditMode || (dog != null && name === dog.name && breed === dog.breed);
 
   const canNext = name.trim().length > 0;
 
@@ -64,7 +65,7 @@ export default function DogBasicScreen() {
     }
   };
 
-  if (isEditMode && (isDogsLoading || !isHydrated)) {
+  if (isEditMode && (isDogsLoading || !isStoreSyncedWithDog)) {
     return (
       <View style={styles.screen}>
         <StackAppBar title="강아지 정보 관리" onBackPress={() => router.back()} />

@@ -2,7 +2,7 @@ const events: string[] = [];
 
 export function trackEvent(name: string, params?: Record<string, string | number | boolean>) {
   if (__DEV__) {
-    console.log('[analytics]', name, params ?? {});
+    console.warn('[analytics]', name, params ?? {});
   }
   events.push(name);
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { fetchWalkPhotos } from '@/lib/api/walkApi';
 import { useFinishWalkStore, useWalkStore } from '@/stores/walkStore';
@@ -36,30 +36,33 @@ export function useDiaryWalkPhotos(
 export function useWalkPhotos(walkId: string | undefined): WalkPhoto[] {
   const pending = useWalkStore((s) => (walkId ? s.pendingWalkPhotosByWalkId[walkId] : undefined));
   const photoUris = useFinishWalkStore((s) => s.form.photoUris);
-  const [photos, setPhotos] = useState<WalkPhoto[]>([]);
+  const [remotePhotosByWalkId, setRemotePhotosByWalkId] = useState<Record<string, WalkPhoto[]>>({});
+
+  const localPhotos = useMemo(() => {
+    if (!walkId) return [];
+    return pending && pending.length > 0 ? pending : localPhotosFromUris(walkId, photoUris);
+  }, [walkId, pending, photoUris]);
 
   useEffect(() => {
-    if (!walkId) {
-      setPhotos([]);
-      return;
-    }
+    if (!walkId) return;
 
-    const localPhotos =
-      pending && pending.length > 0 ? pending : localPhotosFromUris(walkId, photoUris);
-
-    if (localPhotos.length > 0) {
-      setPhotos(localPhotos);
-    }
+    let cancelled = false;
 
     fetchWalkPhotos(walkId)
       .then((fetched) => {
-        if (fetched.length > 0) {
-          setPhotos(fetched);
-          useWalkStore.getState().clearPendingWalkPhotos(walkId);
-        }
+        if (cancelled || fetched.length === 0) return;
+        setRemotePhotosByWalkId((prev) => ({ ...prev, [walkId]: fetched }));
+        useWalkStore.getState().clearPendingWalkPhotos(walkId);
       })
       .catch(() => {});
-  }, [walkId, pending, photoUris]);
 
-  return photos;
+    return () => {
+      cancelled = true;
+    };
+  }, [walkId]);
+
+  if (!walkId) return [];
+
+  const remotePhotos = remotePhotosByWalkId[walkId] ?? [];
+  return remotePhotos.length > 0 ? remotePhotos : localPhotos;
 }

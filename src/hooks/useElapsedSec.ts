@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppState } from 'react-native';
 
 export function getElapsedSecFromStartedAt(startedAt: string | null | undefined): number {
@@ -7,13 +7,10 @@ export function getElapsedSecFromStartedAt(startedAt: string | null | undefined)
 }
 
 export function useElapsedSec(startedAt: string | null | undefined): number {
-  const [elapsedSec, setElapsedSec] = useState(() => getElapsedSecFromStartedAt(startedAt));
+  const [elapsedSec, setElapsedSec] = useState(0);
 
   useEffect(() => {
-    if (!startedAt) {
-      setElapsedSec(0);
-      return;
-    }
+    if (!startedAt) return;
 
     const update = () => setElapsedSec(getElapsedSecFromStartedAt(startedAt));
     update();
@@ -29,5 +26,5 @@ export function useElapsedSec(startedAt: string | null | undefined): number {
     };
   }, [startedAt]);
 
-  return elapsedSec;
+  return useMemo(() => (startedAt ? elapsedSec : 0), [elapsedSec, startedAt]);
 }

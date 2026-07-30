@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, spacing } from '@/constants/theme';
+import { colors } from '@/constants/theme';
 
 interface PawProgressProps {
   currentStep: number;

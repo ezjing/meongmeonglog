@@ -27,6 +27,7 @@ export default function WelcomeScreen() {
   const [isCreating, setIsCreating] = useState(true);
 
   useEffect(() => {
+    // 마운트 시 1회: 온보딩 store → 강아지 등록 → 환영 인사 생성
     (async () => {
       try {
         let profileImageUrl: string | undefined;
@@ -56,6 +57,7 @@ export default function WelcomeScreen() {
         setIsCreating(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 마운트 시 1회 실행
   }, []);
 
   if (isCreating || !greeting) {

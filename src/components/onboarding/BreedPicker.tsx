@@ -1,13 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/overlay';
 import { filterDogBreeds, type DogBreedOption } from '@/constants/dogBreedLabels';

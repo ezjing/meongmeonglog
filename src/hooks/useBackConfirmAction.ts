@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation } from 'expo-router';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { BackHandler } from 'react-native';
 
 export function useBackConfirmAction(onBack: () => void | Promise<void>, enabled = true) {
@@ -7,8 +7,11 @@ export function useBackConfirmAction(onBack: () => void | Promise<void>, enabled
   const allowLeaveRef = useRef(false);
   const onBackRef = useRef(onBack);
   const enabledRef = useRef(enabled);
-  onBackRef.current = onBack;
-  enabledRef.current = enabled;
+
+  useEffect(() => {
+    onBackRef.current = onBack;
+    enabledRef.current = enabled;
+  });
 
   useFocusEffect(
     useCallback(() => {

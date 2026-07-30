@@ -27,6 +27,7 @@ module.exports = defineConfig([
     'node_modules/**',
     'ios/**',
     'android/**',
+    'example/**',
     'supabase/functions/**',
   ]),
   expoConfig,

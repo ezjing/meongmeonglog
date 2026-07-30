@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { GuardianProfileFields } from '@/components/guardian/GuardianProfileFields';
@@ -13,31 +13,26 @@ import { colors, spacing } from '@/constants/theme';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useGuardianProfile, useUpdateGuardianProfile } from '@/hooks/useGuardianProfile';
 import { pickImageFromCamera, pickImageFromLibrary } from '@/lib/pickImage';
+import type { GuardianProfile } from '@/types/domain';
 
-export default function GuardianBasicScreen() {
-  const { mode } = useLocalSearchParams<{ mode?: string }>();
-  const isEditMode = mode === 'edit';
+interface GuardianBasicFormProps {
+  isEditMode: boolean;
+  initialProfile?: GuardianProfile;
+}
+
+function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProps) {
   const { logout } = useAuthSession();
-  const { data: profile, isLoading: isProfileLoading } = useGuardianProfile();
   const updateProfile = useUpdateGuardianProfile();
   const { showAlert, showToast } = useOverlay();
-  const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
   const [values, setValues] = useState({
-    guardianTitle: '',
-    parentingStyle: '',
-    currentConcern: '',
+    guardianTitle: initialProfile?.guardianTitle ?? '',
+    parentingStyle: initialProfile?.parentingStyle ?? '',
+    currentConcern: initialProfile?.currentConcern ?? '',
   });
-
-  useEffect(() => {
-    if (!isEditMode || !profile) return;
-    setValues({
-      guardianTitle: profile.guardianTitle ?? '',
-      parentingStyle: profile.parentingStyle ?? '',
-      currentConcern: profile.currentConcern ?? '',
-    });
-    setProfileImageUri(profile.guardianProfileImageUrl);
-  }, [isEditMode, profile]);
+  const [profileImageUri, setProfileImageUri] = useState<string | null>(
+    initialProfile?.guardianProfileImageUrl ?? null,
+  );
 
   const canNext = values.guardianTitle.trim().length > 0;
 
@@ -87,7 +82,7 @@ export default function GuardianBasicScreen() {
         parentingStyle: values.parentingStyle,
         currentConcern: values.currentConcern,
         profileImageUri:
-          profileImageUri && profileImageUri !== profile?.guardianProfileImageUrl
+          profileImageUri && profileImageUri !== initialProfile?.guardianProfileImageUrl
             ? profileImageUri
             : undefined,
       });
@@ -104,15 +99,6 @@ export default function GuardianBasicScreen() {
       });
     }
   };
-
-  if (isEditMode && isProfileLoading) {
-    return (
-      <View style={styles.screen}>
-        <StackAppBar title="보호자 정보 관리" onBackPress={() => router.back()} />
-        <LoadingPaws message="보호자 정보를 불러오는 중" />
-      </View>
-    );
-  }
 
   return (
     <>
@@ -195,6 +181,38 @@ export default function GuardianBasicScreen() {
         ]}
       />
     </>
+  );
+}
+
+export default function GuardianBasicScreen() {
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const isEditMode = mode === 'edit';
+  const { data: profile, isLoading: isProfileLoading } = useGuardianProfile();
+
+  if (isEditMode && isProfileLoading) {
+    return (
+      <View style={styles.screen}>
+        <StackAppBar title="보호자 정보 관리" onBackPress={() => router.back()} />
+        <LoadingPaws message="보호자 정보를 불러오는 중" />
+      </View>
+    );
+  }
+
+  if (isEditMode && !profile) {
+    return (
+      <View style={styles.screen}>
+        <StackAppBar title="보호자 정보 관리" onBackPress={() => router.back()} />
+        <LoadingPaws message="보호자 정보를 불러올 수 없어요" />
+      </View>
+    );
+  }
+
+  return (
+    <GuardianBasicForm
+      key={isEditMode ? profile?.guardianTitle : 'onboarding'}
+      isEditMode={isEditMode}
+      initialProfile={isEditMode ? profile : undefined}
+    />
   );
 }
 

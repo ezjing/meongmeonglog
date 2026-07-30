@@ -76,16 +76,13 @@ export function useWalkTracker() {
   const [trackingError, setTrackingError] = useState<string | null>(null);
 
   useEffect(() => {
-    weatherFetchedRef.current = false;
-    setTrackingError(null);
-  }, [activeWalk?.walkId]);
-
-  useEffect(() => {
     if (!activeWalk || frozenElapsedSec != null) return;
 
     let cancelled = false;
+    weatherFetchedRef.current = false;
 
     (async () => {
+      setTrackingError(null);
       await syncWalkStateFromStorage();
 
       const granted = await requestWalkLocationPermissions();
@@ -140,6 +137,8 @@ export function useWalkTracker() {
       clearInterval(syncInterval);
       subscription.remove();
     };
+    // activeWalk 전체를 deps에 넣으면 날씨 갱신마다 추적이 재시작됨
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- walkId 기준으로 추적 세션 관리
   }, [activeWalk?.walkId, frozenElapsedSec]);
 
   return {

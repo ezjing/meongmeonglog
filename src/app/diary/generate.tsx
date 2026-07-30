@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { WalkPhotoCarousel } from '@/components/diary/WalkPhotoCarousel';
@@ -34,8 +34,12 @@ export default function DiaryGenerateScreen() {
 
   const isGenerating = generateDiary.isPending || !diary;
 
+  const startedRef = useRef(false);
+
   useEffect(() => {
-    if (!walkId) return;
+    if (!walkId || startedRef.current) return;
+    startedRef.current = true;
+
     generateDiary
       .mutateAsync(walkId)
       .then((result) => {
@@ -43,7 +47,7 @@ export default function DiaryGenerateScreen() {
         resetWalk();
       })
       .catch(() => {});
-  }, [walkId]);
+  }, [walkId, generateDiary, resetWalk]);
 
   useEffect(() => {
     return () => {

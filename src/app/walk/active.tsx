@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
@@ -18,9 +18,40 @@ export default function WalkActiveScreen() {
   const reset = useWalkStore((s) => s.reset);
   const { showAlert, showToast } = useOverlay();
   const cancelWalk = useCancelWalk();
-  const backHandlerRef = useRef<() => void | Promise<void>>(() => {});
+  const allowLeaveRef = useRef<(() => void) | null>(null);
 
-  const { allowLeave } = useBackConfirmAction(() => backHandlerRef.current(), !!activeWalk);
+  const handleCancelPress = useCallback(async () => {
+    if (!activeWalk) return;
+
+    const confirmed = await showAlert({
+      icon: '🐾',
+      title: '산책을 취소할까요?',
+      message: '지금까지 기록한 이동 거리와 시간은 저장되지 않아요.',
+      cancelLabel: '계속하기',
+      confirmLabel: '취소하기',
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    try {
+      await cancelWalk.mutateAsync(activeWalk.walkId);
+      await stopWalkTracking();
+      reset();
+      allowLeaveRef.current?.();
+      router.replace('/(tabs)');
+    } catch {
+      showToast({
+        message: '⚠️ 산책 취소에 실패했어요. 잠시 후 다시 시도해 주세요.',
+        variant: 'warning',
+      });
+    }
+  }, [activeWalk, cancelWalk, reset, showAlert, showToast]);
+
+  const { allowLeave } = useBackConfirmAction(handleCancelPress, !!activeWalk);
+
+  useEffect(() => {
+    allowLeaveRef.current = allowLeave;
+  }, [allowLeave]);
 
   useEffect(() => {
     if (!trackingError) return;
@@ -50,35 +81,6 @@ export default function WalkActiveScreen() {
       router.push('/walk/finish');
     }
   };
-
-  const handleCancelPress = async () => {
-    if (!activeWalk) return;
-
-    const confirmed = await showAlert({
-      icon: '🐾',
-      title: '산책을 취소할까요?',
-      message: '지금까지 기록한 이동 거리와 시간은 저장되지 않아요.',
-      cancelLabel: '계속하기',
-      confirmLabel: '취소하기',
-      destructive: true,
-    });
-    if (!confirmed) return;
-
-    try {
-      await cancelWalk.mutateAsync(activeWalk.walkId);
-      await stopWalkTracking();
-      reset();
-      allowLeave();
-      router.replace('/(tabs)');
-    } catch {
-      showToast({
-        message: '⚠️ 산책 취소에 실패했어요. 잠시 후 다시 시도해 주세요.',
-        variant: 'warning',
-      });
-    }
-  };
-
-  backHandlerRef.current = handleCancelPress;
 
   if (!activeWalk) {
     return (

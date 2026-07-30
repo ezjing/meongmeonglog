@@ -27,14 +27,17 @@ export default function ShareScreen() {
   const { width } = useWindowDimensions();
   const cardWidth = width - spacing.md * 2;
 
+  const shareStartedRef = useRef(false);
+
   useEffect(() => {
-    if (diaryId) {
-      shareCard
-        .mutateAsync(diaryId)
-        .then(setRemoteUrl)
-        .catch(() => {});
-    }
-  }, [diaryId]);
+    if (!diaryId || shareStartedRef.current) return;
+    shareStartedRef.current = true;
+
+    shareCard
+      .mutateAsync(diaryId)
+      .then(setRemoteUrl)
+      .catch(() => {});
+  }, [diaryId, shareCard]);
 
   const handleSaveAndShare = async () => {
     try {

@@ -33,23 +33,22 @@ export function ImagePreviewModal({
   const imageSize = Math.min(width, height) - spacing.xl * 2;
   const uris = imageUris?.length ? imageUris : imageUri ? [imageUri] : [];
   const hasMultiple = uris.length > 1;
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const resolvedIndex = Math.min(Math.max(initialIndex, 0), Math.max(uris.length - 1, 0));
+  const [trackedIndex, setTrackedIndex] = useState(resolvedIndex);
+  const currentIndex = visible ? resolvedIndex : trackedIndex;
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-    if (!visible) return;
-    const index = Math.min(Math.max(initialIndex, 0), Math.max(uris.length - 1, 0));
-    setCurrentIndex(index);
-    if (hasMultiple) {
-      requestAnimationFrame(() => {
-        scrollRef.current?.scrollTo({ x: index * width, animated: false });
-      });
-    }
-  }, [visible, initialIndex, uris.length, hasMultiple, width]);
+    if (!visible || !hasMultiple) return;
+
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ x: currentIndex * width, animated: false });
+    });
+  }, [visible, currentIndex, hasMultiple, width]);
 
   const goToIndex = (index: number) => {
     const nextIndex = Math.min(Math.max(index, 0), uris.length - 1);
-    setCurrentIndex(nextIndex);
+    setTrackedIndex(nextIndex);
     scrollRef.current?.scrollTo({ x: nextIndex * width, animated: true });
   };
 
@@ -69,7 +68,7 @@ export function ImagePreviewModal({
                   showsHorizontalScrollIndicator={false}
                   style={styles.carousel}
                   onMomentumScrollEnd={(event) => {
-                    setCurrentIndex(Math.round(event.nativeEvent.contentOffset.x / width));
+                    setTrackedIndex(Math.round(event.nativeEvent.contentOffset.x / width));
                   }}
                 >
                   {uris.map((uri, index) => (

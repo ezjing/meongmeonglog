@@ -41,7 +41,7 @@ export function WalkMap({ routePath }: WalkMapProps) {
       },
       300,
     );
-  }, [lastPoint?.latitude, lastPoint?.longitude, followUser]);
+  }, [lastPoint, followUser]);
 
   const handleUserMapInteraction = () => {
     setFollowUser(false);

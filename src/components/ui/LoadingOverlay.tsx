@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import {
   Animated,
   Easing,
@@ -17,7 +17,7 @@ interface LoadingOverlayCardProps {
 }
 
 function LoadingSpinner() {
-  const spin = useRef(new Animated.Value(0)).current;
+  const spin = useMemo(() => new Animated.Value(0), []);
 
   useEffect(() => {
     const animation = Animated.loop(
@@ -52,12 +52,7 @@ function LoadingSpinner() {
 }
 
 function PawBounce() {
-  const paws = [
-    useRef(new Animated.Value(0)).current,
-    useRef(new Animated.Value(0)).current,
-    useRef(new Animated.Value(0)).current,
-    useRef(new Animated.Value(0)).current,
-  ];
+  const paws = useMemo(() => Array.from({ length: 4 }, () => new Animated.Value(0)), []);
 
   useEffect(() => {
     const bounce = (anim: Animated.Value) =>

@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
@@ -49,10 +49,45 @@ export default function WalkFinishScreen() {
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const backHandlerRef = useRef<() => void | Promise<void>>(() => {});
   const isLeavingRef = useRef(false);
+  const allowLeaveRef = useRef<(() => void) | null>(null);
 
-  const { allowLeave } = useBackConfirmAction(() => backHandlerRef.current(), !!activeWalk);
+  const handleGoHomeLater = useCallback(async () => {
+    if (!activeWalk || cancelWalk.isPending || isLeavingRef.current) return;
+
+    const confirmed = await showAlert({
+      icon: '🐾',
+      title: '정말 나갈까요?',
+      message: '작성 중인 내용과 지금까지의 산책 기록이 모두 사라져요. 저장되지 않아요.',
+      cancelLabel: '계속 작성',
+      confirmLabel: '나가기',
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    isLeavingRef.current = true;
+    allowLeaveRef.current?.();
+
+    try {
+      await cancelWalk.mutateAsync(activeWalk.walkId);
+      await stopWalkTracking();
+      useWalkStore.getState().reset();
+      resetFinishForm();
+      router.replace('/(tabs)');
+    } catch {
+      isLeavingRef.current = false;
+      showToast({
+        message: '⚠️ 나가기에 실패했어요. 잠시 후 다시 시도해 주세요.',
+        variant: 'warning',
+      });
+    }
+  }, [activeWalk, cancelWalk, resetFinishForm, showAlert, showToast]);
+
+  const { allowLeave } = useBackConfirmAction(handleGoHomeLater, !!activeWalk);
+
+  useEffect(() => {
+    allowLeaveRef.current = allowLeave;
+  }, [allowLeave]);
 
   useEffect(() => {
     let cancelled = false;
@@ -160,39 +195,6 @@ export default function WalkFinishScreen() {
       });
     }
   };
-
-  const handleGoHomeLater = async () => {
-    if (!activeWalk || cancelWalk.isPending || isLeavingRef.current) return;
-
-    const confirmed = await showAlert({
-      icon: '🐾',
-      title: '정말 나갈까요?',
-      message: '작성 중인 내용과 지금까지의 산책 기록이 모두 사라져요. 저장되지 않아요.',
-      cancelLabel: '계속 작성',
-      confirmLabel: '나가기',
-      destructive: true,
-    });
-    if (!confirmed) return;
-
-    isLeavingRef.current = true;
-    allowLeave();
-
-    try {
-      await cancelWalk.mutateAsync(activeWalk.walkId);
-      await stopWalkTracking();
-      useWalkStore.getState().reset();
-      resetFinishForm();
-      router.replace('/(tabs)');
-    } catch {
-      isLeavingRef.current = false;
-      showToast({
-        message: '⚠️ 나가기에 실패했어요. 잠시 후 다시 시도해 주세요.',
-        variant: 'warning',
-      });
-    }
-  };
-
-  backHandlerRef.current = handleGoHomeLater;
 
   const meetingOptions: { label: string; value: DogMeetingLevel }[] = [
     { label: '없음', value: 'NONE' },
