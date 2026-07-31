@@ -51,7 +51,11 @@ export function BottomSheet({
                       option.iconBg ? { backgroundColor: option.iconBg } : undefined,
                     ]}
                   >
-                    {option.icon}
+                    {typeof option.icon === 'string' ? (
+                      <Text style={styles.optionIconText}>{option.icon}</Text>
+                    ) : (
+                      option.icon
+                    )}
                   </View>
                 ) : null}
                 <Text style={styles.optionLabel}>{option.label}</Text>
@@ -122,6 +126,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  optionIconText: {
+    fontSize: 16,
   },
   optionLabel: {
     fontSize: 12.5,

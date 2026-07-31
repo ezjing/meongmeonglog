@@ -1,5 +1,5 @@
-export const GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
-export const GROQ_TEXT_MODEL = "qwen/qwen3-32b";
+export const GROQ_VISION_MODEL = "qwen/qwen3.6-27b";
+export const GROQ_TEXT_MODEL = "qwen/qwen3.6-27b";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MAX_BASE64_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -197,6 +197,10 @@ export async function generateGroqContent(options: {
     temperature: 0.8,
     max_tokens: 1024,
   };
+
+  if (model.startsWith("qwen/qwen3.6")) {
+    body.reasoning_effort = "none";
+  }
 
   if (options.jsonResponse) {
     body.response_format = { type: "json_object" };
