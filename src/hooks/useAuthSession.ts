@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { signInWithProvider, signOut, getCurrentUserId } from '@/lib/api/authApi';
+import { signInWithProvider, signOut, deleteAccount, getCurrentUserId } from '@/lib/api/authApi';
 import { fetchDogs, createDog, updateDog } from '@/lib/api/dogApi';
 import { useAuthStore } from '@/stores/walkStore';
 import type { AuthProvider } from '@/types/database';
@@ -27,12 +27,22 @@ export function useAuthSession() {
     },
   });
 
+  const deleteAccountMutation = useMutation({
+    mutationFn: deleteAccount,
+    onSuccess: () => {
+      clearSession();
+      queryClient.clear();
+    },
+  });
+
   return {
     userId,
     provider,
     login: loginMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
+    deleteAccount: deleteAccountMutation.mutateAsync,
     isLoggingIn: loginMutation.isPending,
+    isDeletingAccount: deleteAccountMutation.isPending,
   };
 }
 

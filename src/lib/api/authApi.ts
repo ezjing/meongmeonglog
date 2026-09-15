@@ -62,6 +62,24 @@ export async function signOut(): Promise<void> {
   }
 }
 
+export async function deleteAccount(): Promise<void> {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase.functions.invoke('delete-account');
+    const responseError = (data as { error?: string } | null)?.error;
+    if (error || responseError) {
+      throw new AppError(
+        'delete_account_failed',
+        responseError ?? error?.message ?? '계정 삭제에 실패했습니다.',
+      );
+    }
+  }
+
+  await clearAuthSession();
+  if (isSupabaseConfigured) {
+    await supabase.auth.signOut();
+  }
+}
+
 export async function getCurrentUserId(): Promise<string | null> {
   if (!isSupabaseConfigured) {
     return DEV_AUTH ? 'dev-kakao-user' : null;

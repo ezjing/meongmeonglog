@@ -13,7 +13,7 @@ import { useGuardianProfile } from '@/hooks/useGuardianProfile';
 import { requestLocationPermission } from '@/hooks/useWalkTracker';
 
 export default function SettingsScreen() {
-  const { logout } = useAuthSession();
+  const { logout, deleteAccount } = useAuthSession();
   const { data: dogs } = useDogs();
   const { showAlert, showToast } = useOverlay();
   const { data: guardianProfile } = useGuardianProfile();
@@ -33,6 +33,26 @@ export default function SettingsScreen() {
     if (!confirmed) return;
     await logout();
     router.replace('/(auth)/login');
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = await showAlert({
+      icon: '⚠️',
+      title: '정말 탈퇴하시겠어요?',
+      message:
+        '반려견 정보, 산책 기록, 사진, 다이어리 등 모든 데이터가 영구적으로 삭제되며 되돌릴 수 없어요.',
+      cancelLabel: '취소',
+      confirmLabel: '탈퇴하기',
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    try {
+      await deleteAccount();
+      router.replace('/(auth)/login');
+    } catch {
+      showToast({ message: '⚠️ 계정 삭제에 실패했어요. 다시 시도해주세요.', variant: 'warning' });
+    }
   };
 
   const handleLocationPermission = async () => {
@@ -107,6 +127,12 @@ export default function SettingsScreen() {
         </Card>
 
         <Button label="로그아웃" variant="outline" onPress={handleLogout} style={styles.logout} />
+        <Button
+          label="회원 탈퇴"
+          variant="outline"
+          onPress={handleDeleteAccount}
+          style={styles.deleteAccount}
+        />
       </ScrollView>
 
       <SettingsDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
@@ -133,4 +159,5 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   logout: { marginTop: spacing.lg },
+  deleteAccount: { marginTop: spacing.sm, borderColor: colors.danger },
 });
