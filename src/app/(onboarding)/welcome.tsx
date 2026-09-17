@@ -51,6 +51,7 @@ export default function WelcomeScreen() {
           dogName: store.name,
           personality: store.personality,
           speechStyle: store.speechStyle,
+          customSpeechStyle: store.customSpeechStyle,
         });
         setGreeting(text);
       } finally {

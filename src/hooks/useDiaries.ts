@@ -67,10 +67,12 @@ export function useWelcomeGreeting() {
       dogName,
       personality,
       speechStyle,
+      customSpeechStyle,
     }: {
       dogName: string;
       personality: string[];
       speechStyle: string | null;
-    }) => fetchWelcomeGreeting(dogName, personality, speechStyle),
+      customSpeechStyle?: string | null;
+    }) => fetchWelcomeGreeting(dogName, personality, speechStyle, customSpeechStyle),
   });
 }

@@ -1,4 +1,10 @@
+/// <reference path="../_shared/deno.d.ts" />
+
 import { generateGroqContent } from "../_shared/groq.ts";
+import {
+  buildGreetingSystemInstruction,
+  buildGreetingUserPrompt,
+} from "../_shared/speechStyle.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,18 +12,27 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { dogName, personality, speechStyle } = await req.json();
+    const { dogName, personality, speechStyle, customSpeechStyle } = await req
+      .json();
 
     const { text: greeting } = await generateGroqContent({
-      systemInstruction:
-        "강아지 1인칭으로 짧은 환영 인사말을 작성합니다. 2문장 이내. 반드시 한국어로만 작성합니다.",
-      userPrompt: `이름: ${dogName}, 성격: ${JSON.stringify(personality)}, 말투: ${speechStyle ?? "기본"}`,
+      systemInstruction: buildGreetingSystemInstruction({
+        speechStyle,
+        customSpeechStyle,
+      }),
+      userPrompt: buildGreetingUserPrompt({
+        dogName,
+        personality,
+        speechStyle,
+        customSpeechStyle,
+      }),
+      temperature: 0.7,
     });
 
     return new Response(JSON.stringify({ greeting }), {

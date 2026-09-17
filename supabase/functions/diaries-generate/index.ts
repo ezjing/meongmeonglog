@@ -1,5 +1,12 @@
+/// <reference path="../_shared/deno.d.ts" />
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { generateGroqContent } from "../_shared/groq.ts";
+import {
+  buildDiaryImagePrompt,
+  buildDiarySystemInstruction,
+  buildDiaryUserPrompt,
+} from "../_shared/speechStyle.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,7 +14,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -39,31 +46,36 @@ Deno.serve(async (req) => {
     const photos = walk.walk_photos ?? [];
 
     const guardianTitle = guardian?.guardian_title?.trim() || "보호자";
-    const parentingStyle = guardian?.parenting_style?.trim();
-    const currentConcern = guardian?.current_concern?.trim();
-
-    const prompt = `
-강아지 ${dog.name}(${dog.breed})의 1인칭 시점으로 산책 일기를 작성해주세요.
-성격: ${JSON.stringify(dog.personality)}
-말투: ${dog.speech_style ?? "기본"}
-보호자 호칭: ${guardianTitle}
-${parentingStyle ? `양육 스타일/가치관: ${parentingStyle}` : ""}
-${currentConcern ? `보호자의 현재 고민: ${currentConcern}` : ""}
-산책 시간: ${walk.duration_sec ?? 0}초, 거리: ${walk.distance_meter ?? 0}m
-날씨: ${walk.weather_condition ?? "맑음"} ${walk.weather_temp ?? ""}°C
-특이사항: 배변 소변 ${event?.pee_count ?? 0}, 대변 ${event?.poop_count ?? 0}, 친구 만남 ${event?.dog_meeting_level ?? "NONE"}, 메모: ${event?.memo ?? ""}
-
-보호자를 언급할 때는 반드시 "${guardianTitle}"(으)로 부르세요.
-JSON 형식으로 응답: {"content":"일기 본문","dailyQuote":"오늘의 한마디 한 줄"}
-`.trim();
 
     const { text: content, model } = await generateGroqContent({
-      systemInstruction:
-        "당신은 반려견 시점의 감성 일기 작가입니다. 따뜻하고 자연스러운 한국어로 작성합니다.",
-      userPrompt: prompt,
+      systemInstruction: buildDiarySystemInstruction({
+        dogName: dog.name,
+        speechStyle: dog.speech_style,
+        customSpeechStyle: dog.custom_speech_style,
+      }),
+      userPrompt: buildDiaryUserPrompt({
+        dogName: dog.name,
+        breed: dog.breed,
+        personality: dog.personality,
+        customPersonality: dog.custom_personality,
+        speechStyle: dog.speech_style,
+        customSpeechStyle: dog.custom_speech_style,
+        guardianTitle,
+        parentingStyle: guardian?.parenting_style,
+        currentConcern: guardian?.current_concern,
+        durationSec: walk.duration_sec,
+        distanceMeter: walk.distance_meter,
+        weatherCondition: walk.weather_condition,
+        weatherTemp: walk.weather_temp,
+        peeCount: event?.pee_count,
+        poopCount: event?.poop_count,
+        dogMeetingLevel: event?.dog_meeting_level,
+        memo: event?.memo,
+      }),
       jsonResponse: true,
       imageUrl: photos.length > 0 ? photos[0].image_url : undefined,
-      imagePrompt: "산책 사진을 참고해 상황을 묘사해주세요.",
+      imagePrompt: buildDiaryImagePrompt(),
+      temperature: 0.7,
     });
 
     const parsed = JSON.parse(content);

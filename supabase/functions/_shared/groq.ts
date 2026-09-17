@@ -1,5 +1,7 @@
-export const GROQ_VISION_MODEL = "qwen/qwen3.6-27b";
-export const GROQ_TEXT_MODEL = "qwen/qwen3.6-27b";
+/// <reference path="./deno.d.ts" />
+
+export const GROQ_VISION_MODEL = "qwen/qwen3.8-27b";
+export const GROQ_TEXT_MODEL = "qwen/qwen3.8-27b";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MAX_BASE64_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -152,6 +154,7 @@ export async function generateGroqContent(options: {
   jsonResponse?: boolean;
   imageUrl?: string;
   imagePrompt?: string;
+  temperature?: number;
 }): Promise<{ text: string; model: string }> {
   const apiKey = Deno.env.get("GROQ_API_KEY");
   if (!apiKey) {
@@ -194,11 +197,11 @@ export async function generateGroqContent(options: {
   const body: Record<string, unknown> = {
     model,
     messages,
-    temperature: 0.8,
-    max_tokens: 1024,
+    temperature: options.temperature ?? 0.8,
+    max_tokens: 800,
   };
 
-  if (model.startsWith("qwen/qwen3.6")) {
+  if (model.startsWith("qwen/qwen3")) {
     body.reasoning_effort = "none";
   }
 
