@@ -206,7 +206,7 @@ npx eas update --channel production --environment production --message "변경 �
 
 - 앱은 실행 시 업데이트를 확인·다운로드하고 **다음 실행 때** 적용한다.
 - 번들의 `EXPO_PUBLIC_*` 값은 `--environment`로 지정한 **EAS 환경변수**에서 가져온다 (로컬 `.env`와 값을 맞춰 둘 것).
-  - 현재 EAS 환경변수는 **production에만** 등록되어 있다. preview 채널을 쓰려면 먼저 preview 환경에도 같은 값을 등록한다 (`npx eas env:create --environment preview ...`).
+  - EAS 환경변수는 production·preview 두 환경에 같은 `EXPO_PUBLIC_*` 값이 등록되어 있다. `.env` 값을 바꾸면 두 환경 모두 갱신한다 (`npx eas env:update`).
 - **네이티브를 바꿨다면 반드시 `app.json`의 `version`을 올린다** (예: 1.0.0 → 1.1.0). 올리지 않으면 이전 네이티브 앱에 맞지 않는 JS가 내려가 앱이 깨질 수 있다.
 - 문제가 생긴 업데이트는 `npx eas update:rollback`으로 되돌린다.
 
