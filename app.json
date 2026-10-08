@@ -3,6 +3,9 @@
     "name": "멍멍로그",
     "slug": "meongmeonglog",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "meongmeonglog",
@@ -81,6 +84,9 @@
       "eas": {
         "projectId": "bc84f419-f502-4ac9-918c-7bd9a25077e4"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/bc84f419-f502-4ac9-918c-7bd9a25077e4"
     }
   }
 }

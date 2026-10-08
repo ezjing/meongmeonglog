@@ -185,7 +185,30 @@ supabase functions deploy welcome-greeting
 # 그 외 변경된 함수만 선택 배포
 ```
 
-`expo-updates`가 설치되어 있지 않아 **OTA 업데이트 불가** — 클라이언트 코드(`src/`)가 바뀌면 아래 네이티브 빌드가 항상 필요하다.
+### 클라이언트 변경: OTA 업데이트 vs 스토어 빌드
+
+| 변경 내용                                                                                    | 배포 방법                                      |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| JS/TS·화면·스타일·이미지 (`src/`, `assets/`)                                                 | **EAS Update (OTA)** — 스토어 심사 없이 반영   |
+| 네이티브 패키지 추가·제거, 권한, `app.json`/`app.config.ts` 플러그인·키, Expo SDK 업그레이드 | **`version` 올리고** 2~3번(EAS Build + Submit) |
+
+#### EAS Update (OTA)
+
+`runtimeVersion` 정책은 `appVersion`이다. 업데이트는 **같은 `version`으로 빌드된 앱에만** 내려간다.
+
+```bash
+set -a && source .env && set +a
+# 1) preview 채널로 먼저 확인 (preview 프로필 빌드에서 수신)
+npx eas update --channel preview --environment preview --message "변경 내용"
+# 2) 운영 배포
+npx eas update --channel production --environment production --message "변경 내용"
+```
+
+- 앱은 실행 시 업데이트를 확인·다운로드하고 **다음 실행 때** 적용한다.
+- 번들의 `EXPO_PUBLIC_*` 값은 `--environment`로 지정한 **EAS 환경변수**에서 가져온다 (로컬 `.env`와 값을 맞춰 둘 것).
+  - 현재 EAS 환경변수는 **production에만** 등록되어 있다. preview 채널을 쓰려면 먼저 preview 환경에도 같은 값을 등록한다 (`npx eas env:create --environment preview ...`).
+- **네이티브를 바꿨다면 반드시 `app.json`의 `version`을 올린다** (예: 1.0.0 → 1.1.0). 올리지 않으면 이전 네이티브 앱에 맞지 않는 JS가 내려가 앱이 깨질 수 있다.
+- 문제가 생긴 업데이트는 `npx eas update:rollback`으로 되돌린다.
 
 ### 2. EAS Build (Android)
 
