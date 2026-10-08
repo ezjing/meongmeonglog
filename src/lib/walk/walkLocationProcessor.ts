@@ -4,7 +4,7 @@ import { saveWalkLocation } from '@/lib/api/walkApi';
 import { haversineDistance } from '@/lib/utils/formatDistance';
 import {
   loadPersistedWalkState,
-  savePersistedWalkState,
+  updatePersistedWalkState,
   type WalkCoord,
 } from '@/lib/walk/walkSessionStorage';
 
@@ -52,52 +52,63 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
   const state = await loadPersistedWalkState();
   if (!state?.activeWalk) return;
 
-  let { distanceMeter, walkPath, lastLatitude, lastLongitude, pendingDbLocations, activeWalk } =
-    state;
+  const updated = await updatePersistedWalkState(state.activeWalk.walkId, (current) => {
+    let { distanceMeter, walkPath, lastLatitude, lastLongitude, pendingDbLocations } = current;
 
-  for (const location of locations) {
-    const { latitude, longitude } = location.coords;
-    const coord: WalkCoord = { latitude, longitude };
+    for (const location of locations) {
+      const { latitude, longitude } = location.coords;
+      const coord: WalkCoord = { latitude, longitude };
 
-    walkPath = [...walkPath, coord];
-    pendingDbLocations = [...pendingDbLocations, coord];
+      walkPath = [...walkPath, coord];
+      pendingDbLocations = [...pendingDbLocations, coord];
 
-    const next = applyLocationDelta(
+      const next = applyLocationDelta(
+        lastLatitude,
+        lastLongitude,
+        latitude,
+        longitude,
+        distanceMeter,
+      );
+      distanceMeter = next.distanceMeter;
+      lastLatitude = next.lastLatitude;
+      lastLongitude = next.lastLongitude;
+    }
+
+    return {
+      ...current,
+      distanceMeter,
+      walkPath,
       lastLatitude,
       lastLongitude,
-      latitude,
-      longitude,
-      distanceMeter,
-    );
-    distanceMeter = next.distanceMeter;
-    lastLatitude = next.lastLatitude;
-    lastLongitude = next.lastLongitude;
-  }
-
-  pendingDbLocations = await flushPendingDbLocations(activeWalk.walkId, pendingDbLocations);
-
-  await savePersistedWalkState({
-    ...state,
-    activeWalk,
-    distanceMeter,
-    walkPath,
-    lastLatitude,
-    lastLongitude,
-    pendingDbLocations,
+      pendingDbLocations,
+    };
   });
+
+  if (updated) await flushAllPendingDbLocations();
 }
 
-export async function flushAllPendingDbLocations(): Promise<void> {
-  const state = await loadPersistedWalkState();
-  if (!state?.activeWalk) return;
+let flushChain: Promise<unknown> = Promise.resolve();
 
-  const pendingDbLocations = await flushPendingDbLocations(
-    state.activeWalk.walkId,
-    state.pendingDbLocations,
-  );
+async function flushPersistedPendingLocations(): Promise<void> {
+  const snapshot = await loadPersistedWalkState();
+  if (!snapshot?.activeWalk || snapshot.pendingDbLocations.length === 0) return;
 
-  await savePersistedWalkState({
-    ...state,
-    pendingDbLocations,
-  });
+  const { walkId } = snapshot.activeWalk;
+  const pending = snapshot.pendingDbLocations;
+  const remaining = await flushPendingDbLocations(walkId, pending);
+  const flushedCount = pending.length - remaining.length;
+  if (flushedCount === 0) return;
+
+  // 전송 중 새로 쌓인 좌표는 유지하고, 전송한 앞부분만 제거
+  await updatePersistedWalkState(walkId, (current) => ({
+    ...current,
+    pendingDbLocations: current.pendingDbLocations.slice(flushedCount),
+  }));
+}
+
+/** 미전송 좌표 전송을 한 번에 하나씩 실행해 같은 좌표가 중복 저장되지 않게 한다 */
+export function flushAllPendingDbLocations(): Promise<void> {
+  const run = flushChain.then(flushPersistedPendingLocations);
+  flushChain = run.catch(() => {});
+  return run;
 }

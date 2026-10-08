@@ -7,7 +7,7 @@ import { updateWalkWeather } from '@/lib/api/walkApi';
 import { fetchCurrentWeather } from '@/lib/api/weatherApi';
 import { flushAllPendingDbLocations } from '@/lib/walk/walkLocationProcessor';
 import { requestWalkLocationPermissions, startWalkTracking } from '@/lib/walk/walkLocationService';
-import { loadPersistedWalkState, savePersistedWalkState } from '@/lib/walk/walkSessionStorage';
+import { loadPersistedWalkState, updatePersistedWalkState } from '@/lib/walk/walkSessionStorage';
 import { useWalkStore } from '@/stores/walkStore';
 
 const SYNC_INTERVAL_MS = 2_000;
@@ -43,18 +43,15 @@ async function applyWeatherForCoords(
 
   useWalkStore.getState().updateActiveWalkWeather(payload);
 
-  const persisted = await loadPersistedWalkState();
-  if (persisted?.activeWalk.walkId === walkId) {
-    await savePersistedWalkState({
-      ...persisted,
-      activeWalk: {
-        ...persisted.activeWalk,
-        weatherCondition: payload.weatherCondition,
-        weatherTemp: payload.weatherTemp,
-        weatherIcon: payload.weatherIcon,
-      },
-    });
-  }
+  await updatePersistedWalkState(walkId, (current) => ({
+    ...current,
+    activeWalk: {
+      ...current.activeWalk,
+      weatherCondition: payload.weatherCondition,
+      weatherTemp: payload.weatherTemp,
+      weatherIcon: payload.weatherIcon,
+    },
+  }));
 
   await updateWalkWeather(walkId, payload).catch(() => {});
 }

@@ -7,6 +7,7 @@ import {
   createInitialWalkState,
   loadPersistedWalkState,
   savePersistedWalkState,
+  withWalkStateLock,
 } from '@/lib/walk/walkSessionStorage';
 import type { WalkSession } from '@/types/domain';
 
@@ -41,12 +42,14 @@ export async function requestWalkLocationPermissions(): Promise<boolean> {
 }
 
 export async function startWalkTracking(activeWalk: WalkSession): Promise<void> {
-  const existing = await loadPersistedWalkState();
-  if (existing?.activeWalk.walkId === activeWalk.walkId) {
-    await savePersistedWalkState({ ...existing, activeWalk });
-  } else {
-    await savePersistedWalkState(createInitialWalkState(activeWalk));
-  }
+  await withWalkStateLock(async () => {
+    const existing = await loadPersistedWalkState();
+    if (existing?.activeWalk.walkId === activeWalk.walkId) {
+      await savePersistedWalkState({ ...existing, activeWalk });
+    } else {
+      await savePersistedWalkState(createInitialWalkState(activeWalk));
+    }
+  });
 
   const alreadyRunning = await isBackgroundWalkTaskRunning();
   if (alreadyRunning) return;
@@ -90,5 +93,5 @@ export async function pauseWalkLocationUpdates(): Promise<void> {
 
 export async function stopWalkTracking(): Promise<void> {
   await pauseWalkLocationUpdates();
-  await clearPersistedWalkState();
+  await withWalkStateLock(clearPersistedWalkState);
 }

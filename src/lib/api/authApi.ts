@@ -3,6 +3,7 @@ import { persistAuthSession, clearAuthSession, loadAuthSession } from '@/lib/aut
 import { unlinkKakaoAccount } from '@/lib/kakaoAuth';
 import { unlinkNaverAccount } from '@/lib/naverAuth';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { stopWalkTracking } from '@/lib/walk/walkLocationService';
 import type { AuthProvider } from '@/types/database';
 import type { AuthSession } from '@/types/domain';
 
@@ -57,7 +58,13 @@ async function mockDevSession(provider: AuthProvider): Promise<AuthSession> {
   return authSession;
 }
 
+/** 진행 중이던 산책(위치 추적·저장 상태)을 정리해 다른 계정에 복원되지 않게 한다 */
+async function clearWalkSession(): Promise<void> {
+  await stopWalkTracking().catch(() => {});
+}
+
 export async function signOut(): Promise<void> {
+  await clearWalkSession();
   await clearAuthSession();
   if (isSupabaseConfigured) {
     await supabase.auth.signOut();
@@ -84,17 +91,25 @@ export async function deleteAccount(): Promise<void> {
     await unlinkKakaoAccount();
   }
 
+  await clearWalkSession();
   await clearAuthSession();
   if (isSupabaseConfigured) {
     await supabase.auth.signOut();
   }
 }
 
-/** 소셜 로그인으로 받은 이메일 (이메일 미제공 시 생성한 대체 주소는 제외) */
+/**
+ * 소셜 로그인으로 받은 실제 이메일 (public.users.email).
+ * Auth 이메일은 소셜 고유 ID 기반 대체 주소라 표시용으로 쓰지 않는다.
+ */
 export async function getCurrentUserEmail(): Promise<string | null> {
   if (!isSupabaseConfigured) return null;
-  const { data } = await supabase.auth.getUser();
-  const email = data.user?.email ?? null;
+  const { data: authData } = await supabase.auth.getUser();
+  const userId = authData.user?.id;
+  if (!userId) return null;
+
+  const { data } = await supabase.from('users').select('email').eq('id', userId).maybeSingle();
+  const email = (data?.email as string | null | undefined) ?? null;
   if (!email || email.endsWith('@meongmeonglog.dev')) return null;
   return email;
 }

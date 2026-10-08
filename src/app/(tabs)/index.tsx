@@ -20,12 +20,9 @@ import {
 } from '@/hooks/useWalkTracker';
 import { fetchCurrentWeather } from '@/lib/api/weatherApi';
 import { formatDate, formatDistance, calculateAge } from '@/lib/utils/formatDistance';
+import { getLocalDateKey } from '@/lib/utils/localDate';
 import { useWalkStore } from '@/stores/walkStore';
 import type { DiaryListItem } from '@/types/domain';
-
-function getLocalDateKey(date = new Date()) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
 
 function isDiaryToday(diary: DiaryListItem) {
   const created = new Date(diary.createdAt);
@@ -116,9 +113,13 @@ export default function HomeScreen() {
       // 위치·날씨 조회 실패 시 산책 중 GPS로 다시 시도
     }
 
-    const walk = await startWalk.mutateAsync({ dogId: dog.dogId, weather });
-    setActiveWalk(walk);
-    router.push('/walk/active');
+    try {
+      const walk = await startWalk.mutateAsync({ dogId: dog.dogId, weather });
+      setActiveWalk(walk);
+      router.push('/walk/active');
+    } catch {
+      showToast({ message: '⚠️ 산책을 시작하지 못했어요. 다시 시도해주세요.', variant: 'warning' });
+    }
   };
 
   return (

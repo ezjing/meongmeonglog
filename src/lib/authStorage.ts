@@ -14,7 +14,12 @@ export async function persistAuthSession(session: StoredAuth): Promise<void> {
 export async function loadAuthSession(): Promise<StoredAuth | null> {
   const raw = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
   if (!raw) return null;
-  return JSON.parse(raw) as StoredAuth;
+
+  try {
+    return JSON.parse(raw) as StoredAuth;
+  } catch {
+    return null;
+  }
 }
 
 export async function clearAuthSession(): Promise<void> {

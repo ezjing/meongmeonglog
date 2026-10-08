@@ -188,6 +188,10 @@ export async function uploadWalkPhotos(walkId: string, uris: string[]): Promise<
     throw new AppError('storage_auth_required', '사진 업로드를 위해 로그인이 필요합니다.');
   }
 
+  // 이전 시도에서 일부만 저장된 사진 행을 정리 (재시도 시 중복 방지, 파일은 같은 경로로 덮어씀)
+  const { error: clearError } = await supabase.from('walk_photos').delete().eq('walk_id', walkId);
+  if (clearError) throw new AppError('photo_save_failed', clearError.message);
+
   for (let i = 0; i < uris.length; i++) {
     const uri = uris[i];
     const path = `${ownerId}/${walkId}/${i}.jpg`;

@@ -9,6 +9,7 @@ import { TabAppBar } from '@/components/ui/TabAppBar';
 import { colors, spacing } from '@/constants/theme';
 import { useCalendar, useDiaryList } from '@/hooks/useDiaries';
 import { formatDate, formatDistance, formatDuration } from '@/lib/utils/formatDistance';
+import { getLocalDateKey } from '@/lib/utils/localDate';
 import { useWalkStore } from '@/stores/walkStore';
 import type { DiaryListItem } from '@/types/domain';
 
@@ -29,7 +30,7 @@ export default function CalendarScreen() {
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
 
   const firstDay = new Date(year, month - 1, 1).getDay();
-  const today = now.toISOString().slice(0, 10);
+  const today = getLocalDateKey(now);
 
   const cells: (null | { date: string; hasDiary: boolean })[] = [
     ...Array(firstDay).fill(null),

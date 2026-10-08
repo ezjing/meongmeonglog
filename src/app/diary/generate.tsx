@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { WalkPhotoCarousel } from '@/components/diary/WalkPhotoCarousel';
@@ -10,6 +10,7 @@ import { LoadingOverlayScreen } from '@/components/ui/LoadingOverlay';
 import { useOverlay } from '@/components/ui/overlay';
 import { QuoteCard } from '@/components/ui/ScreenContainer';
 import { colors, spacing } from '@/constants/theme';
+import { useBackConfirmAction } from '@/hooks/useBackConfirmAction';
 import { useGenerateDiary } from '@/hooks/useDiaries';
 import { useDogDisplayName } from '@/hooks/useDogName';
 import { useWalk } from '@/hooks/useWalkMutations';
@@ -36,18 +37,24 @@ export default function DiaryGenerateScreen() {
 
   const startedRef = useRef(false);
 
+  const runGenerate = useCallback(
+    (id: string) => {
+      generateDiary
+        .mutateAsync(id)
+        .then((result) => {
+          setDiary(result);
+          resetWalk();
+        })
+        .catch(() => {});
+    },
+    [generateDiary, resetWalk],
+  );
+
   useEffect(() => {
     if (!walkId || startedRef.current) return;
     startedRef.current = true;
-
-    generateDiary
-      .mutateAsync(walkId)
-      .then((result) => {
-        setDiary(result);
-        resetWalk();
-      })
-      .catch(() => {});
-  }, [walkId, generateDiary, resetWalk]);
+    runGenerate(walkId);
+  }, [walkId, runGenerate]);
 
   useEffect(() => {
     return () => {
@@ -55,13 +62,30 @@ export default function DiaryGenerateScreen() {
     };
   }, [resetForm]);
 
+  // 뒤로가기도 "저장만 하기"와 같이 홈으로 이동 (이전 산책 완료 화면은 이미 정리된 상태라 돌아가면 로딩에 갇힘)
+  const allowLeaveRef = useRef<(() => void) | null>(null);
+
+  const goHome = useCallback(() => {
+    if (diary) {
+      showToast({ message: '🐾 일기가 저장되었어요', variant: 'success' });
+    }
+    allowLeaveRef.current?.();
+    router.replace('/(tabs)');
+  }, [diary, showToast]);
+
+  const { allowLeave } = useBackConfirmAction(goHome);
+
+  useEffect(() => {
+    allowLeaveRef.current = allowLeave;
+  }, [allowLeave]);
+
   if (generateDiary.isError) {
     const message =
       generateDiary.error instanceof Error ? generateDiary.error.message : '일기 생성에 실패했어요';
     return (
       <View style={styles.center}>
         <Text style={styles.error}>{message}</Text>
-        <Button label="다시 시도" onPress={() => walkId && generateDiary.mutate(walkId)} />
+        <Button label="다시 시도" onPress={() => walkId && runGenerate(walkId)} />
       </View>
     );
   }
@@ -110,13 +134,7 @@ export default function DiaryGenerateScreen() {
                 label="저장만 하기"
                 variant="soft"
                 style={styles.actionBtn}
-                onPress={() => {
-                  showToast({
-                    message: '🐾 일기가 저장되었어요',
-                    variant: 'success',
-                  });
-                  router.replace('/(tabs)');
-                }}
+                onPress={goHome}
               />
               <Button
                 label="저장하고 공유하기"

@@ -8,7 +8,7 @@ import {
   getCurrentUserId,
 } from '@/lib/api/authApi';
 import { fetchDogs, createDog, updateDog } from '@/lib/api/dogApi';
-import { useAuthStore } from '@/stores/walkStore';
+import { useAuthStore, useWalkStore } from '@/stores/walkStore';
 import type { AuthProvider } from '@/types/database';
 import type { CreateDogInput } from '@/types/domain';
 
@@ -29,6 +29,7 @@ export function useAuthSession() {
     mutationFn: signOut,
     onSuccess: () => {
       clearSession();
+      useWalkStore.getState().reset();
       queryClient.clear();
     },
   });
@@ -37,6 +38,7 @@ export function useAuthSession() {
     mutationFn: deleteAccount,
     onSuccess: () => {
       clearSession();
+      useWalkStore.getState().reset();
       queryClient.clear();
     },
   });

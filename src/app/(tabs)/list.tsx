@@ -10,6 +10,7 @@ import { TabAppBar } from '@/components/ui/TabAppBar';
 import { colors, spacing } from '@/constants/theme';
 import { useDiaryList } from '@/hooks/useDiaries';
 import { formatDate, formatDistance, formatDuration } from '@/lib/utils/formatDistance';
+import { getLocalDateKey } from '@/lib/utils/localDate';
 import { useWalkStore } from '@/stores/walkStore';
 import type { DiaryListItem } from '@/types/domain';
 
@@ -21,7 +22,7 @@ export default function ListScreen() {
 
   const sorted = [...(diaries ?? [])].sort((a, b) => {
     if (sortByDate) {
-      return a.createdAt.slice(0, 10).localeCompare(b.createdAt.slice(0, 10));
+      return getLocalDateKey(a.createdAt).localeCompare(getLocalDateKey(b.createdAt));
     }
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });

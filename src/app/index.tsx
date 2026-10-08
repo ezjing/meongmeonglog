@@ -16,8 +16,11 @@ export default function Index() {
   const [route, setRoute] = useState<Href | null>(null);
 
   useEffect(() => {
-    loadAuthSession().then(async (stored) => {
-      if (stored) {
+    (async () => {
+      try {
+        const stored = await loadAuthSession();
+        if (!stored) return;
+
         setSession(stored.userId, stored.provider);
 
         const persistedWalk = await loadPersistedWalkState();
@@ -28,9 +31,12 @@ export default function Index() {
           const nextRoute = await resolveOnboardingRoute(stored.userId);
           setRoute(nextRoute);
         }
+      } catch {
+        // 오프라인 등으로 경로 확인에 실패하면 기본 경로(홈 탭)로 진입
+      } finally {
+        setReady(true);
       }
-      setReady(true);
-    });
+    })();
   }, [setSession]);
 
   if (!ready) {

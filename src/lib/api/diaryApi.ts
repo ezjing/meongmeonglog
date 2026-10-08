@@ -4,6 +4,7 @@ import { fetchWalkPhotos, getMockWalk } from '@/lib/api/walkApi';
 import { AppError } from '@/lib/AppError';
 import { toDiary } from '@/lib/mappers/diaryMappers';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { getLocalDateKey, getLocalDateRangeIso } from '@/lib/utils/localDate';
 import type { DiaryRow } from '@/types/database';
 import type { CalendarDay, Diary, DiaryListItem } from '@/types/domain';
 
@@ -74,7 +75,8 @@ export async function fetchDiaries(date?: string): Promise<DiaryListItem[]> {
     .order('created_at', { ascending: false });
 
   if (date) {
-    query = query.gte('created_at', `${date}T00:00:00`).lte('created_at', `${date}T23:59:59`);
+    const { from, to } = getLocalDateRangeIso(date);
+    query = query.gte('created_at', from).lt('created_at', to);
   }
 
   const { data, error } = await query;
@@ -116,15 +118,16 @@ export async function fetchCalendar(year: number, month: number): Promise<Calend
     });
   }
 
+  const { from, to } = getLocalDateRangeIso(start, end);
   const { data, error } = await supabase
     .from('diaries')
     .select('created_at')
-    .gte('created_at', `${start}T00:00:00`)
-    .lte('created_at', `${end}T23:59:59`);
+    .gte('created_at', from)
+    .lt('created_at', to);
 
   if (error) throw new AppError('fetch_calendar_failed', error.message);
 
-  const diaryDates = new Set((data ?? []).map((d) => d.created_at.slice(0, 10)));
+  const diaryDates = new Set((data ?? []).map((d) => getLocalDateKey(d.created_at)));
   const daysInMonth = endDate.getDate();
   return Array.from({ length: daysInMonth }, (_, i) => {
     const date = `${year}-${String(month).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
