@@ -69,6 +69,7 @@ supabase functions deploy auth-naver
 supabase functions deploy diaries-generate
 supabase functions deploy welcome-greeting
 supabase functions deploy share-card
+supabase functions deploy delete-account
 ```
 
 Edge Function secrets: `GROQ_API_KEY`, `DEV_AUTH`, `SUPABASE_SERVICE_ROLE_KEY`
@@ -128,18 +129,44 @@ Android 키 제한: 앱 패키지 `com.ezjing.meongmeonglog` + SHA-1 지문 등�
 
 Expo Go에서는 Android/iOS 모두 추가 설정 없이 지도가 표시됩니다.
 
-카카오 개발자 콘솔 등록:
+### 소셜 로그인 콘솔 설정
 
-- Android 패키지: `com.ezjing.meongmeonglog` + 키 해시
-- iOS 번들 ID: `com.ezjing.meongmeonglog`
-- 동의항목: 닉네임, 카카오계정(이메일)
+#### 카카오 개발자 콘솔
 
-네이버 개발자센터 iOS 등록:
+- Android 패키지 / iOS 번들 ID: `com.ezjing.meongmeonglog`
+- 동의항목(필수 동의): 닉네임, 프로필 사진, 카카오계정(이메일) — 이메일은 비즈 앱(개인 개발자) 전환 필요
+- 별도 운영 전환 검수 없음 (카카오 로그인 ON이면 모든 사용자 사용 가능)
+- **Android 키 해시는 서명 키별로 모두 등록해야 한다.** 누락 시 해당 빌드에서만 카카오 로그인이 실패한다.
 
-- Bundle ID: `com.ezjing.meongmeonglog`
-- URL Scheme: `navergCz8w9XGrHS81JnOoJB6`
-- Android 패키지: `com.ezjing.meongmeonglog`
+| 서명 키         | 사용처                        | SHA-1 확인 위치                                       |
+| --------------- | ----------------------------- | ----------------------------------------------------- |
+| 디버그 키       | 로컬 `npm run android`        | `android/app/debug.keystore`                          |
+| 업로드 키       | EAS 빌드 산출물 직접 설치     | Play Console > 앱 서명 > 업로드 키 인증서             |
+| Play 앱 서명 키 | **Play 스토어에서 설치한 앱** | Play Console > 앱 서명 > 앱 서명 키 (SHA-1 복사 버튼) |
+
+SHA-1 → 카카오 키 해시 변환:
+
+```bash
+echo "AA:BB:...(SHA-1)" | tr -d ':' | xxd -r -p | openssl base64
+```
+
+#### 네이버 개발자센터
+
+- Android 패키지 / iOS Bundle ID: `com.ezjing.meongmeonglog`
+- iOS URL Scheme: `navergCz8w9XGrHS81JnOoJB6`
 - `.env`에 `EXPO_PUBLIC_NAVER_CLIENT_SECRET` (Client Secret) 추가 필요
+- 제공 정보: **이메일 주소만** 사용 (계정 식별 + 설정 > 로그인 계정에 표시)
+- "개발 중" 상태에서는 등록자·멤버관리 테스터만 로그인 가능 → 출시 전 **검수상태 탭에서 검수 요청** 필요
+  - 검수 첨부용 캡처: `store-assets/screenshots/naver-review/` (개인정보 마스킹 완료)
+
+#### 회원 탈퇴 시 연동 해제
+
+`deleteAccount()`(`src/lib/api/authApi.ts`)는 서버 계정 삭제 성공 후 로그인 수단에 맞춰 연동을 해제한다.
+
+- 네이버: `NaverLogin.deleteToken()` / 카카오: `unlink()`
+- 기기에 저장된 SDK 토큰으로 요청하므로, 앱 재설치 등으로 토큰이 없으면 해제되지 않는다 (탈퇴 자체는 정상 진행)
+
+콘솔 설정(키·스킴) 변경 후에는 다시 빌드한다:
 
 ```bash
 npm run prebuild:clean
