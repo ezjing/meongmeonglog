@@ -1,7 +1,7 @@
 /// <reference path="../_shared/deno.d.ts" />
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { generateGroqContent } from "../_shared/groq.ts";
+import { createAdminClient, getRequestUserId } from "../_shared/requestUser.ts";
 import {
   buildDiaryImagePrompt,
   buildDiarySystemInstruction,
@@ -21,10 +21,8 @@ Deno.serve(async (req: Request) => {
 
   try {
     const { walkId } = await req.json();
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const supabase = createAdminClient();
+    const userId = await getRequestUserId(req, supabase);
 
     const { data: walk, error: walkError } = await supabase
       .from("walks")
@@ -35,6 +33,26 @@ Deno.serve(async (req: Request) => {
     if (walkError || !walk) throw new Error("Walk not found");
 
     const dog = walk.dogs;
+    if (dog?.user_id !== userId) throw new Error("Walk not found");
+
+    // 재시도 등으로 이미 생성된 일기가 있으면 새로 만들지 않고 그대로 반환
+    const { data: existingDiary } = await supabase
+      .from("diaries")
+      .select("id, diary_content, daily_quote, ai_model")
+      .eq("walk_id", walkId)
+      .maybeSingle();
+
+    if (existingDiary) {
+      return new Response(
+        JSON.stringify({
+          diaryId: existingDiary.id,
+          content: existingDiary.diary_content,
+          dailyQuote: existingDiary.daily_quote,
+          aiModel: existingDiary.ai_model,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const { data: guardian } = await supabase
       .from("users")

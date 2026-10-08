@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createAdminClient, getRequestUserId } from '../_shared/requestUser.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,18 +12,16 @@ Deno.serve(async (req) => {
 
   try {
     const { diaryId } = await req.json();
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    );
+    const supabase = createAdminClient();
+    const userId = await getRequestUserId(req, supabase);
 
     const { data: diary, error } = await supabase
       .from('diaries')
-      .select('*, dogs(name), walk_photos:walks(walk_photos(image_url))')
+      .select('*, dogs(name, user_id), walk_photos:walks(walk_photos(image_url))')
       .eq('id', diaryId)
       .single();
 
-    if (error || !diary) throw new Error('Diary not found');
+    if (error || !diary || diary.dogs?.user_id !== userId) throw new Error('Diary not found');
 
     const placeholderUrl = `https://placeholder.meongmeonglog/share/${diaryId}.png`;
 

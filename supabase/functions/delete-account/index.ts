@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,16 +7,54 @@ const corsHeaders = {
 
 const STORAGE_BUCKETS = ['dog-profiles', 'walk-photos', 'share-cards'] as const;
 
+const LIST_PAGE_SIZE = 1000;
+
+/** prefix 아래 모든 파일 경로를 하위 폴더(예: {userId}/{walkId}/0.jpg)까지 재귀로 수집 */
+async function listAllFilePaths(
+  supabaseAdmin: SupabaseClient,
+  bucket: string,
+  prefix: string,
+): Promise<string[]> {
+  const paths: string[] = [];
+  let offset = 0;
+
+  while (true) {
+    const { data: entries, error } = await supabaseAdmin.storage
+      .from(bucket)
+      .list(prefix, { limit: LIST_PAGE_SIZE, offset });
+    if (error) throw error;
+    if (!entries?.length) break;
+
+    for (const entry of entries) {
+      const path = `${prefix}/${entry.name}`;
+      // 폴더 항목은 id가 없다
+      if (entry.id == null) {
+        paths.push(...(await listAllFilePaths(supabaseAdmin, bucket, path)));
+      } else {
+        paths.push(path);
+      }
+    }
+
+    if (entries.length < LIST_PAGE_SIZE) break;
+    offset += LIST_PAGE_SIZE;
+  }
+
+  return paths;
+}
+
 async function deleteUserFiles(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: SupabaseClient,
   userId: string,
 ) {
   for (const bucket of STORAGE_BUCKETS) {
-    const { data: files } = await supabaseAdmin.storage.from(bucket).list(userId);
-    if (!files?.length) continue;
+    const paths = await listAllFilePaths(supabaseAdmin, bucket, userId);
 
-    const paths = files.map((file) => `${userId}/${file.name}`);
-    await supabaseAdmin.storage.from(bucket).remove(paths);
+    for (let i = 0; i < paths.length; i += LIST_PAGE_SIZE) {
+      const { error } = await supabaseAdmin.storage
+        .from(bucket)
+        .remove(paths.slice(i, i + LIST_PAGE_SIZE));
+      if (error) throw error;
+    }
   }
 }
 
@@ -41,6 +79,7 @@ Deno.serve(async (req) => {
 
     // dogs/walks/diaries/... all cascade-delete from `public.users`,
     // which itself cascades from `auth.users` (see 001_initial.sql).
+    // 파일 삭제가 실패하면 계정을 지우기 전에 중단한다 (재시도 가능하도록).
     await deleteUserFiles(supabaseAdmin, userId);
 
     const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId);
