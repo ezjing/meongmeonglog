@@ -3,6 +3,7 @@ import {
   isKakaoTalkLoginAvailable,
   login as kakaoLogin,
   logout as kakaoLogout,
+  unlink as kakaoUnlink,
 } from '@react-native-kakao/user';
 import { Platform } from 'react-native';
 
@@ -23,6 +24,19 @@ export function initKakaoSdk() {
 
   initializeKakaoSDK(KAKAO_APP_KEY);
   sdkInitialized = true;
+}
+
+/** 회원 탈퇴 시 카카오 연결 끊기 (실패해도 탈퇴 흐름은 계속 진행) */
+export async function unlinkKakaoAccount(): Promise<void> {
+  if (DEV_AUTH || Platform.OS === 'web') return;
+  if (!KAKAO_APP_KEY || KAKAO_APP_KEY === 'your-kakao-app-key') return;
+
+  initKakaoSdk();
+  try {
+    await kakaoUnlink();
+  } catch {
+    // 저장된 토큰이 없거나 이미 연결이 끊긴 경우
+  }
 }
 
 interface KakaoAccessTokenOptions {

@@ -1,5 +1,7 @@
 import { AppError } from '@/lib/AppError';
-import { persistAuthSession, clearAuthSession } from '@/lib/authStorage';
+import { persistAuthSession, clearAuthSession, loadAuthSession } from '@/lib/authStorage';
+import { unlinkKakaoAccount } from '@/lib/kakaoAuth';
+import { unlinkNaverAccount } from '@/lib/naverAuth';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { AuthProvider } from '@/types/database';
 import type { AuthSession } from '@/types/domain';
@@ -63,6 +65,8 @@ export async function signOut(): Promise<void> {
 }
 
 export async function deleteAccount(): Promise<void> {
+  const storedAuth = await loadAuthSession();
+
   if (isSupabaseConfigured) {
     const { data, error } = await supabase.functions.invoke('delete-account');
     const responseError = (data as { error?: string } | null)?.error;
@@ -74,10 +78,25 @@ export async function deleteAccount(): Promise<void> {
     }
   }
 
+  if (storedAuth?.provider === 'naver') {
+    await unlinkNaverAccount();
+  } else if (storedAuth?.provider === 'kakao') {
+    await unlinkKakaoAccount();
+  }
+
   await clearAuthSession();
   if (isSupabaseConfigured) {
     await supabase.auth.signOut();
   }
+}
+
+/** 소셜 로그인으로 받은 이메일 (이메일 미제공 시 생성한 대체 주소는 제외) */
+export async function getCurrentUserEmail(): Promise<string | null> {
+  if (!isSupabaseConfigured) return null;
+  const { data } = await supabase.auth.getUser();
+  const email = data.user?.email ?? null;
+  if (!email || email.endsWith('@meongmeonglog.dev')) return null;
+  return email;
 }
 
 export async function getCurrentUserId(): Promise<string | null> {

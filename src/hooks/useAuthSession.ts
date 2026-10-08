@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { signInWithProvider, signOut, deleteAccount, getCurrentUserId } from '@/lib/api/authApi';
+import {
+  signInWithProvider,
+  signOut,
+  deleteAccount,
+  getCurrentUserEmail,
+  getCurrentUserId,
+} from '@/lib/api/authApi';
 import { fetchDogs, createDog, updateDog } from '@/lib/api/dogApi';
 import { useAuthStore } from '@/stores/walkStore';
 import type { AuthProvider } from '@/types/database';
@@ -44,6 +50,16 @@ export function useAuthSession() {
     isLoggingIn: loginMutation.isPending,
     isDeletingAccount: deleteAccountMutation.isPending,
   };
+}
+
+export function useAccountEmail() {
+  const userId = useAuthStore((s) => s.userId);
+
+  return useQuery({
+    queryKey: ['accountEmail', userId],
+    queryFn: getCurrentUserEmail,
+    enabled: !!userId,
+  });
 }
 
 export function useDogs() {

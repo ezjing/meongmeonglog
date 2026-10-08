@@ -56,6 +56,15 @@ async function clearNaverSdkSession() {
   }
 }
 
+/** 회원 탈퇴 시 네이버 연동 해제 (실패해도 탈퇴 흐름은 계속 진행) */
+export async function unlinkNaverAccount(): Promise<void> {
+  if (DEV_AUTH || Platform.OS === 'web') return;
+  if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return;
+
+  initNaverSdk();
+  await clearNaverSdkSession();
+}
+
 interface NaverAccessTokenOptions {
   forceAccountPicker?: boolean;
 }

@@ -8,12 +8,19 @@ import { Card } from '@/components/ui/Card';
 import { useOverlay } from '@/components/ui/overlay';
 import { TabAppBar } from '@/components/ui/TabAppBar';
 import { colors, spacing } from '@/constants/theme';
-import { useAuthSession, useDogs } from '@/hooks/useAuthSession';
+import { useAccountEmail, useAuthSession, useDogs } from '@/hooks/useAuthSession';
 import { useGuardianProfile } from '@/hooks/useGuardianProfile';
 import { requestLocationPermission } from '@/hooks/useWalkTracker';
+import type { AuthProvider } from '@/types/database';
+
+const PROVIDER_LABEL: Record<AuthProvider, string> = {
+  kakao: '카카오',
+  naver: '네이버',
+};
 
 export default function SettingsScreen() {
-  const { logout, deleteAccount } = useAuthSession();
+  const { provider, logout, deleteAccount } = useAuthSession();
+  const { data: accountEmail } = useAccountEmail();
   const { data: dogs } = useDogs();
   const { showAlert, showToast } = useOverlay();
   const { data: guardianProfile } = useGuardianProfile();
@@ -118,6 +125,14 @@ export default function SettingsScreen() {
           ) : (
             <Text style={styles.row}>등록된 강아지가 없습니다</Text>
           )}
+        </Card>
+
+        <Card style={styles.section}>
+          <Text style={styles.sectionTitle}>로그인 계정</Text>
+          <Text style={styles.row}>
+            {provider ? PROVIDER_LABEL[provider] : '-'}
+            {accountEmail ? ` · ${accountEmail}` : ''}
+          </Text>
         </Card>
 
         <Card style={styles.section}>
