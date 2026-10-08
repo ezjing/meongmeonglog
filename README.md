@@ -173,7 +173,7 @@ npm run prebuild:clean
 npm run ios   # 또는 npm run android
 ```
 
-## 배포 (Android 비공개 테스트)
+## 배포 (Android)
 
 서버 로직(LLM 모델/프롬프트 등)만 바뀐 경우와 클라이언트 코드가 바뀐 경우를 구분한다.
 
@@ -220,16 +220,16 @@ npx eas build --platform android --profile production --non-interactive --no-wai
 - `eas.json`의 `build.production.autoIncrement: true`로 `versionCode`가 매번 자동 증가한다.
 - 빌드 상태 확인: `npx eas build:view <BUILD_ID> --json` (역시 `.env` source 필요)
 
-### 3. EAS Submit (Play 비공개 테스트 = alpha 트랙)
+### 3. EAS Submit (Play 프로덕션 트랙)
 
 ```bash
 set -a && source .env && set +a
 npx eas submit --platform android --id <BUILD_ID> --non-interactive
 ```
 
-- `eas.json`의 `submit.production.android.track: "alpha"`가 Play "비공개 테스트" 트랙에 대응한다 (internal은 "내부 테스트", production은 정식 출시).
+- `eas.json`의 `submit.production.android.track: "production"`으로 Play 정식 출시 트랙에 제출한다 (alpha는 "비공개 테스트", internal은 "내부 테스트"). 제출 후 Google 검토가 끝나면 자동 공개된다.
 - 인증은 `submit.production.android.serviceAccountKeyPath: "./google-play-service-account.json"` (로컬 파일, git에는 커밋하지 않음 — `.gitignore` 등록됨)로 처리한다.
-  - 이 키는 Google Cloud 서비스 계정(Play Android Developer API 사용 설정 필요) + Play Console "사용자 및 권한"에서 해당 서비스 계정 이메일을 "앱을 테스트 트랙으로 출시" 권한으로 초대해야 동작한다.
+  - 이 키는 Google Cloud 서비스 계정(Play Android Developer API 사용 설정 필요) + Play Console "사용자 및 권한"에서 해당 서비스 계정 이메일을 출시 권한으로 초대해야 동작한다. 프로덕션 트랙 제출에는 프로덕션 출시 권한도 필요하다.
 - **같은 versionCode는 재제출 불가** — "You've already submitted this version" 에러가 나면 2번(EAS Build)부터 다시 실행해 versionCode를 올린 뒤 그 빌드로 제출한다.
 - 제출 자체(스토어에 실제로 반영되는 단계)는 자동화 권한 정책상 에이전트가 직접 실행하지 못할 수 있다 — 이 경우 명령을 직접 터미널에서 실행한다.
 

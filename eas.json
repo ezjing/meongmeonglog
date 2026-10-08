@@ -23,7 +23,7 @@
   "submit": {
     "production": {
       "android": {
-        "track": "alpha",
+        "track": "production",
         "serviceAccountKeyPath": "./google-play-service-account.json"
       }
     }
