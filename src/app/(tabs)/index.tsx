@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
 import { DogAvatar } from '@/components/dog/DogAvatar';
 import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
 import { Card } from '@/components/ui/Card';
 import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
+import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 import { useOverlay } from '@/components/ui/overlay';
 import { TabAppBar } from '@/components/ui/TabAppBar';
 import { colors, spacing } from '@/constants/theme';
@@ -70,6 +71,8 @@ export default function HomeScreen() {
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [profilePreviewVisible, setProfilePreviewVisible] = useState(false);
+  const [isStartingWalk, setIsStartingWalk] = useState(false);
+  const startingWalkRef = useRef(false);
   const { showToast } = useOverlay();
 
   const dog = dogs?.[0];
@@ -81,8 +84,19 @@ export default function HomeScreen() {
   const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries);
 
   const handleStartWalk = async () => {
-    if (!dog) return;
+    if (!dog || startingWalkRef.current) return;
 
+    startingWalkRef.current = true;
+    setIsStartingWalk(true);
+    try {
+      await runStartWalk(dog.dogId);
+    } finally {
+      startingWalkRef.current = false;
+      setIsStartingWalk(false);
+    }
+  };
+
+  const runStartWalk = async (dogId: string) => {
     const granted = await requestLocationPermission();
     if (!granted) {
       showToast({
@@ -114,7 +128,7 @@ export default function HomeScreen() {
     }
 
     try {
-      const walk = await startWalk.mutateAsync({ dogId: dog.dogId, weather });
+      const walk = await startWalk.mutateAsync({ dogId, weather });
       setActiveWalk(walk);
       router.push('/walk/active');
     } catch {
@@ -151,7 +165,13 @@ export default function HomeScreen() {
           <Text>{walkStatus.emoji}</Text>
         </Card>
 
-        <Pressable style={styles.walkCta} onPress={handleStartWalk} disabled={!dog}>
+        <Pressable
+          style={({ pressed }) => [styles.walkCta, pressed && styles.walkCtaPressed]}
+          onPress={handleStartWalk}
+          disabled={!dog || isStartingWalk}
+          accessibilityRole="button"
+          accessibilityState={{ busy: isStartingWalk, disabled: !dog || isStartingWalk }}
+        >
           <Text style={styles.walkCtaEmoji}>🐾</Text>
           <Text style={styles.walkCtaLabel}>산책 시작</Text>
         </Pressable>
@@ -184,6 +204,9 @@ export default function HomeScreen() {
         imageUri={dog?.profileImageUrl}
         onClose={() => setProfilePreviewVisible(false)}
       />
+      <Modal visible={isStartingWalk} transparent animationType="fade" statusBarTranslucent>
+        <LoadingOverlay title="산책 준비 중이에요" subtitle="위치와 날씨를 확인하고 있어요" />
+      </Modal>
     </>
   );
 }
@@ -218,6 +241,7 @@ const styles = StyleSheet.create({
     shadowRadius: 28,
     elevation: 6,
   },
+  walkCtaPressed: { opacity: 0.85, transform: [{ scale: 0.96 }] },
   walkCtaEmoji: { fontSize: 24 },
   walkCtaLabel: { color: colors.white, fontWeight: '700', fontSize: 13, marginTop: spacing.xs },
   sectionTitle: {
