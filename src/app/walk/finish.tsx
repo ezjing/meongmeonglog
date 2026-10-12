@@ -8,7 +8,16 @@ import { Chip } from '@/components/ui/Chip';
 import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
 import { LoadingOverlayScreen } from '@/components/ui/LoadingOverlay';
 import { BottomSheet, useOverlay } from '@/components/ui/overlay';
-import { colors, radius, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  borderWidth,
+  opacity,
+} from '@/constants/theme';
 import { useBackConfirmAction } from '@/hooks/useBackConfirmAction';
 import { useDogDisplayName } from '@/hooks/useDogName';
 import { getElapsedSecFromStartedAt } from '@/hooks/useElapsedSec';
@@ -25,6 +34,10 @@ import { flushAllPendingDbLocations } from '@/lib/walk/walkLocationProcessor';
 import { loadPersistedWalkState } from '@/lib/walk/walkSessionStorage';
 import { useFinishWalkStore, useWalkStore } from '@/stores/walkStore';
 import type { DogMeetingLevel } from '@/types/database';
+
+const PHOTO_SIZE = 56;
+const PHOTO_REMOVE_SIZE = 18;
+const MEMO_MIN_HEIGHT = 50;
 
 export default function WalkFinishScreen() {
   const activeWalk = useWalkStore((s) => s.activeWalk);
@@ -335,25 +348,25 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   summaryBar: {
     flexDirection: 'row',
-    gap: spacing.sm - 2,
+    gap: spacing.sm,
     marginBottom: spacing.md,
   },
   label: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: colors.grey,
     marginBottom: spacing.sm,
   },
   photoGrid: {
     flexDirection: 'row',
-    gap: spacing.sm - 2,
+    gap: spacing.sm,
     marginBottom: spacing.md,
     flexWrap: 'wrap',
   },
   photo: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.sm - 1,
+    width: PHOTO_SIZE,
+    height: PHOTO_SIZE,
+    borderRadius: radius.sm,
     backgroundColor: colors.clay,
     overflow: 'hidden',
     position: 'relative',
@@ -362,48 +375,48 @@ const styles = StyleSheet.create({
   photoImage: { width: '100%', height: '100%' },
   photoRemove: {
     position: 'absolute',
-    top: 2,
-    right: 2,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: 'rgba(43,43,61,0.72)',
+    top: spacing.xxs,
+    right: spacing.xxs,
+    width: PHOTO_REMOVE_SIZE,
+    height: PHOTO_REMOVE_SIZE,
+    borderRadius: radius.full,
+    backgroundColor: colors.overlayStrong,
     alignItems: 'center',
     justifyContent: 'center',
   },
   photoRemoveText: {
     color: colors.white,
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 16,
-    marginTop: -1,
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.bold,
+    lineHeight: lineHeight.sm,
+    marginTop: -spacing.xxs,
   },
   photoAdd: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.sm - 1,
+    width: PHOTO_SIZE,
+    height: PHOTO_SIZE,
+    borderRadius: radius.sm,
     backgroundColor: colors.white,
-    borderWidth: 1.4,
+    borderWidth: borderWidth.medium,
     borderStyle: 'dashed',
     borderColor: colors.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  photoAddText: { fontSize: 16, color: colors.grey, fontWeight: '700' },
+  photoAddText: { fontSize: fontSize.lg, color: colors.grey, fontWeight: fontWeight.bold },
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm - 2,
+    gap: spacing.sm,
     marginBottom: spacing.md,
   },
   memo: {
     backgroundColor: colors.white,
-    borderWidth: 1.3,
+    borderWidth: borderWidth.medium,
     borderColor: colors.line,
-    borderRadius: radius.md - 2,
-    padding: spacing.md - 4,
-    minHeight: 50,
-    fontSize: 12,
+    borderRadius: radius.md,
+    padding: spacing.ms,
+    minHeight: MEMO_MIN_HEIGHT,
+    fontSize: fontSize.md,
     color: colors.ink,
     marginBottom: spacing.lg,
     textAlignVertical: 'top',
@@ -412,15 +425,15 @@ const styles = StyleSheet.create({
   skipLinkWrap: {
     alignItems: 'center',
     paddingTop: spacing.md,
-    paddingBottom: spacing.md - 2,
+    paddingBottom: spacing.md,
   },
   skipLink: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.semibold,
     color: colors.grey,
-    borderBottomWidth: 1,
+    borderBottomWidth: borderWidth.thin,
     borderBottomColor: colors.line,
-    paddingBottom: 2,
+    paddingBottom: spacing.xxs,
   },
-  skipLinkDisabled: { opacity: 0.5 },
+  skipLinkDisabled: { opacity: opacity.disabled },
 });

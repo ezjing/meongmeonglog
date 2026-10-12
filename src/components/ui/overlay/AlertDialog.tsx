@@ -1,9 +1,20 @@
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  borderWidth,
+  shadows,
+} from '@/constants/theme';
 
 import { OverlayBackdrop } from './OverlayBackdrop';
 import type { AlertDialogOptions } from './types';
+
+const ICON_WRAP_SIZE = 42;
 
 interface AlertDialogProps extends AlertDialogOptions {
   visible: boolean;
@@ -56,42 +67,38 @@ const styles = StyleSheet.create({
   card: {
     width: '82%',
     backgroundColor: colors.white,
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 22,
+    borderRadius: radius.xl,
+    paddingHorizontal: spacing.ml,
+    paddingVertical: spacing.lg,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.35,
-    shadowRadius: 22,
-    elevation: 8,
+    ...shadows.overlay,
   },
   iconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: ICON_WRAP_SIZE,
+    height: ICON_WRAP_SIZE,
+    borderRadius: radius.full,
     backgroundColor: colors.quoteBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.ms,
   },
   icon: {
-    fontSize: 19,
+    fontSize: fontSize.xxl,
     color: colors.apricotDark,
   },
   title: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.extrabold,
     color: colors.ink,
-    marginBottom: 6,
+    marginBottom: spacing.sm,
     textAlign: 'center',
   },
   message: {
-    fontSize: 11,
+    fontSize: fontSize.sm,
     color: colors.grey,
-    lineHeight: 17,
+    lineHeight: lineHeight.sm,
     textAlign: 'center',
-    marginBottom: 18,
+    marginBottom: spacing.ml,
   },
   actions: {
     flexDirection: 'row',
@@ -101,19 +108,19 @@ const styles = StyleSheet.create({
   },
   btn: {
     flex: 1,
-    borderRadius: radius.md,
-    paddingVertical: 11,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.ms,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnSoft: {
     backgroundColor: colors.white,
-    borderWidth: 1,
+    borderWidth: borderWidth.thin,
     borderColor: colors.line,
   },
   btnSoftText: {
-    fontSize: 12.5,
-    fontWeight: '700',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: colors.ink,
   },
   btnPrimary: {
@@ -123,8 +130,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.danger,
   },
   btnPrimaryText: {
-    fontSize: 12.5,
-    fontWeight: '700',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: colors.white,
   },
 });

@@ -5,12 +5,24 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { LoadingPaws } from '@/components/ui/LoadingPaws';
-import { colors, radius, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  emojiSize,
+  fontWeight,
+  lineHeight,
+  shadows,
+} from '@/constants/theme';
 import { useCreateDog } from '@/hooks/useAuthSession';
 import { useWelcomeGreeting } from '@/hooks/useDiaries';
 import { AnalyticsEvents, trackEvent } from '@/lib/analytics';
 import { uploadDogProfileImage } from '@/lib/api/dogApi';
 import { useAuthStore, useOnboardingStore } from '@/stores/walkStore';
+
+const CHECK_SIZE = 46;
+const AVATAR_SIZE = 64;
 
 function parseWeightKg(value: string): number | null {
   const parsed = Number.parseFloat(value);
@@ -112,26 +124,26 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   check: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: CHECK_SIZE,
+    height: CHECK_SIZE,
+    borderRadius: radius.full,
     backgroundColor: colors.moss,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
   },
-  checkText: { color: colors.white, fontSize: 20, fontWeight: '700' },
-  doneTitle: { fontSize: 14, fontWeight: '800', color: colors.ink },
+  checkText: { color: colors.white, fontSize: fontSize.xxl, fontWeight: fontWeight.bold },
+  doneTitle: { fontSize: fontSize.base, fontWeight: fontWeight.extrabold, color: colors.ink },
   doneSub: {
-    fontSize: 11,
+    fontSize: fontSize.sm,
     color: colors.grey,
     marginBottom: spacing.md,
     textAlign: 'center',
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: radius.full,
     backgroundColor: colors.apricot,
     alignItems: 'center',
     justifyContent: 'center',
@@ -139,19 +151,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   avatarImage: { width: '100%', height: '100%' },
-  avatarEmoji: { fontSize: 28 },
+  avatarEmoji: { fontSize: emojiSize.sm },
   speech: {
     backgroundColor: colors.white,
     borderRadius: radius.xl,
     padding: spacing.md,
     width: '100%',
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 18,
-    elevation: 3,
+    ...shadows.raised,
   },
-  speechText: { fontSize: 14, lineHeight: 22, color: colors.ink },
-  paws: { fontSize: 14, marginVertical: spacing.md },
+  speechText: { fontSize: fontSize.base, lineHeight: lineHeight.lg, color: colors.ink },
+  paws: { fontSize: fontSize.base, marginVertical: spacing.md },
   cta: { width: '100%' },
 });

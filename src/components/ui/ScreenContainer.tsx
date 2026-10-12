@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing } from '@/constants/theme';
+import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/constants/theme';
 
 interface ScreenContainerProps {
   children: React.ReactNode;
@@ -25,13 +25,13 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.extrabold,
     color: colors.ink,
     marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: fontSize.md,
     color: colors.grey,
     marginBottom: spacing.md,
   },
@@ -48,15 +48,15 @@ export function QuoteCard({ quote }: { quote: string }) {
 const quoteStyles = StyleSheet.create({
   card: {
     backgroundColor: colors.quoteBg,
-    borderLeftWidth: 4,
+    borderLeftWidth: borderWidth.heavy,
     borderLeftColor: colors.apricot,
-    borderRadius: radius.sm,
-    padding: spacing.md - 4,
+    borderRadius: radius.md,
+    padding: spacing.ms,
     marginVertical: spacing.sm,
   },
   text: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.bold,
     color: colors.apricotDark,
   },
 });

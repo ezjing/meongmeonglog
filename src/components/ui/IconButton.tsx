@@ -7,7 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors } from '@/constants/theme';
+import { colors, radius, iconSize, sizes, borderWidth, opacity } from '@/constants/theme';
 
 type IconButtonIcon = 'back' | 'share';
 
@@ -26,23 +26,23 @@ export function IconButton({ icon, style, ...props }: IconButtonProps) {
 
   return (
     <Pressable style={({ pressed }) => [styles.base, pressed && styles.pressed, style]} {...props}>
-      <SymbolView name={name} size={18} tintColor={colors.ink} />
+      <SymbolView name={name} size={iconSize.md} tintColor={colors.ink} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: sizes.control,
+    height: sizes.control,
+    borderRadius: radius.full,
     backgroundColor: colors.white,
-    borderWidth: 1,
+    borderWidth: borderWidth.thin,
     borderColor: colors.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pressed: {
-    opacity: 0.85,
+    opacity: opacity.pressed,
   },
 });

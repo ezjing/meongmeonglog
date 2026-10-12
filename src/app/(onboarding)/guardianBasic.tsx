@@ -9,7 +9,16 @@ import { LoadingPaws } from '@/components/ui/LoadingPaws';
 import { BottomSheet, useOverlay } from '@/components/ui/overlay';
 import { PawProgress } from '@/components/ui/PawProgress';
 import { StackAppBar } from '@/components/ui/StackAppBar';
-import { colors, spacing } from '@/constants/theme';
+import { PROFILE_AVATAR_SIZE, PROFILE_CAMERA_BADGE_SIZE } from '@/constants/layout';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  emojiSize,
+  fontWeight,
+  borderWidth,
+} from '@/constants/theme';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useGuardianProfile, useUpdateGuardianProfile } from '@/hooks/useGuardianProfile';
 import { pickImageFromCamera, pickImageFromLibrary } from '@/lib/pickImage';
@@ -230,37 +239,37 @@ const styles = StyleSheet.create({
   },
   progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
     color: colors.ink,
     marginTop: spacing.sm,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 11.5,
+    fontSize: fontSize.md,
     color: colors.grey,
-    marginBottom: 14,
+    marginBottom: spacing.md,
   },
   editSubtitle: {
-    fontSize: 11.5,
+    fontSize: fontSize.md,
     color: colors.grey,
-    marginBottom: 14,
+    marginBottom: spacing.md,
     marginTop: spacing.xs,
   },
   avatarWrap: {
     alignSelf: 'center',
-    marginTop: 8,
-    marginBottom: 16,
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
     position: 'relative',
   },
   avatar: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+    width: PROFILE_AVATAR_SIZE,
+    height: PROFILE_AVATAR_SIZE,
+    borderRadius: radius.full,
     backgroundColor: colors.clay,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3,
+    borderWidth: borderWidth.heavy,
     borderColor: colors.white,
     borderStyle: 'dashed',
     overflow: 'hidden',
@@ -270,26 +279,26 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   avatarEmoji: {
-    fontSize: 30,
+    fontSize: emojiSize.md,
   },
   camBadge: {
     position: 'absolute',
-    right: -2,
-    bottom: -2,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    right: -spacing.xxs,
+    bottom: -spacing.xxs,
+    width: PROFILE_CAMERA_BADGE_SIZE,
+    height: PROFILE_CAMERA_BADGE_SIZE,
+    borderRadius: radius.full,
     backgroundColor: colors.ink,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: borderWidth.thick,
     borderColor: colors.background,
   },
   camEmoji: {
-    fontSize: 12,
+    fontSize: fontSize.md,
   },
   footer: {
-    paddingVertical: 14,
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.background,
   },

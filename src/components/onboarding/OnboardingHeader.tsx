@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { PawProgress } from '@/components/ui/PawProgress';
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, fontSize, fontWeight, hitSlop } from '@/constants/theme';
 
 interface OnboardingHeaderProps {
   currentStep: number;
@@ -21,7 +21,12 @@ export function OnboardingHeader({ currentStep, totalSteps, onBack }: Onboarding
 
   return (
     <View style={styles.header}>
-      <Pressable onPress={handleBack} style={styles.backBtn} hitSlop={8} accessibilityRole="button">
+      <Pressable
+        onPress={handleBack}
+        style={styles.backBtn}
+        hitSlop={hitSlop}
+        accessibilityRole="button"
+      >
         <Text style={styles.backText}>←</Text>
       </Pressable>
       <View style={styles.progressWrap}>
@@ -41,9 +46,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   backText: {
-    fontSize: 22,
+    fontSize: fontSize.display,
     color: colors.ink,
-    fontWeight: '600',
+    fontWeight: fontWeight.semibold,
   },
   progressWrap: {
     paddingHorizontal: spacing.xs,

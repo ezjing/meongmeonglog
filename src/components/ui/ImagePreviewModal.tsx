@@ -10,7 +10,18 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
-import { colors, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  emojiSize,
+  fontWeight,
+  opacity,
+} from '@/constants/theme';
+
+const NAV_BUTTON_WIDTH = 40;
+const NAV_BUTTON_HEIGHT = 48;
 
 interface ImagePreviewModalProps {
   visible: boolean;
@@ -136,7 +147,7 @@ export function ImagePreviewModal({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.85)',
+    backgroundColor: colors.scrimStrong,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -153,23 +164,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    borderRadius: 16,
+    borderRadius: radius.lg,
   },
   placeholder: {
-    borderRadius: 16,
+    borderRadius: radius.lg,
     backgroundColor: colors.apricot,
     alignItems: 'center',
     justifyContent: 'center',
   },
   emoji: {
-    fontSize: 96,
+    fontSize: emojiSize.xl,
   },
   navBtn: {
     position: 'absolute',
     top: '50%',
-    marginTop: -24,
-    width: 40,
-    height: 48,
+    marginTop: -spacing.lg,
+    width: NAV_BUTTON_WIDTH,
+    height: NAV_BUTTON_HEIGHT,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -180,18 +191,18 @@ const styles = StyleSheet.create({
     right: spacing.sm,
   },
   navText: {
-    fontSize: 36,
+    fontSize: emojiSize.lg,
     color: colors.white,
-    fontWeight: '300',
+    fontWeight: fontWeight.light,
   },
   navTextDisabled: {
-    opacity: 0.35,
+    opacity: opacity.subtle,
   },
   counter: {
     position: 'absolute',
     bottom: spacing.xl * 2,
     color: colors.white,
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.semibold,
   },
 });

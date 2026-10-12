@@ -6,7 +6,7 @@ import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
 import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
 import { Card } from '@/components/ui/Card';
 import { TabAppBar } from '@/components/ui/TabAppBar';
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/constants/theme';
 import { useCalendar, useDiaryList } from '@/hooks/useDiaries';
 import { formatDate, formatDistance, formatDuration } from '@/lib/utils/formatDistance';
 import { getLocalDateKey } from '@/lib/utils/localDate';
@@ -152,38 +152,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.sm,
   },
-  nav: { fontSize: 20, color: colors.ink, padding: spacing.sm },
-  monthTitle: { fontSize: 15, fontWeight: '700', color: colors.ink },
+  nav: { fontSize: fontSize.xxl, color: colors.ink, padding: spacing.sm },
+  monthTitle: { fontSize: fontSize.lg, fontWeight: fontWeight.bold, color: colors.ink },
   weekRow: { flexDirection: 'row', marginBottom: spacing.xs },
-  weekday: { flex: 1, textAlign: 'center', fontSize: 10, color: colors.grey },
+  weekday: { flex: 1, textAlign: 'center', fontSize: fontSize.xs, color: colors.grey },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: {
     width: CELL_SIZE,
     height: CELL_SIZE,
-    padding: 5,
+    padding: spacing.xs,
   },
   cellInner: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 8,
+    borderRadius: radius.sm,
   },
   todayCell: { backgroundColor: colors.apricot },
   diaryCell: { backgroundColor: colors.white },
-  selectedCell: { borderWidth: 2, borderColor: colors.apricotDark },
-  cellText: { fontSize: 11, color: '#5b5b66' },
-  todayText: { color: colors.white, fontWeight: '800' },
-  paw: { fontSize: 7, marginTop: 1 },
+  selectedCell: { borderWidth: borderWidth.thick, borderColor: colors.apricotDark },
+  cellText: { fontSize: fontSize.sm, color: colors.inkSoft },
+  todayText: { color: colors.white, fontWeight: fontWeight.extrabold },
+  paw: { fontSize: fontSize.xxs, marginTop: spacing.xxs },
   sheetListScroll: { flex: 1, marginTop: spacing.md },
   sheetList: { gap: spacing.sm, paddingBottom: spacing.md },
   sheet: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center' },
   sheetBody: { flex: 1 },
-  sheetMeta: { fontSize: 10, color: colors.grey, marginBottom: 3 },
-  sheetQuote: { fontSize: 12, fontWeight: '600', color: colors.ink },
+  sheetMeta: { fontSize: fontSize.xs, color: colors.grey, marginBottom: spacing.xs },
+  sheetQuote: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, color: colors.ink },
   noDiary: {
     textAlign: 'center',
     color: colors.grey,
     marginTop: spacing.lg,
-    fontSize: 12,
+    fontSize: fontSize.md,
   },
 });

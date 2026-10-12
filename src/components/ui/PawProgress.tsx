@@ -1,7 +1,9 @@
 import { Fragment } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '@/constants/theme';
+import { colors, fontSize, opacity } from '@/constants/theme';
+
+const LINE_HEIGHT = 2;
 
 interface PawProgressProps {
   currentStep: number;
@@ -32,15 +34,15 @@ const styles = StyleSheet.create({
   },
   line: {
     flex: 1,
-    height: 2,
+    height: LINE_HEIGHT,
     backgroundColor: colors.line,
   },
   lineActive: {
     backgroundColor: colors.apricot,
   },
   paw: {
-    fontSize: 12,
-    opacity: 0.25,
+    fontSize: fontSize.md,
+    opacity: opacity.subtle,
   },
   pawActive: {
     opacity: 1,

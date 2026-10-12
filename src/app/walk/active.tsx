@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
 import { useOverlay } from '@/components/ui/overlay';
 import { WalkMap } from '@/components/walk/WalkMap';
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, radius, fontSize, fontWeight } from '@/constants/theme';
 import { useBackConfirmAction } from '@/hooks/useBackConfirmAction';
 import { useCancelWalk } from '@/hooks/useWalkMutations';
 import { stopWalkTracking, useWalkTracker, freezeWalkSession } from '@/hooks/useWalkTracker';
@@ -148,27 +148,27 @@ const styles = StyleSheet.create({
   mapWrap: { height: '50%', position: 'relative' },
   weatherBadge: {
     position: 'absolute',
-    top: spacing.sm + 2,
-    left: spacing.sm + 2,
+    top: spacing.ms,
+    left: spacing.ms,
     backgroundColor: colors.white,
-    borderRadius: 999,
-    paddingHorizontal: spacing.sm + 2,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.ms,
     paddingVertical: spacing.xs,
   },
-  weatherText: { fontSize: 10, fontWeight: '700' },
+  weatherText: { fontSize: fontSize.xs, fontWeight: fontWeight.bold },
   stats: { padding: spacing.md },
-  timerLabel: { textAlign: 'center', fontSize: 11, color: colors.grey },
+  timerLabel: { textAlign: 'center', fontSize: fontSize.sm, color: colors.grey },
   timer: {
     textAlign: 'center',
-    fontSize: 34,
-    fontWeight: '700',
+    fontSize: fontSize.hero,
+    fontWeight: fontWeight.bold,
     color: colors.ink,
     marginVertical: spacing.xs,
   },
   statPair: { flexDirection: 'row', justifyContent: 'center', gap: spacing.lg },
   statItem: { alignItems: 'center' },
-  statValue: { fontSize: 14, fontWeight: '700', color: colors.ink },
-  statLabel: { fontSize: 10, color: colors.grey },
+  statValue: { fontSize: fontSize.base, fontWeight: fontWeight.bold, color: colors.ink },
+  statLabel: { fontSize: fontSize.xs, color: colors.grey },
   actions: {
     flexDirection: 'row',
     gap: spacing.sm,

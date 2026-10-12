@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, radius, fontSize, sizes, shadows } from '@/constants/theme';
 
 interface MapCoordinate {
   latitude: number;
@@ -14,6 +14,8 @@ interface WalkMapProps {
 }
 
 /** 서울시청 기준 */
+const ROUTE_STROKE_WIDTH = 3;
+
 const DEFAULT_REGION = {
   latitude: 37.566535,
   longitude: 126.977969,
@@ -89,7 +91,11 @@ export function WalkMap({ routePath }: WalkMapProps) {
         }}
       >
         {routePath.length > 1 && (
-          <Polyline coordinates={routePath} strokeColor={colors.apricot} strokeWidth={3} />
+          <Polyline
+            coordinates={routePath}
+            strokeColor={colors.apricot}
+            strokeWidth={ROUTE_STROKE_WIDTH}
+          />
         )}
         {lastPoint && <Marker coordinate={lastPoint} />}
       </MapView>
@@ -113,19 +119,15 @@ const styles = StyleSheet.create({
   map: { flex: 1, backgroundColor: colors.background },
   recenterBtn: {
     position: 'absolute',
-    right: spacing.sm + 2,
-    bottom: spacing.sm + 2,
+    right: spacing.ms,
+    bottom: spacing.ms,
     backgroundColor: colors.white,
-    borderRadius: 999,
-    width: 36,
-    height: 36,
+    borderRadius: radius.full,
+    width: sizes.control,
+    height: sizes.control,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 3,
-    elevation: 2,
+    ...shadows.sm,
   },
-  recenterText: { fontSize: 16 },
+  recenterText: { fontSize: fontSize.lg },
 });

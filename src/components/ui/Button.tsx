@@ -9,7 +9,16 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors, radius, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  iconSize,
+  fontWeight,
+  borderWidth,
+  opacity,
+} from '@/constants/theme';
 
 type ButtonVariant = 'primary' | 'outline' | 'soft' | 'kakao' | 'naver';
 
@@ -28,7 +37,7 @@ const variantStyles: Record<ButtonVariant, { container: ViewStyle; text: { color
   outline: {
     container: {
       backgroundColor: 'transparent',
-      borderWidth: 1.5,
+      borderWidth: borderWidth.medium,
       borderColor: colors.ink,
     },
     text: { color: colors.ink },
@@ -36,17 +45,17 @@ const variantStyles: Record<ButtonVariant, { container: ViewStyle; text: { color
   soft: {
     container: {
       backgroundColor: colors.white,
-      borderWidth: 1,
+      borderWidth: borderWidth.thin,
       borderColor: colors.line,
     },
     text: { color: colors.ink },
   },
   kakao: {
-    container: { backgroundColor: colors.kakao, borderRadius: radius.social },
+    container: { backgroundColor: colors.kakao, borderRadius: radius.md },
     text: { color: colors.kakaoText },
   },
   naver: {
-    container: { backgroundColor: colors.naver, borderRadius: radius.social },
+    container: { backgroundColor: colors.naver, borderRadius: radius.md },
     text: { color: colors.white },
   },
 };
@@ -82,8 +91,8 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: radius.md,
-    paddingVertical: spacing.md - 3,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.ms,
     paddingHorizontal: spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
@@ -91,22 +100,22 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
   },
   iconWrap: {
-    width: 20,
-    height: 20,
+    width: iconSize.lg,
+    height: iconSize.lg,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
   },
   disabled: {
-    opacity: 0.5,
+    opacity: opacity.disabled,
   },
   pressed: {
-    opacity: 0.85,
+    opacity: opacity.pressed,
   },
 });

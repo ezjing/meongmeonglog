@@ -9,7 +9,19 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  zIndex,
+  fontWeight,
+  borderWidth,
+  opacity,
+  shadows,
+} from '@/constants/theme';
+
+const SPINNER_SIZE = 36;
 
 interface LoadingOverlayCardProps {
   title: string;
@@ -166,12 +178,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backdropDim: {
-    opacity: 0.94,
+    opacity: opacity.dim,
   },
   overlay: {
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.overlay,
-    zIndex: 10,
+    zIndex: zIndex.overlay,
   },
   center: {
     flex: 1,
@@ -182,44 +194,40 @@ const styles = StyleSheet.create({
   card: {
     width: '78%',
     backgroundColor: colors.white,
-    borderRadius: 20,
-    paddingVertical: 28,
-    paddingHorizontal: 22,
+    borderRadius: radius.xl,
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 24 },
-    shadowOpacity: 0.35,
-    shadowRadius: 22,
-    elevation: 8,
+    ...shadows.overlay,
   },
   spinner: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 4,
+    width: SPINNER_SIZE,
+    height: SPINNER_SIZE,
+    borderRadius: radius.full,
+    borderWidth: borderWidth.heavy,
     borderColor: colors.line,
     borderTopColor: colors.apricot,
   },
   title: {
-    marginTop: 14,
-    marginBottom: 4,
-    fontSize: 14.5,
-    fontWeight: '800',
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.extrabold,
     color: colors.ink,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 10.5,
+    fontSize: fontSize.sm,
     color: colors.grey,
     textAlign: 'center',
   },
   pawRow: {
     flexDirection: 'row',
-    gap: 7,
+    gap: spacing.sm,
     justifyContent: 'center',
-    marginTop: 14,
+    marginTop: spacing.md,
   },
   paw: {
-    fontSize: 16,
+    fontSize: fontSize.lg,
   },
 });

@@ -7,12 +7,14 @@ import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
 import { Card } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
 import { TabAppBar } from '@/components/ui/TabAppBar';
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, fontSize, fontWeight } from '@/constants/theme';
 import { useDiaryList } from '@/hooks/useDiaries';
 import { formatDate, formatDistance, formatDuration } from '@/lib/utils/formatDistance';
 import { getLocalDateKey } from '@/lib/utils/localDate';
 import { useWalkStore } from '@/stores/walkStore';
 import type { DiaryListItem } from '@/types/domain';
+
+const THUMBNAIL_SIZE = 50;
 
 export default function ListScreen() {
   const [sortByDate, setSortByDate] = useState(false);
@@ -29,7 +31,11 @@ export default function ListScreen() {
 
   const renderItem = ({ item }: { item: DiaryListItem }) => (
     <Card style={styles.card} onTouchEnd={() => router.push(`/diary/${item.diaryId}`)}>
-      <DiaryThumbnail diary={item} pendingPhotosByWalkId={pendingPhotosByWalkId} size={50} />
+      <DiaryThumbnail
+        diary={item}
+        pendingPhotosByWalkId={pendingPhotosByWalkId}
+        size={THUMBNAIL_SIZE}
+      />
       <View style={styles.body}>
         <Text style={styles.meta}>
           {formatDate(item.createdAt)}
@@ -77,12 +83,12 @@ const styles = StyleSheet.create({
   list: { padding: spacing.md, paddingTop: spacing.xs, gap: spacing.sm },
   card: {
     flexDirection: 'row',
-    gap: spacing.sm + 2,
+    gap: spacing.ms,
     alignItems: 'center',
     marginBottom: spacing.sm,
   },
   body: { flex: 1 },
-  meta: { fontSize: 10, color: colors.grey, marginBottom: 3 },
-  quote: { fontSize: 12, fontWeight: '600', color: colors.ink },
+  meta: { fontSize: fontSize.xs, color: colors.grey, marginBottom: spacing.xs },
+  quote: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, color: colors.ink },
   empty: { textAlign: 'center', color: colors.grey, marginTop: spacing.xl },
 });

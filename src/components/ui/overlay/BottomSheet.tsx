@@ -1,10 +1,22 @@
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  fontWeight,
+  borderWidth,
+  shadows,
+} from '@/constants/theme';
 
 import { OverlayBackdrop } from './OverlayBackdrop';
 import type { BottomSheetOption } from './types';
+
+const HANDLE_WIDTH = 38;
+const HANDLE_HEIGHT = 5;
+const OPTION_ICON_SIZE = 30;
 
 interface BottomSheetProps {
   visible: boolean;
@@ -31,7 +43,7 @@ export function BottomSheet({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <OverlayBackdrop onPress={onClose} style={styles.backdrop}>
         <Pressable style={styles.sheetWrap} onPress={(event) => event.stopPropagation()}>
-          <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+          <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.ml) }]}>
             <View style={styles.handle} />
             {title ? <Text style={styles.title}>{title}</Text> : null}
             {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
@@ -81,70 +93,66 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: colors.white,
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    paddingTop: 10,
-    paddingHorizontal: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -8 },
-    shadowOpacity: 0.28,
-    shadowRadius: 16,
-    elevation: 10,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    paddingTop: spacing.ms,
+    paddingHorizontal: spacing.ml,
+    ...shadows.sheet,
   },
   handle: {
-    width: 38,
-    height: 5,
+    width: HANDLE_WIDTH,
+    height: HANDLE_HEIGHT,
     borderRadius: radius.full,
     backgroundColor: colors.line,
     alignSelf: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   title: {
-    fontSize: 13,
-    fontWeight: '800',
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.extrabold,
     color: colors.ink,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 10.5,
+    fontSize: fontSize.sm,
     color: colors.grey,
-    marginBottom: 14,
+    marginBottom: spacing.md,
   },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 11,
-    paddingVertical: 11,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: spacing.ms,
+    paddingVertical: spacing.ms,
+    borderBottomWidth: borderWidth.hairline,
     borderBottomColor: colors.line,
   },
   optionIcon: {
-    width: 30,
-    height: 30,
-    borderRadius: 9,
+    width: OPTION_ICON_SIZE,
+    height: OPTION_ICON_SIZE,
+    borderRadius: radius.sm,
     backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
   optionIconText: {
-    fontSize: 16,
+    fontSize: fontSize.lg,
   },
   optionLabel: {
-    fontSize: 12.5,
-    fontWeight: '700',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: colors.ink,
   },
   cancel: {
-    marginTop: 12,
+    marginTop: spacing.ms,
     backgroundColor: colors.background,
-    borderRadius: 13,
-    paddingVertical: 12,
+    borderRadius: radius.md,
+    paddingVertical: spacing.ms,
     alignItems: 'center',
   },
   cancelText: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#5b5b66',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.extrabold,
+    color: colors.inkSoft,
   },
 });

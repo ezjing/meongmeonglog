@@ -2,8 +2,10 @@ import { Image } from 'expo-image';
 import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, radius, zIndex } from '@/constants/theme';
 import type { WalkPhoto } from '@/types/domain';
+
+const DOT_SIZE = 6;
 
 interface WalkPhotoCarouselProps {
   photos: WalkPhoto[];
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFill,
-    zIndex: 1,
+    zIndex: zIndex.base,
   },
   dots: {
     position: 'absolute',
@@ -89,14 +91,14 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 6,
-    zIndex: 2,
+    gap: spacing.sm,
+    zIndex: zIndex.raised,
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.5)',
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: radius.full,
+    backgroundColor: colors.whiteAlpha50,
   },
   dotActive: {
     backgroundColor: colors.white,

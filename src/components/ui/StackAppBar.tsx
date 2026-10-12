@@ -1,7 +1,18 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
-import { colors, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  fontSize,
+  iconSize,
+  sizes,
+  zIndex,
+  fontWeight,
+  lineHeight,
+  borderWidth,
+  opacity,
+} from '@/constants/theme';
 
 interface StackAppBarProps {
   title: string;
@@ -10,7 +21,8 @@ interface StackAppBarProps {
   style?: ViewStyle;
 }
 
-const sideSize = 36;
+const APP_BAR_HEIGHT = 44;
+const sideSize = sizes.control;
 
 export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAppBarProps) {
   return (
@@ -37,7 +49,7 @@ export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAp
         >
           <SymbolView
             name={{ ios: 'square.and.arrow.up', android: 'share', web: 'share' }}
-            size={16}
+            size={iconSize.sm}
             tintColor={colors.ink}
           />
         </Pressable>
@@ -50,7 +62,7 @@ export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAp
 
 const styles = StyleSheet.create({
   bar: {
-    height: 44,
+    height: APP_BAR_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
@@ -62,26 +74,26 @@ const styles = StyleSheet.create({
     height: sideSize,
     borderRadius: sideSize / 2,
     backgroundColor: colors.white,
-    borderWidth: 1,
+    borderWidth: borderWidth.thin,
     borderColor: colors.line,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1,
+    zIndex: zIndex.base,
   },
   backIcon: {
-    fontSize: 22,
-    lineHeight: 24,
-    fontWeight: '700',
+    fontSize: fontSize.display,
+    lineHeight: lineHeight.lg,
+    fontWeight: fontWeight.bold,
     color: colors.ink,
-    marginTop: -2,
+    marginTop: -spacing.xxs,
   },
   title: {
     position: 'absolute',
     left: spacing.md + sideSize,
     right: spacing.md + sideSize,
     textAlign: 'center',
-    fontWeight: '700',
-    fontSize: 14,
+    fontWeight: fontWeight.bold,
+    fontSize: fontSize.base,
     color: colors.ink,
   },
   sidePlaceholder: {
@@ -92,6 +104,6 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   pressed: {
-    opacity: 0.85,
+    opacity: opacity.pressed,
   },
 });

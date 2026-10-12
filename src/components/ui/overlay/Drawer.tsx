@@ -4,9 +4,23 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
-import { colors } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  iconSize,
+  zIndex,
+  fontWeight,
+  borderWidth,
+  shadows,
+  hitSlop,
+} from '@/constants/theme';
 
 import { OverlayBackdrop } from './OverlayBackdrop';
+
+const CLOSE_BUTTON_SIZE = 26;
+const AVATAR_SIZE = 46;
 
 export interface DrawerItem {
   icon: string;
@@ -44,14 +58,14 @@ export function Drawer({
           <Pressable
             style={[
               styles.drawer,
-              { paddingTop: insets.top + 36, paddingBottom: insets.bottom + 20 },
+              { paddingTop: insets.top + spacing.xl, paddingBottom: insets.bottom + spacing.ml },
             ]}
             onPress={(event) => event.stopPropagation()}
           >
             <Pressable
-              style={[styles.closeBtn, { top: insets.top + 14 }]}
+              style={[styles.closeBtn, { top: insets.top + spacing.md }]}
               onPress={onClose}
-              hitSlop={8}
+              hitSlop={hitSlop}
             >
               <Text style={styles.closeText}>✕</Text>
             </Pressable>
@@ -111,91 +125,87 @@ const styles = StyleSheet.create({
     width: '76%',
     height: '100%',
     backgroundColor: colors.white,
-    paddingHorizontal: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 10, height: 0 },
-    shadowOpacity: 0.28,
-    shadowRadius: 15,
-    elevation: 12,
+    paddingHorizontal: spacing.ml,
+    ...shadows.drawer,
   },
   closeBtn: {
     position: 'absolute',
-    top: 14,
-    right: 14,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    top: spacing.md,
+    right: spacing.md,
+    width: CLOSE_BUTTON_SIZE,
+    height: CLOSE_BUTTON_SIZE,
+    borderRadius: radius.full,
     backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1,
+    zIndex: zIndex.base,
   },
   closeText: {
-    fontSize: 12,
+    fontSize: fontSize.md,
     color: colors.ink,
-    fontWeight: '700',
+    fontWeight: fontWeight.bold,
   },
   profile: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 11,
-    paddingBottom: 16,
-    marginBottom: 8,
-    marginTop: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: spacing.ms,
+    paddingBottom: spacing.md,
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
+    borderBottomWidth: borderWidth.hairline,
     borderBottomColor: colors.line,
   },
   avatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: radius.full,
     backgroundColor: colors.apricot,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
   avatarImage: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: radius.full,
   },
   avatarEmoji: {
-    fontSize: 22,
+    fontSize: fontSize.display,
   },
   profileText: {
     flex: 1,
   },
   profileName: {
-    fontSize: 13.5,
-    fontWeight: '800',
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.extrabold,
     color: colors.ink,
   },
   profileSub: {
-    fontSize: 10.5,
+    fontSize: fontSize.sm,
     color: colors.grey,
-    marginTop: 2,
+    marginTop: spacing.xxs,
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 13,
-    paddingHorizontal: 4,
+    gap: spacing.ms,
+    paddingVertical: spacing.ms,
+    paddingHorizontal: spacing.xs,
   },
   itemDanger: {
-    marginTop: 8,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    marginTop: spacing.sm,
+    borderTopWidth: borderWidth.hairline,
     borderTopColor: colors.line,
-    paddingTop: 16,
+    paddingTop: spacing.md,
   },
   itemIcon: {
-    fontSize: 15,
-    width: 20,
+    fontSize: fontSize.lg,
+    width: iconSize.lg,
     textAlign: 'center',
   },
   itemLabel: {
-    fontSize: 12.5,
-    fontWeight: '700',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: colors.ink,
   },
   itemLabelDanger: {

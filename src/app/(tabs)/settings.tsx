@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useOverlay } from '@/components/ui/overlay';
 import { TabAppBar } from '@/components/ui/TabAppBar';
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, fontSize, fontWeight, lineHeight } from '@/constants/theme';
 import { useAccountEmail, useAuthSession, useDogs } from '@/hooks/useAuthSession';
 import { useGuardianProfile } from '@/hooks/useGuardianProfile';
 import { requestLocationPermission } from '@/hooks/useWalkTracker';
@@ -160,18 +160,18 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   section: { marginBottom: spacing.md },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.bold,
     color: colors.ink,
     marginBottom: spacing.sm,
   },
-  row: { fontSize: 14, color: '#5b5b66', marginBottom: spacing.sm },
+  row: { fontSize: fontSize.base, color: colors.inkSoft, marginBottom: spacing.sm },
   btn: { marginTop: spacing.xs },
   hint: {
-    fontSize: 11,
+    fontSize: fontSize.sm,
     color: colors.grey,
     marginTop: spacing.sm,
-    lineHeight: 16,
+    lineHeight: lineHeight.sm,
   },
   logout: { marginTop: spacing.lg },
   deleteAccount: { marginTop: spacing.sm, borderColor: colors.danger },

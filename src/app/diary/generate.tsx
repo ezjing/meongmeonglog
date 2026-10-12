@@ -9,7 +9,7 @@ import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
 import { LoadingOverlayScreen } from '@/components/ui/LoadingOverlay';
 import { useOverlay } from '@/components/ui/overlay';
 import { QuoteCard } from '@/components/ui/ScreenContainer';
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, radius, fontSize, fontWeight, lineHeight } from '@/constants/theme';
 import { useBackConfirmAction } from '@/hooks/useBackConfirmAction';
 import { useGenerateDiary } from '@/hooks/useDiaries';
 import { useDogDisplayName } from '@/hooks/useDogName';
@@ -172,19 +172,19 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   diaryTitle: {
-    fontWeight: '800',
-    fontSize: 14,
+    fontWeight: fontWeight.extrabold,
+    fontSize: fontSize.base,
     color: colors.ink,
     marginBottom: spacing.sm,
   },
-  diaryBody: { fontSize: 13, lineHeight: 22, color: colors.ink },
+  diaryBody: { fontSize: fontSize.base, lineHeight: lineHeight.lg, color: colors.ink },
   chips: { flexDirection: 'row', gap: spacing.sm, marginVertical: spacing.sm },
   chip: {
-    fontSize: 11,
+    fontSize: fontSize.sm,
     backgroundColor: colors.white,
-    paddingHorizontal: spacing.sm + 2,
+    paddingHorizontal: spacing.ms,
     paddingVertical: spacing.xs,
-    borderRadius: 999,
+    borderRadius: radius.full,
     overflow: 'hidden',
   },
   actions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },

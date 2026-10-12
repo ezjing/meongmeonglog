@@ -1,6 +1,16 @@
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
-import { colors, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  sizes,
+  fontWeight,
+  borderWidth,
+} from '@/constants/theme';
+
+const APP_BAR_MIN_HEIGHT = 42;
 
 interface TabAppBarProps {
   title?: string;
@@ -27,31 +37,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.sm + 2,
+    gap: spacing.ms,
     marginBottom: spacing.md,
-    minHeight: 42,
+    minHeight: APP_BAR_MIN_HEIGHT,
   },
   headerMain: {
     flex: 1,
     justifyContent: 'center',
   },
   title: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.extrabold,
     color: colors.ink,
   },
   menuBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: sizes.control,
+    height: sizes.control,
+    borderRadius: radius.full,
     backgroundColor: colors.white,
-    borderWidth: 1,
+    borderWidth: borderWidth.thin,
     borderColor: colors.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
   menuBtnText: {
-    fontSize: 16,
+    fontSize: fontSize.lg,
     color: colors.ink,
   },
 });

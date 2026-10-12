@@ -3,13 +3,15 @@ import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 import { colors } from '@/constants/theme';
 
+const DEFAULT_SIZE = 42;
+
 interface DogAvatarProps {
   imageUri?: string | null;
   size?: number;
   style?: ViewStyle;
 }
 
-export function DogAvatar({ imageUri, size = 42, style }: DogAvatarProps) {
+export function DogAvatar({ imageUri, size = DEFAULT_SIZE, style }: DogAvatarProps) {
   return (
     <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }, style]}>
       {imageUri ? (

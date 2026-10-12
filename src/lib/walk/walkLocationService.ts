@@ -1,6 +1,7 @@
 import * as Location from 'expo-location';
 import { PermissionsAndroid, Platform } from 'react-native';
 
+import { colors } from '@/constants/theme';
 import { BACKGROUND_WALK_TASK, isBackgroundWalkTaskRunning } from '@/lib/walk/backgroundWalkTask';
 import {
   clearPersistedWalkState,
@@ -68,7 +69,7 @@ export async function startWalkTracking(activeWalk: WalkSession): Promise<void> 
         foregroundService: {
           notificationTitle: '멍멍로그',
           notificationBody: '산책 경로를 기록하고 있어요',
-          notificationColor: '#FF8A5B',
+          notificationColor: colors.apricot,
         },
       });
       return;

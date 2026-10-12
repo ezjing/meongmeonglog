@@ -9,10 +9,12 @@ import { PawProgress } from '@/components/ui/PawProgress';
 import { StackAppBar } from '@/components/ui/StackAppBar';
 import { DEFAULT_DOG_NAME } from '@/constants/dog';
 import { personalityOptions, speechStyleOptions } from '@/constants/personalityOptions';
-import { colors, radius, spacing } from '@/constants/theme';
+import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/constants/theme';
 import { useDogs, useUpdateDog } from '@/hooks/useAuthSession';
 import { uploadDogProfileImage } from '@/lib/api/dogApi';
 import { useAuthStore, useOnboardingStore } from '@/stores/walkStore';
+
+const AVATAR_SIZE = 64;
 
 function parseWeightKg(value: string): number | null {
   const parsed = Number.parseFloat(value);
@@ -99,7 +101,7 @@ export default function DogPersonalityScreen() {
           </View>
         ) : null}
 
-        <DogAvatar imageUri={profileImageUri} size={64} style={styles.avatar} />
+        <DogAvatar imageUri={profileImageUri} size={AVATAR_SIZE} style={styles.avatar} />
 
         <Text style={styles.title}>{name || DEFAULT_DOG_NAME}는 어떤 성격인가요?</Text>
         <Text style={styles.subtitle}>중복 선택 가능 · AI 일기 말투에 반영돼요</Text>
@@ -160,27 +162,27 @@ const styles = StyleSheet.create({
   progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
   avatar: { alignSelf: 'center', marginVertical: spacing.sm },
   title: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.extrabold,
     color: colors.ink,
     marginTop: spacing.sm,
   },
-  subtitle: { fontSize: 12, color: colors.grey, marginBottom: spacing.md },
+  subtitle: { fontSize: fontSize.md, color: colors.grey, marginBottom: spacing.md },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm - 2,
+    gap: spacing.sm,
     marginBottom: spacing.md,
   },
   bubble: {
     backgroundColor: colors.white,
-    borderWidth: 1.3,
+    borderWidth: borderWidth.medium,
     borderColor: colors.line,
-    borderRadius: radius.md - 2,
-    padding: spacing.md - 4,
+    borderRadius: radius.md,
+    padding: spacing.ms,
     marginBottom: spacing.lg,
   },
-  bubbleText: { fontSize: 12, color: '#5b5b66' },
+  bubbleText: { fontSize: fontSize.md, color: colors.inkSoft },
   btnRow: {
     flexDirection: 'row',
     gap: spacing.sm,

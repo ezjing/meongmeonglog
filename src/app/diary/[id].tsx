@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
 import { QuoteCard } from '@/components/ui/ScreenContainer';
 import { StackAppBar } from '@/components/ui/StackAppBar';
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, radius, fontSize, fontWeight, lineHeight } from '@/constants/theme';
 import { useDiary } from '@/hooks/useDiaries';
 import { useDiaryDogName } from '@/hooks/useDogName';
 import { useDiaryWalkPhotos } from '@/hooks/useWalkPhotos';
@@ -88,12 +88,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   title: {
-    fontWeight: '800',
-    fontSize: 14,
+    fontWeight: fontWeight.extrabold,
+    fontSize: fontSize.base,
     color: colors.ink,
     marginBottom: spacing.sm,
   },
-  body: { fontSize: 13, lineHeight: 22, color: colors.ink },
+  body: { fontSize: fontSize.base, lineHeight: lineHeight.lg, color: colors.ink },
   metaRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -101,10 +101,10 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   meta: {
-    fontSize: 11,
+    fontSize: fontSize.sm,
     backgroundColor: colors.white,
-    paddingHorizontal: spacing.sm + 2,
+    paddingHorizontal: spacing.ms,
     paddingVertical: spacing.xs,
-    borderRadius: 999,
+    borderRadius: radius.full,
   },
 });

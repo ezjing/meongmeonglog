@@ -9,11 +9,21 @@ import { WalkPhotoCarousel } from '@/components/diary/WalkPhotoCarousel';
 import { Button } from '@/components/ui/Button';
 import { useOverlay } from '@/components/ui/overlay';
 import { QuoteCard } from '@/components/ui/ScreenContainer';
-import { colors, radius, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  shadows,
+} from '@/constants/theme';
 import { useDiary, useShareCard } from '@/hooks/useDiaries';
 import { useDiaryDogName } from '@/hooks/useDogName';
 import { useDiaryWalkPhotos } from '@/hooks/useWalkPhotos';
 import { formatDate } from '@/lib/utils/formatDistance';
+
+const PHOTO_HEIGHT = 150;
 
 export default function ShareScreen() {
   const { diaryId } = useLocalSearchParams<{ diaryId: string }>();
@@ -71,7 +81,7 @@ export default function ShareScreen() {
 
       <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
         <View style={styles.card}>
-          <WalkPhotoCarousel photos={photos} width={cardWidth} height={150}>
+          <WalkPhotoCarousel photos={photos} width={cardWidth} height={PHOTO_HEIGHT}>
             <View style={styles.tagWrap}>
               <Text style={styles.tag}>
                 🐾 {dogName} · {formatDate(diary.createdAt)}
@@ -120,8 +130,8 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: colors.grey },
   title: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.extrabold,
     color: colors.ink,
     marginBottom: spacing.md,
   },
@@ -130,42 +140,38 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
     overflow: 'hidden',
     marginBottom: spacing.md,
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 4,
+    ...shadows.raised,
   },
   tagWrap: {
     flex: 1,
     justifyContent: 'flex-end',
-    padding: spacing.sm + 2,
+    padding: spacing.ms,
   },
   tag: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: colors.scrim,
     color: colors.white,
-    fontSize: 10,
-    paddingHorizontal: spacing.sm + 2,
+    fontSize: fontSize.xs,
+    paddingHorizontal: spacing.ms,
     paddingVertical: spacing.xs,
-    borderRadius: 999,
+    borderRadius: radius.full,
     overflow: 'hidden',
   },
-  cardBody: { padding: spacing.md - 4 },
+  cardBody: { padding: spacing.ms },
   summary: {
-    fontSize: 12,
-    lineHeight: 20,
+    fontSize: fontSize.md,
+    lineHeight: lineHeight.md,
     color: colors.ink,
     marginBottom: spacing.sm,
   },
-  remoteHint: { fontSize: 10, color: colors.grey, marginBottom: spacing.sm },
+  remoteHint: { fontSize: fontSize.xs, color: colors.grey, marginBottom: spacing.sm },
   sectionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: colors.grey,
     marginBottom: spacing.sm,
   },
   shareBtn: { marginBottom: spacing.sm },
-  instaBtn: { backgroundColor: '#E1306C' },
+  instaBtn: { backgroundColor: colors.instagram },
   done: { marginTop: spacing.sm },
 });

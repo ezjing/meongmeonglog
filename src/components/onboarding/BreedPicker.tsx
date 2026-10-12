@@ -3,8 +3,10 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput } f
 
 import { BottomSheet } from '@/components/ui/overlay';
 import { filterDogBreeds, type DogBreedOption } from '@/constants/dogBreedLabels';
-import { colors, radius, spacing } from '@/constants/theme';
+import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/constants/theme';
 import { useDogBreeds } from '@/hooks/useDogBreeds';
+
+const LIST_MAX_HEIGHT = 280;
 
 interface BreedPickerProps {
   value: string;
@@ -87,38 +89,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.white,
-    borderWidth: 1.3,
+    borderWidth: borderWidth.medium,
     borderColor: colors.line,
-    borderRadius: radius.md - 2,
-    padding: spacing.md - 4,
-    marginBottom: spacing.md - 4,
+    borderRadius: radius.md,
+    padding: spacing.ms,
+    marginBottom: spacing.ms,
   },
-  triggerText: { fontSize: 14, color: colors.ink, flex: 1 },
+  triggerText: { fontSize: fontSize.base, color: colors.ink, flex: 1 },
   placeholder: { color: colors.grey },
-  chevron: { fontSize: 16, color: colors.grey, marginLeft: spacing.sm },
+  chevron: { fontSize: fontSize.lg, color: colors.grey, marginLeft: spacing.sm },
   search: {
     backgroundColor: colors.background,
-    borderWidth: 1.3,
+    borderWidth: borderWidth.medium,
     borderColor: colors.line,
-    borderRadius: radius.md - 2,
-    padding: spacing.md - 4,
-    fontSize: 14,
+    borderRadius: radius.md,
+    padding: spacing.ms,
+    fontSize: fontSize.base,
     color: colors.ink,
     marginBottom: spacing.sm,
   },
   list: {
-    maxHeight: 280,
+    maxHeight: LIST_MAX_HEIGHT,
     marginBottom: spacing.sm,
   },
   loader: { marginVertical: spacing.lg },
   errorText: { textAlign: 'center', color: colors.grey, marginVertical: spacing.lg },
   option: {
     paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.md - 2,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: spacing.md,
+    borderBottomWidth: borderWidth.hairline,
     borderBottomColor: colors.line,
   },
   optionActive: { backgroundColor: colors.quoteBg },
-  optionText: { fontSize: 14, color: colors.ink },
-  optionTextActive: { fontWeight: '700' },
+  optionText: { fontSize: fontSize.base, color: colors.ink },
+  optionTextActive: { fontWeight: fontWeight.bold },
 });

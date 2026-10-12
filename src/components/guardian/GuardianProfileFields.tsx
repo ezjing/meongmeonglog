@@ -1,6 +1,16 @@
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { colors, radius } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  fontWeight,
+  lineHeight,
+  borderWidth,
+} from '@/constants/theme';
+
+const MULTILINE_MIN_HEIGHT = 72;
 
 export interface GuardianProfileFormValues {
   guardianTitle: string;
@@ -64,38 +74,38 @@ export function GuardianProfileFields({ values, onChange }: GuardianProfileField
 
 const styles = StyleSheet.create({
   field: {
-    marginBottom: 11,
+    marginBottom: spacing.ms,
   },
   label: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#5b5b66',
-    marginBottom: 5,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.inkSoft,
+    marginBottom: spacing.xs,
   },
   input: {
     backgroundColor: colors.white,
-    borderWidth: 1.3,
+    borderWidth: borderWidth.medium,
     borderColor: colors.line,
-    borderRadius: radius.md - 2,
-    paddingVertical: 11,
-    paddingHorizontal: 12,
-    fontSize: 12.5,
+    borderRadius: radius.md,
+    paddingVertical: spacing.ms,
+    paddingHorizontal: spacing.ms,
+    fontSize: fontSize.md,
     color: colors.ink,
   },
   multilineInput: {
-    minHeight: 72,
+    minHeight: MULTILINE_MIN_HEIGHT,
     textAlignVertical: 'top',
   },
   relationNote: {
     backgroundColor: colors.quoteBg,
-    borderRadius: radius.sm,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    marginTop: 2,
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.ms,
+    marginTop: spacing.xxs,
   },
   relationNoteText: {
-    fontSize: 10,
+    fontSize: fontSize.xs,
     color: colors.apricotDark,
-    lineHeight: 15,
+    lineHeight: lineHeight.sm,
   },
 });

@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { StyleSheet, Text } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors } from '@/constants/theme';
+import { colors, fontSize, fontWeight, opacity } from '@/constants/theme';
 
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   const icons: Record<string, string> = {
@@ -11,7 +11,9 @@ function TabIcon({ label, focused }: { label: string; focused: boolean }) {
     list: '📋',
     settings: '⚙️',
   };
-  return <Text style={{ fontSize: 16, opacity: focused ? 1 : 0.5 }}>{icons[label] ?? '•'}</Text>;
+  return (
+    <Text style={[styles.tabIcon, !focused && styles.tabIconInactive]}>{icons[label] ?? '•'}</Text>
+  );
 }
 
 const TAB_BAR_HEIGHT = 56;
@@ -68,6 +70,8 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
+  tabIcon: { fontSize: fontSize.lg },
+  tabIconInactive: { opacity: opacity.disabled },
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
@@ -77,7 +81,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.line,
   },
   tabLabel: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
   },
 });

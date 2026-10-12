@@ -1,15 +1,29 @@
 import type { ExpoConfig } from 'expo/config';
 
 import appJson from './app.json';
+import colors from './src/constants/colors.json';
 
 const naverClientId = process.env.EXPO_PUBLIC_NAVER_CLIENT_ID ?? '';
 const naverUrlScheme = naverClientId ? `naver${naverClientId}` : '';
 const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 
+const baseConfig = appJson.expo as ExpoConfig;
+
+// 스플래시·적응형 아이콘 배경을 앱 배경 토큰과 맞춘다
+const basePlugins = (baseConfig.plugins ?? []).map((plugin) =>
+  Array.isArray(plugin) && plugin[0] === 'expo-splash-screen'
+    ? [plugin[0], { ...plugin[1], backgroundColor: colors.background }]
+    : plugin,
+);
+
 export default (): ExpoConfig => ({
-  ...(appJson.expo as ExpoConfig),
+  ...baseConfig,
+  android: {
+    ...baseConfig.android,
+    adaptiveIcon: { ...baseConfig.android?.adaptiveIcon, backgroundColor: colors.background },
+  },
   plugins: [
-    ...(appJson.expo.plugins ?? []),
+    ...basePlugins,
     'expo-dev-client',
     [
       '@react-native-kakao/core',

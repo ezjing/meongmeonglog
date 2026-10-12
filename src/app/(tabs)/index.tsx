@@ -10,7 +10,16 @@ import { ImagePreviewModal } from '@/components/ui/ImagePreviewModal';
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 import { useOverlay } from '@/components/ui/overlay';
 import { TabAppBar } from '@/components/ui/TabAppBar';
-import { colors, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  fontWeight,
+  opacity,
+  shadows,
+  scale,
+} from '@/constants/theme';
 import { useDogs } from '@/hooks/useAuthSession';
 import { useDiaryList } from '@/hooks/useDiaries';
 import { useStartWalk } from '@/hooks/useWalkMutations';
@@ -24,6 +33,8 @@ import { formatDate, formatDistance, calculateAge } from '@/lib/utils/formatDist
 import { getLocalDateKey } from '@/lib/utils/localDate';
 import { useWalkStore } from '@/stores/walkStore';
 import type { DiaryListItem } from '@/types/domain';
+
+const WALK_CTA_SIZE = 118;
 
 function isDiaryToday(diary: DiaryListItem) {
   const created = new Date(diary.createdAt);
@@ -214,9 +225,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
-  headerMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm + 2 },
-  dogName: { fontSize: 15, fontWeight: '800', color: colors.ink },
-  dogBreed: { fontSize: 11, color: colors.grey },
+  headerMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms },
+  dogName: { fontSize: fontSize.lg, fontWeight: fontWeight.extrabold, color: colors.ink },
+  dogBreed: { fontSize: fontSize.sm, color: colors.grey },
   statusCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -224,40 +235,41 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   statusBody: { flex: 1, marginRight: spacing.sm },
-  statusText: { fontSize: 12, color: '#5b5b66' },
-  statusSubtext: { fontSize: 11, color: colors.grey, marginTop: 2 },
+  statusText: { fontSize: fontSize.md, color: colors.inkSoft },
+  statusSubtext: { fontSize: fontSize.sm, color: colors.grey, marginTop: spacing.xxs },
   walkCta: {
-    width: 118,
-    height: 118,
-    borderRadius: 59,
+    width: WALK_CTA_SIZE,
+    height: WALK_CTA_SIZE,
+    borderRadius: radius.full,
     backgroundColor: colors.apricot,
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: spacing.md,
-    shadowColor: colors.apricot,
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.4,
-    shadowRadius: 28,
-    elevation: 6,
+    ...shadows.cta,
   },
-  walkCtaPressed: { opacity: 0.85, transform: [{ scale: 0.96 }] },
-  walkCtaEmoji: { fontSize: 24 },
-  walkCtaLabel: { color: colors.white, fontWeight: '700', fontSize: 13, marginTop: spacing.xs },
+  walkCtaPressed: { opacity: opacity.pressed, transform: [{ scale: scale.pressed }] },
+  walkCtaEmoji: { fontSize: fontSize.displayLg },
+  walkCtaLabel: {
+    color: colors.white,
+    fontWeight: fontWeight.bold,
+    fontSize: fontSize.base,
+    marginTop: spacing.xs,
+  },
   sectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: colors.grey,
     marginBottom: spacing.sm,
   },
   recentCard: {
     flexDirection: 'row',
-    gap: spacing.sm + 2,
+    gap: spacing.ms,
     alignItems: 'center',
     marginBottom: spacing.sm,
   },
   recentBody: { flex: 1 },
-  recentDate: { fontSize: 10, color: colors.grey, marginBottom: 2 },
-  recentQuote: { fontSize: 12, fontWeight: '600', color: colors.ink },
-  emptyText: { fontSize: 12, color: colors.grey },
+  recentDate: { fontSize: fontSize.xs, color: colors.grey, marginBottom: spacing.xxs },
+  recentQuote: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, color: colors.ink },
+  emptyText: { fontSize: fontSize.md, color: colors.grey },
 });

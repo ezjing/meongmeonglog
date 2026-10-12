@@ -5,7 +5,18 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
 import { BottomSheet, useOverlay } from '@/components/ui/overlay';
 import { KakaoIcon, NaverIcon } from '@/components/ui/SocialIcons';
-import { colors, spacing } from '@/constants/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  emojiSize,
+  iconSize,
+  fontWeight,
+  lineHeight,
+  opacity,
+  hitSlop,
+} from '@/constants/theme';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { AnalyticsEvents, trackEvent } from '@/lib/analytics';
 import { AppError } from '@/lib/AppError';
@@ -13,6 +24,8 @@ import { getKakaoAccessToken } from '@/lib/kakaoAuth';
 import { getNaverAccessToken } from '@/lib/naverAuth';
 import { resolveOnboardingRoute } from '@/lib/onboardingRoute';
 import type { AuthProvider } from '@/types/database';
+
+const LOGO_SIZE = 74;
 
 export default function LoginScreen() {
   const { login, isLoggingIn } = useAuthSession();
@@ -62,14 +75,14 @@ export default function LoginScreen() {
         <Button
           label="카카오로 시작하기"
           variant="kakao"
-          icon={<KakaoIcon size={20} />}
+          icon={<KakaoIcon size={iconSize.lg} />}
           onPress={() => handleProviderLogin('kakao')}
           disabled={isLoggingIn}
         />
         <Button
           label="네이버로 시작하기"
           variant="naver"
-          icon={<NaverIcon size={20} />}
+          icon={<NaverIcon size={iconSize.lg} />}
           onPress={() => handleProviderLogin('naver')}
           disabled={isLoggingIn}
         />
@@ -78,7 +91,7 @@ export default function LoginScreen() {
       <Pressable
         onPress={() => setAccountSheetVisible(true)}
         disabled={isLoggingIn}
-        hitSlop={8}
+        hitSlop={hitSlop}
         accessibilityRole="button"
         accessibilityLabel="다른 계정으로 로그인"
       >
@@ -98,13 +111,13 @@ export default function LoginScreen() {
         subtitle="계정 선택 화면으로 이동합니다"
         options={[
           {
-            icon: <KakaoIcon size={16} />,
+            icon: <KakaoIcon size={iconSize.sm} />,
             iconBg: colors.kakao,
             label: '카카오 다른 계정',
             onPress: () => handleProviderLogin('kakao', true),
           },
           {
-            icon: <NaverIcon size={16} />,
+            icon: <NaverIcon size={iconSize.sm} />,
             iconBg: colors.naver,
             label: '네이버 다른 계정',
             onPress: () => handleProviderLogin('naver', true),
@@ -124,9 +137,9 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   logo: {
-    width: 74,
-    height: 74,
-    borderRadius: 22,
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+    borderRadius: radius.xl,
     backgroundColor: colors.apricot,
     alignItems: 'center',
     justifyContent: 'center',
@@ -134,16 +147,16 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   logoEmoji: {
-    fontSize: 34,
+    fontSize: emojiSize.md,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: fontSize.display,
+    fontWeight: fontWeight.extrabold,
     color: colors.ink,
     marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: fontSize.md,
     color: colors.grey,
     marginBottom: spacing.xl,
   },
@@ -153,19 +166,19 @@ const styles = StyleSheet.create({
   },
   otherAccount: {
     marginTop: spacing.md,
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: colors.grey,
     textDecorationLine: 'underline',
   },
   otherAccountDisabled: {
-    opacity: 0.5,
+    opacity: opacity.disabled,
   },
   footer: {
     marginTop: spacing.lg,
-    fontSize: 10,
+    fontSize: fontSize.xs,
     color: colors.grey,
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: lineHeight.sm,
   },
 });
