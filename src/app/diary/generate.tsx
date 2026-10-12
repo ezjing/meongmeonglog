@@ -70,7 +70,7 @@ export default function DiaryGenerateScreen() {
       showToast({ message: '🐾 일기가 저장되었어요', variant: 'success' });
     }
     allowLeaveRef.current?.();
-    router.replace('/(tabs)');
+    router.dismissTo('/(tabs)');
   }, [diary, showToast]);
 
   const { allowLeave } = useBackConfirmAction(goHome);

@@ -86,7 +86,7 @@ export default function WalkFinishScreen() {
       await stopWalkTracking();
       useWalkStore.getState().reset();
       resetFinishForm();
-      router.replace('/(tabs)');
+      router.dismissTo('/(tabs)');
     } catch {
       isLeavingRef.current = false;
       showToast({

@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
@@ -16,6 +16,7 @@ import {
   shadows,
 } from '@/constants/theme';
 import { useCreateDog } from '@/hooks/useAuthSession';
+import { useBackConfirmAction } from '@/hooks/useBackConfirmAction';
 import { useWelcomeGreeting } from '@/hooks/useDiaries';
 import { AnalyticsEvents, trackEvent } from '@/lib/analytics';
 import { uploadDogProfileImage } from '@/lib/api/dogApi';
@@ -37,6 +38,21 @@ export default function WelcomeScreen() {
   const welcomeGreeting = useWelcomeGreeting();
   const [greeting, setGreeting] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(true);
+  const allowLeaveRef = useRef<(() => void) | null>(null);
+
+  // 등록이 끝나면 홈으로. 이전 단계로 돌아가 다시 진입하면 강아지가 중복 등록되므로 뒤로가기도 홈으로 보낸다
+  const goHome = useCallback(() => {
+    if (isCreating) return;
+    store.reset();
+    allowLeaveRef.current?.();
+    router.dismissTo('/(tabs)');
+  }, [isCreating, store]);
+
+  const { allowLeave } = useBackConfirmAction(goHome);
+
+  useEffect(() => {
+    allowLeaveRef.current = allowLeave;
+  }, [allowLeave]);
 
   useEffect(() => {
     // 마운트 시 1회: 온보딩 store → 강아지 등록 → 환영 인사 생성
@@ -103,14 +119,7 @@ export default function WelcomeScreen() {
 
       <Text style={styles.paws}>🐾 🐾 🐾</Text>
 
-      <Button
-        label="산책하러 가볼까?"
-        onPress={() => {
-          store.reset();
-          router.replace('/(tabs)');
-        }}
-        style={styles.cta}
-      />
+      <Button label="산책하러 가볼까?" onPress={goHome} style={styles.cta} />
     </View>
   );
 }

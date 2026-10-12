@@ -38,7 +38,7 @@ export default function WalkActiveScreen() {
       await stopWalkTracking();
       reset();
       allowLeaveRef.current?.();
-      router.replace('/(tabs)');
+      router.dismissTo('/(tabs)');
     } catch {
       showToast({
         message: '⚠️ 산책 취소에 실패했어요. 잠시 후 다시 시도해 주세요.',
@@ -86,7 +86,7 @@ export default function WalkActiveScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.empty}>진행 중인 산책이 없습니다</Text>
-        <Button label="홈으로" onPress={() => router.replace('/(tabs)')} />
+        <Button label="홈으로" onPress={() => router.dismissTo('/(tabs)')} />
       </View>
     );
   }

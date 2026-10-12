@@ -117,7 +117,7 @@ export default function ShareScreen() {
       <Button
         label="완료"
         variant="outline"
-        onPress={() => router.replace('/(tabs)')}
+        onPress={() => router.dismissTo('/(tabs)')}
         style={styles.done}
       />
     </ScrollView>

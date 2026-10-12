@@ -53,7 +53,7 @@ export default function DogPersonalityScreen() {
 
   const handleNext = async () => {
     if (!isEditMode) {
-      router.push('/(onboarding)/welcome');
+      router.replace('/(onboarding)/welcome');
       return;
     }
 
@@ -80,7 +80,7 @@ export default function DogPersonalityScreen() {
       });
       reset();
       showToast({ message: '강아지 정보를 저장했어요', variant: 'success' });
-      router.replace('/(tabs)');
+      router.dismissTo('/(tabs)');
     } catch {
       showToast({
         message: '⚠️ 강아지 정보 저장에 실패했어요',

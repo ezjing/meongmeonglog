@@ -13,8 +13,11 @@ import { colors } from '@/constants/theme';
 import { initKakaoSdk } from '@/lib/kakaoAuth';
 import { initNaverSdk } from '@/lib/naverAuth';
 import { queryClient } from '@/lib/queryClient';
+import { useAuthStore } from '@/stores/walkStore';
 
 export default function RootLayout() {
+  const isLoggedIn = useAuthStore((s) => s.userId != null);
+
   useEffect(() => {
     initKakaoSdk();
     initNaverSdk();
@@ -33,12 +36,17 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="index" />
-              <Stack.Screen name="(auth)" />
-              <Stack.Screen name="(onboarding)" />
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="walk" />
-              <Stack.Screen name="diary" />
-              <Stack.Screen name="share" />
+              {/* 로그인 상태가 바뀌면 반대쪽 화면들이 스택에서 제거되어 뒤로가기로 돌아갈 수 없다 */}
+              <Stack.Protected guard={!isLoggedIn}>
+                <Stack.Screen name="(auth)" />
+              </Stack.Protected>
+              <Stack.Protected guard={isLoggedIn}>
+                <Stack.Screen name="(onboarding)" />
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="walk" />
+                <Stack.Screen name="diary" />
+                <Stack.Screen name="share" />
+              </Stack.Protected>
             </Stack>
           </QueryClientProvider>
         </OverlayProvider>

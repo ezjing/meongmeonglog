@@ -23,6 +23,8 @@ export function useBackConfirmAction(onBack: () => void | Promise<void>, enabled
       };
 
       const backSubscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        // 비활성 상태면 기본 뒤로가기 동작에 맡긴다
+        if (!enabledRef.current) return false;
         runBackAction();
         return true;
       });
