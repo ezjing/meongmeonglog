@@ -4,6 +4,7 @@ import { ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors } from '@/constants/theme';
+import { checkSupabaseSession, clearLocalAuth } from '@/lib/api/authApi';
 import { loadAuthSession } from '@/lib/authStorage';
 import { resolveOnboardingRoute } from '@/lib/onboardingRoute';
 import { loadPersistedWalkState } from '@/lib/walk/walkSessionStorage';
@@ -20,6 +21,13 @@ export default function Index() {
       try {
         const stored = await loadAuthSession();
         if (!stored) return;
+
+        // 앱 로그인 정보만 남고 Supabase 세션이 끊긴 경우 → 로그인 화면으로
+        const sessionStatus = await checkSupabaseSession(stored.userId);
+        if (sessionStatus === 'missing') {
+          await clearLocalAuth();
+          return;
+        }
 
         setSession(stored.userId, stored.provider);
 

@@ -21,7 +21,9 @@ import {
 } from '@/constants/theme';
 import { useAuthSession } from '@/hooks/useAuthSession';
 import { useGuardianProfile, useUpdateGuardianProfile } from '@/hooks/useGuardianProfile';
+import { resolveOnboardingRoute } from '@/lib/onboardingRoute';
 import { pickImageFromCamera, pickImageFromLibrary } from '@/lib/pickImage';
+import { useAuthStore } from '@/stores/walkStore';
 import type { GuardianProfile } from '@/types/domain';
 
 interface GuardianBasicFormProps {
@@ -31,6 +33,7 @@ interface GuardianBasicFormProps {
 
 function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProps) {
   const { logout } = useAuthSession();
+  const userId = useAuthStore((s) => s.userId);
   const updateProfile = useUpdateGuardianProfile();
   const { showAlert, showToast } = useOverlay();
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
@@ -98,6 +101,12 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
       if (isEditMode) {
         showToast({ message: '보호자 정보를 저장했어요', variant: 'success' });
         router.back();
+        return;
+      }
+      // 이미 강아지가 등록된 사용자는 강아지 등록을 다시 거치지 않는다 (중복 등록 방지)
+      const nextRoute = userId ? await resolveOnboardingRoute(userId) : '/(onboarding)/dogBasic';
+      if (nextRoute === '/(tabs)') {
+        router.dismissTo('/(tabs)');
         return;
       }
       router.push('/(onboarding)/dogBasic');

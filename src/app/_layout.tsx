@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { OverlayProvider } from '@/components/ui/overlay';
 import { colors } from '@/constants/theme';
+import { subscribeAuthSessionSync } from '@/lib/authSessionSync';
 import { initKakaoSdk } from '@/lib/kakaoAuth';
 import { initNaverSdk } from '@/lib/naverAuth';
 import { queryClient } from '@/lib/queryClient';
@@ -22,6 +23,8 @@ export default function RootLayout() {
     initKakaoSdk();
     initNaverSdk();
   }, []);
+
+  useEffect(() => subscribeAuthSessionSync(), []);
 
   return (
     <GestureHandlerRootView style={styles.root}>

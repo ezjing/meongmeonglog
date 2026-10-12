@@ -1,3 +1,5 @@
+import { isAuthRetryableFetchError } from '@supabase/supabase-js';
+
 import { AppError } from '@/lib/AppError';
 import { persistAuthSession, clearAuthSession, loadAuthSession } from '@/lib/authStorage';
 import { unlinkKakaoAccount } from '@/lib/kakaoAuth';
@@ -61,6 +63,29 @@ async function mockDevSession(provider: AuthProvider): Promise<AuthSession> {
 /** 진행 중이던 산책(위치 추적·저장 상태)을 정리해 다른 계정에 복원되지 않게 한다 */
 async function clearWalkSession(): Promise<void> {
   await stopWalkTracking().catch(() => {});
+}
+
+export type SupabaseSessionStatus = 'valid' | 'missing' | 'unknown';
+
+/**
+ * 앱에 저장된 로그인 사용자와 실제 Supabase 인증 세션이 일치하는지 확인한다.
+ * 세션이 없으면 조회가 RLS에 막혀 빈 결과로 돌아오므로, 로그인 상태로 취급하면 안 된다.
+ */
+export async function checkSupabaseSession(userId: string): Promise<SupabaseSessionStatus> {
+  if (!isSupabaseConfigured) return 'valid';
+  if (DEV_AUTH && userId.startsWith('dev-')) return 'valid';
+
+  const { data, error } = await supabase.auth.getSession();
+  // 오프라인 등 일시적인 실패는 로그아웃시키지 않는다
+  if (error && isAuthRetryableFetchError(error)) return 'unknown';
+  if (!data.session || data.session.user.id !== userId) return 'missing';
+  return 'valid';
+}
+
+/** Supabase 세션이 이미 끊긴 경우 서버 호출 없이 기기에 남은 로그인·산책 상태만 정리한다 */
+export async function clearLocalAuth(): Promise<void> {
+  await clearWalkSession();
+  await clearAuthSession();
 }
 
 export async function signOut(): Promise<void> {

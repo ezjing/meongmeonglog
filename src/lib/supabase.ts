@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 const isServer = typeof window === 'undefined';
 
@@ -37,3 +37,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
+
+// React Native는 브라우저처럼 자동 토큰 갱신이 돌지 않아 앱이 포그라운드일 때만 직접 켠다 (Supabase RN 가이드)
+if (!isServer && Platform.OS !== 'web' && isSupabaseConfigured) {
+  if (AppState.currentState === 'active') {
+    void supabase.auth.startAutoRefresh();
+  }
+  AppState.addEventListener('change', (state) => {
+    if (state === 'active') {
+      void supabase.auth.startAutoRefresh();
+    } else {
+      void supabase.auth.stopAutoRefresh();
+    }
+  });
+}
