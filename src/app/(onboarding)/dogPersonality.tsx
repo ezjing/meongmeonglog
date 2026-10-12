@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DogAvatar } from '@/components/dog/DogAvatar';
@@ -24,6 +24,7 @@ function parseWeightKg(value: string): number | null {
 
 export default function DogPersonalityScreen() {
   const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const navigation = useNavigation();
   const isEditMode = mode === 'edit';
   const userId = useAuthStore((s) => s.userId);
   const { data: dogs } = useDogs();
@@ -80,7 +81,13 @@ export default function DogPersonalityScreen() {
       });
       reset();
       showToast({ message: '강아지 정보를 저장했어요', variant: 'success' });
-      router.dismissTo('/(tabs)');
+      // 수정 화면 묶음(기본 정보·성격)을 통째로 닫고 진입했던 화면(설정 등)으로 돌아간다
+      const rootNavigation = navigation.getParent();
+      if (rootNavigation?.canGoBack()) {
+        rootNavigation.goBack();
+      } else {
+        router.dismissTo('/(tabs)');
+      }
     } catch {
       showToast({
         message: '⚠️ 강아지 정보 저장에 실패했어요',

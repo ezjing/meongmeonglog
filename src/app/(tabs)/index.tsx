@@ -1,6 +1,15 @@
-import { router } from 'expo-router';
-import { useRef, useState } from 'react';
-import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
+import {
+  BackHandler,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
 import { DogAvatar } from '@/components/dog/DogAvatar';
@@ -35,6 +44,7 @@ import { useWalkStore } from '@/stores/walkStore';
 import type { DiaryListItem } from '@/types/domain';
 
 const WALK_CTA_SIZE = 118;
+const EXIT_CONFIRM_WINDOW_MS = 2000;
 
 function isDiaryToday(diary: DiaryListItem) {
   const created = new Date(diary.createdAt);
@@ -85,6 +95,21 @@ export default function HomeScreen() {
   const [isStartingWalk, setIsStartingWalk] = useState(false);
   const startingWalkRef = useRef(false);
   const { showToast } = useOverlay();
+  const lastBackPressRef = useRef(0);
+
+  // 안드로이드: 홈에서 뒤로가기를 한 번 더 눌러야 종료
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        const now = Date.now();
+        if (now - lastBackPressRef.current < EXIT_CONFIRM_WINDOW_MS) return false;
+        lastBackPressRef.current = now;
+        showToast({ message: '한 번 더 누르면 종료돼요', duration: EXIT_CONFIRM_WINDOW_MS });
+        return true;
+      });
+      return () => subscription.remove();
+    }, [showToast]),
+  );
 
   const dog = dogs?.[0];
   const sortedDiaries = [...(diaries ?? [])].sort(

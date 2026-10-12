@@ -11,6 +11,7 @@ import { colors, spacing, radius, fontSize, fontWeight, lineHeight } from '@/con
 import { useDiary } from '@/hooks/useDiaries';
 import { useDiaryDogName } from '@/hooks/useDogName';
 import { useDiaryWalkPhotos } from '@/hooks/useWalkPhotos';
+import { goBackOrHome } from '@/lib/navigation';
 import { formatDate, formatDistance, formatDuration } from '@/lib/utils/formatDistance';
 
 export default function DiaryDetailScreen() {
@@ -34,7 +35,7 @@ export default function DiaryDetailScreen() {
     <View style={styles.screen}>
       <StackAppBar
         title={formatDate(diary.createdAt)}
-        onBackPress={() => router.back()}
+        onBackPress={goBackOrHome}
         onSharePress={() => router.push(`/share/${diary.diaryId}`)}
       />
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>

@@ -172,6 +172,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   shareBtn: { marginBottom: spacing.sm },
-  instaBtn: { backgroundColor: colors.instagram },
+  instaBtn: { backgroundColor: colors.instagram, marginBottom: spacing.sm },
   done: { marginTop: spacing.sm },
 });
