@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
@@ -23,6 +23,7 @@ import { AppError } from '@/lib/AppError';
 import { getKakaoAccessToken } from '@/lib/kakaoAuth';
 import { getNaverAccessToken } from '@/lib/naverAuth';
 import { resolveOnboardingRoute } from '@/lib/onboardingRoute';
+import { useAuthStore } from '@/stores/walkStore';
 import type { AuthProvider } from '@/types/database';
 
 const LOGO_SIZE = 74;
@@ -31,6 +32,14 @@ export default function LoginScreen() {
   const { login, isLoggingIn } = useAuthSession();
   const { showToast } = useOverlay();
   const [accountSheetVisible, setAccountSheetVisible] = useState(false);
+  const sessionEndedElsewhere = useAuthStore((s) => s.sessionEndedElsewhere);
+  const setSessionEndedElsewhere = useAuthStore((s) => s.setSessionEndedElsewhere);
+
+  useEffect(() => {
+    if (!sessionEndedElsewhere) return;
+    showToast({ message: '다른 기기에서 로그인되어 로그아웃되었어요', variant: 'warning' });
+    setSessionEndedElsewhere(false);
+  }, [sessionEndedElsewhere, setSessionEndedElsewhere, showToast]);
 
   const navigateAfterLogin = async (userId: string) => {
     const route = await resolveOnboardingRoute(userId);

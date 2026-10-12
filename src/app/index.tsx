@@ -26,6 +26,7 @@ export default function Index() {
         const sessionStatus = await checkSupabaseSession(stored.userId);
         if (sessionStatus === 'missing') {
           await clearLocalAuth();
+          useAuthStore.getState().setSessionEndedElsewhere(true);
           return;
         }
 

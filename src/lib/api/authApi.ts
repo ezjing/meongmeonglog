@@ -1,4 +1,4 @@
-import { isAuthRetryableFetchError } from '@supabase/supabase-js';
+import { isAuthApiError, isAuthRetryableFetchError } from '@supabase/supabase-js';
 
 import { AppError } from '@/lib/AppError';
 import { persistAuthSession, clearAuthSession, loadAuthSession } from '@/lib/authStorage';
@@ -79,7 +79,14 @@ export async function checkSupabaseSession(userId: string): Promise<SupabaseSess
   // 오프라인 등 일시적인 실패는 로그아웃시키지 않는다
   if (error && isAuthRetryableFetchError(error)) return 'unknown';
   if (!data.session || data.session.user.id !== userId) return 'missing';
-  return 'valid';
+
+  // 다른 기기 로그인 등으로 서버에서 폐기된 세션은 기기에 저장된 값만으로 알 수 없어 서버에 확인한다
+  const { error: userError } = await supabase.auth.getUser();
+  if (!userError) return 'valid';
+  if (isAuthApiError(userError) && (userError.status === 401 || userError.status === 403)) {
+    return 'missing';
+  }
+  return 'unknown';
 }
 
 /** Supabase 세션이 이미 끊긴 경우 서버 호출 없이 기기에 남은 로그인·산책 상태만 정리한다 */

@@ -123,6 +123,17 @@ export async function createSocialSession(supabaseAdmin: SupabaseClient, profile
   });
   if (signInError) throw signInError;
 
+  // 사용자당 세션 하나만 유지: 방금 발급한 세션을 제외한 다른 기기 세션을 모두 종료한다
+  const newAccessToken = signInData.session?.access_token;
+  if (newAccessToken) {
+    const { error: signOutError } = await supabaseAdmin.auth.admin.signOut(
+      newAccessToken,
+      'others',
+    );
+    // 종료에 실패해도 로그인 자체는 진행한다
+    if (signOutError) console.error('[auth] 다른 세션 종료 실패', signOutError.message);
+  }
+
   return {
     userId,
     accessToken: signInData.session?.access_token,
