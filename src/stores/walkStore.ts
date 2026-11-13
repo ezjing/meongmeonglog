@@ -101,6 +101,9 @@ interface OnboardingStore {
   customPersonality: string;
   customSpeechStyle: string;
   profileImageUri: string | null;
+  /** 수정 모드에서 서버 값을 채운 강아지 id. 한 번 채운 뒤 refetch돼도 입력 중인 값을 덮어쓰지 않기 위함 */
+  syncedDogId: string | null;
+  setSyncedDogId: (dogId: string) => void;
   setBasic: (
     data: Partial<
       Pick<
@@ -131,10 +134,12 @@ const defaultOnboarding = {
   customPersonality: '',
   customSpeechStyle: '',
   profileImageUri: null as string | null,
+  syncedDogId: null as string | null,
 };
 
 export const useOnboardingStore = create<OnboardingStore>((set) => ({
   ...defaultOnboarding,
+  setSyncedDogId: (dogId) => set({ syncedDogId: dogId }),
   setBasic: (data) => set(data),
   setPersonality: (data) => set(data),
   reset: () => set(defaultOnboarding),

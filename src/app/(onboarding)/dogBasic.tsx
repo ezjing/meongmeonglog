@@ -29,12 +29,29 @@ export default function DogBasicScreen() {
   const isEditMode = mode === 'edit';
   const { data: dogs, isLoading: isDogsLoading } = useDogs();
   const dog = dogs?.[0];
-  const { name, breed, birthDate, gender, weightKg, profileImageUri, setBasic, setPersonality } =
-    useOnboardingStore();
+  const {
+    name,
+    breed,
+    birthDate,
+    gender,
+    weightKg,
+    profileImageUri,
+    syncedDogId,
+    setSyncedDogId,
+    setBasic,
+    setPersonality,
+    reset,
+  } = useOnboardingStore();
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
 
+  // 수정 모드를 저장 없이 나가면 입력하던 값이 store에 남으므로, 다음 진입 때 서버 값을 다시 채우도록 비운다
   useEffect(() => {
-    if (!isEditMode || !dog) return;
+    if (!isEditMode) return;
+    return reset;
+  }, [isEditMode, reset]);
+
+  useEffect(() => {
+    if (!isEditMode || !dog || syncedDogId === dog.dogId) return;
     setBasic({
       name: dog.name,
       breed: dog.breed,
@@ -47,10 +64,10 @@ export default function DogBasicScreen() {
       personality: dog.personality,
       speechStyle: dog.speechStyle ?? '기본',
     });
-  }, [isEditMode, dog, setBasic, setPersonality]);
+    setSyncedDogId(dog.dogId);
+  }, [isEditMode, dog, syncedDogId, setSyncedDogId, setBasic, setPersonality]);
 
-  const isStoreSyncedWithDog =
-    !isEditMode || (dog != null && name === dog.name && breed === dog.breed);
+  const isStoreSyncedWithDog = !isEditMode || (dog != null && syncedDogId === dog.dogId);
 
   const canNext = name.trim().length > 0;
 
