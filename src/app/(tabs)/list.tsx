@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryThumbnail } from '@/components/diary/DiaryThumbnail';
 import { SettingsDrawer } from '@/components/settings/SettingsDrawer';
@@ -30,23 +30,25 @@ export default function ListScreen() {
   });
 
   const renderItem = ({ item }: { item: DiaryListItem }) => (
-    <Card style={styles.card} onTouchEnd={() => router.push(`/diary/${item.diaryId}`)}>
-      <DiaryThumbnail
-        diary={item}
-        pendingPhotosByWalkId={pendingPhotosByWalkId}
-        size={THUMBNAIL_SIZE}
-      />
-      <View style={styles.body}>
-        <Text style={styles.meta}>
-          {formatDate(item.createdAt)}
-          {item.durationSec ? ` · ${formatDuration(item.durationSec)}` : ''}
-          {item.distanceMeter ? ` · ${formatDistance(item.distanceMeter)}` : ''}
-        </Text>
-        <Text style={styles.quote} numberOfLines={1}>
-          {item.dailyQuote}
-        </Text>
-      </View>
-    </Card>
+    <Pressable onPress={() => router.push(`/diary/${item.diaryId}`)}>
+      <Card style={styles.card}>
+        <DiaryThumbnail
+          diary={item}
+          pendingPhotosByWalkId={pendingPhotosByWalkId}
+          size={THUMBNAIL_SIZE}
+        />
+        <View style={styles.body}>
+          <Text style={styles.meta}>
+            {formatDate(item.createdAt)}
+            {item.durationSec ? ` · ${formatDuration(item.durationSec)}` : ''}
+            {item.distanceMeter ? ` · ${formatDistance(item.distanceMeter)}` : ''}
+          </Text>
+          <Text style={styles.quote} numberOfLines={1}>
+            {item.dailyQuote}
+          </Text>
+        </View>
+      </Card>
+    </Pressable>
   );
 
   return (

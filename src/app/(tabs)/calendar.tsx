@@ -41,23 +41,21 @@ export default function CalendarScreen() {
   ];
 
   const renderDiaryCard = (diary: DiaryListItem) => (
-    <Card
-      key={diary.diaryId}
-      style={styles.sheet}
-      onTouchEnd={() => router.push(`/diary/${diary.diaryId}`)}
-    >
-      <DiaryThumbnail diary={diary} pendingPhotosByWalkId={pendingPhotosByWalkId} />
-      <View style={styles.sheetBody}>
-        <Text style={styles.sheetMeta}>
-          {formatDate(diary.createdAt)}
-          {diary.durationSec ? ` · ${formatDuration(diary.durationSec)}` : ''}
-          {diary.distanceMeter ? ` · ${formatDistance(diary.distanceMeter)}` : ''}
-        </Text>
-        <Text style={styles.sheetQuote} numberOfLines={1}>
-          {diary.dailyQuote}
-        </Text>
-      </View>
-    </Card>
+    <Pressable key={diary.diaryId} onPress={() => router.push(`/diary/${diary.diaryId}`)}>
+      <Card style={styles.sheet}>
+        <DiaryThumbnail diary={diary} pendingPhotosByWalkId={pendingPhotosByWalkId} />
+        <View style={styles.sheetBody}>
+          <Text style={styles.sheetMeta}>
+            {formatDate(diary.createdAt)}
+            {diary.durationSec ? ` · ${formatDuration(diary.durationSec)}` : ''}
+            {diary.distanceMeter ? ` · ${formatDistance(diary.distanceMeter)}` : ''}
+          </Text>
+          <Text style={styles.sheetQuote} numberOfLines={1}>
+            {diary.dailyQuote}
+          </Text>
+        </View>
+      </Card>
+    </Pressable>
   );
 
   return (

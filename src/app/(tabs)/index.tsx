@@ -191,15 +191,17 @@ export default function HomeScreen() {
           </TabAppBar>
         ) : null}
 
-        <Card style={styles.statusCard} onTouchEnd={walkStatus.onPress}>
-          <View style={styles.statusBody}>
-            <Text style={styles.statusText}>{walkStatus.title}</Text>
-            {walkStatus.subtitle ? (
-              <Text style={styles.statusSubtext}>{walkStatus.subtitle}</Text>
-            ) : null}
-          </View>
-          <Text>{walkStatus.emoji}</Text>
-        </Card>
+        <Pressable onPress={walkStatus.onPress}>
+          <Card style={styles.statusCard}>
+            <View style={styles.statusBody}>
+              <Text style={styles.statusText}>{walkStatus.title}</Text>
+              {walkStatus.subtitle ? (
+                <Text style={styles.statusSubtext}>{walkStatus.subtitle}</Text>
+              ) : null}
+            </View>
+            <Text>{walkStatus.emoji}</Text>
+          </Card>
+        </Pressable>
 
         <Pressable
           style={({ pressed }) => [styles.walkCta, pressed && styles.walkCtaPressed]}
@@ -215,19 +217,17 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>최근 일기</Text>
         {recentDiaries.length > 0 ? (
           recentDiaries.map((diary) => (
-            <Card
-              key={diary.diaryId}
-              style={styles.recentCard}
-              onTouchEnd={() => router.push(`/diary/${diary.diaryId}`)}
-            >
-              <DiaryThumbnail diary={diary} pendingPhotosByWalkId={pendingPhotosByWalkId} />
-              <View style={styles.recentBody}>
-                <Text style={styles.recentDate}>{formatDate(diary.createdAt)}</Text>
-                <Text style={styles.recentQuote} numberOfLines={1}>
-                  {diary.dailyQuote}
-                </Text>
-              </View>
-            </Card>
+            <Pressable key={diary.diaryId} onPress={() => router.push(`/diary/${diary.diaryId}`)}>
+              <Card style={styles.recentCard}>
+                <DiaryThumbnail diary={diary} pendingPhotosByWalkId={pendingPhotosByWalkId} />
+                <View style={styles.recentBody}>
+                  <Text style={styles.recentDate}>{formatDate(diary.createdAt)}</Text>
+                  <Text style={styles.recentQuote} numberOfLines={1}>
+                    {diary.dailyQuote}
+                  </Text>
+                </View>
+              </Card>
+            </Pressable>
           ))
         ) : (
           <Text style={styles.emptyText}>아직 작성된 일기가 없어요</Text>
