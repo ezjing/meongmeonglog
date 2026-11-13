@@ -1,16 +1,14 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { useCreateDog, uploadDogProfileImage } from '@/entities/dog';
-import { useWelcomeGreeting, useOnboardingStore } from '@/features/onboarding';
+import { DogAvatar, useCreateDog, uploadDogProfileImage } from '@/entities/dog';
+import { toDogInput, useWelcomeGreeting, useOnboardingStore } from '@/features/onboarding';
 import {
   colors,
   spacing,
   radius,
   fontSize,
-  emojiSize,
   fontWeight,
   lineHeight,
   shadows,
@@ -23,12 +21,6 @@ import { LoadingPaws } from '@/shared/ui/LoadingPaws';
 
 const CHECK_SIZE = 46;
 const AVATAR_SIZE = 64;
-
-function parseWeightKg(value: string): number | null {
-  const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) return null;
-  return parsed;
-}
 
 export function WelcomeScreen() {
   const store = useOnboardingStore();
@@ -64,18 +56,7 @@ export function WelcomeScreen() {
           profileImageUrl = await uploadDogProfileImage(userId, store.profileImageUri);
         }
 
-        await createDog.mutateAsync({
-          name: store.name,
-          breed: store.breed,
-          birthDate: store.birthDate,
-          gender: store.gender,
-          personality: store.personality,
-          speechStyle: store.speechStyle,
-          customPersonality: store.customPersonality.trim(),
-          customSpeechStyle: store.customSpeechStyle.trim(),
-          weightKg: parseWeightKg(store.weightKg),
-          profileImageUrl,
-        });
+        await createDog.mutateAsync(toDogInput(store, profileImageUrl));
         dogCreatedRef.current = true;
         trackEvent(AnalyticsEvents.dogRegistered);
       }
@@ -134,17 +115,7 @@ export function WelcomeScreen() {
       <Text style={styles.doneTitle}>강아지 등록 완료!</Text>
       <Text style={styles.doneSub}>{store.name}의 성격·말투를 반영해 인사말을 쓰고 있어요</Text>
 
-      <View style={styles.avatar}>
-        {store.profileImageUri ? (
-          <Image
-            source={{ uri: store.profileImageUri }}
-            style={styles.avatarImage}
-            contentFit="cover"
-          />
-        ) : (
-          <Text style={styles.avatarEmoji}>🐶</Text>
-        )}
-      </View>
+      <DogAvatar imageUri={store.profileImageUri} size={AVATAR_SIZE} style={styles.avatar} />
 
       <View style={styles.speech}>
         <Text style={styles.speechText}>&quot;{greeting}&quot;</Text>
@@ -182,18 +153,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     textAlign: 'center',
   },
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: radius.full,
-    backgroundColor: colors.apricot,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: spacing.md,
-    overflow: 'hidden',
-  },
-  avatarImage: { width: '100%', height: '100%' },
-  avatarEmoji: { fontSize: emojiSize.sm },
+  avatar: { marginVertical: spacing.md },
+
   speech: {
     backgroundColor: colors.white,
     borderRadius: radius.xl,

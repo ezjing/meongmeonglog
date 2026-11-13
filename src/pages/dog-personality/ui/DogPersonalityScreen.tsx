@@ -10,7 +10,7 @@ import {
   useUpdateDog,
   uploadDogProfileImage,
 } from '@/entities/dog';
-import { useOnboardingStore } from '@/features/onboarding';
+import { toDogInput, useOnboardingStore } from '@/features/onboarding';
 import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
@@ -25,12 +25,6 @@ const OTHER_OPTION = '기타';
 /** 직접 입력값은 AI 프롬프트에 그대로 들어가므로 길이를 제한한다 */
 const CUSTOM_INPUT_MAX_LENGTH = 50;
 
-function parseWeightKg(value: string): number | null {
-  const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) return null;
-  return parsed;
-}
-
 export function DogPersonalityScreen() {
   const { mode } = useLocalSearchParams<{ mode?: string }>();
   const navigation = useNavigation();
@@ -43,10 +37,6 @@ export function DogPersonalityScreen() {
   const store = useOnboardingStore();
   const {
     name,
-    breed,
-    birthDate,
-    gender,
-    weightKg,
     personality,
     speechStyle,
     customPersonality,
@@ -96,18 +86,7 @@ export function DogPersonalityScreen() {
 
       await updateDog.mutateAsync({
         dogId: dog.dogId,
-        input: {
-          name,
-          breed,
-          birthDate,
-          gender,
-          personality,
-          speechStyle,
-          customPersonality: isOtherPersonality ? customPersonality.trim() : '',
-          customSpeechStyle: isOtherSpeechStyle ? customSpeechStyle.trim() : '',
-          weightKg: parseWeightKg(weightKg),
-          profileImageUrl,
-        },
+        input: toDogInput(store, profileImageUrl),
       });
       reset();
       showToast({ message: '강아지 정보를 저장했어요', variant: 'success' });

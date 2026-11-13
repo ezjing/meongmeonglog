@@ -1,7 +1,6 @@
-import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import {
   GuardianProfileFields,
@@ -11,22 +10,13 @@ import {
 import type { GuardianProfile } from '@/entities/guardian';
 import { useAuthSession } from '@/features/auth';
 import { resolveOnboardingRoute } from '@/features/onboarding';
-import { PROFILE_AVATAR_SIZE, PROFILE_CAMERA_BADGE_SIZE } from '@/shared/config/layout';
-import {
-  colors,
-  spacing,
-  radius,
-  fontSize,
-  emojiSize,
-  fontWeight,
-  borderWidth,
-} from '@/shared/config/theme';
-import { pickImageFromCamera, pickImageFromLibrary } from '@/shared/lib/pickImage';
+import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
 import { LoadingPaws } from '@/shared/ui/LoadingPaws';
-import { BottomSheet, useOverlay } from '@/shared/ui/overlay/index';
+import { useOverlay } from '@/shared/ui/overlay/index';
 import { PawProgress } from '@/shared/ui/PawProgress';
+import { ProfilePhotoPicker } from '@/shared/ui/ProfilePhotoPicker';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
 
 interface GuardianBasicFormProps {
@@ -39,7 +29,6 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
   const userId = useAuthStore((s) => s.userId);
   const updateProfile = useUpdateGuardianProfile();
   const { showAlert, showToast } = useOverlay();
-  const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
   const [values, setValues] = useState({
     guardianTitle: initialProfile?.guardianTitle ?? '',
     parentingStyle: initialProfile?.parentingStyle ?? '',
@@ -68,26 +57,6 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
     if (!confirmed) return;
     await logout();
     router.replace('/(auth)/login');
-  };
-
-  const handlePickFromLibrary = async () => {
-    const uris = await pickImageFromLibrary({
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (uris?.[0]) {
-      setProfileImageUri(uris[0]);
-    }
-  };
-
-  const handlePickFromCamera = async () => {
-    const uris = await pickImageFromCamera({
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (uris?.[0]) {
-      setProfileImageUri(uris[0]);
-    }
   };
 
   const handleNext = async () => {
@@ -149,22 +118,14 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
             </Text>
           )}
 
-          <Pressable style={styles.avatarWrap} onPress={() => setPhotoSheetVisible(true)}>
-            <View style={styles.avatar}>
-              {profileImageUri ? (
-                <Image
-                  source={{ uri: profileImageUri }}
-                  style={styles.avatarImage}
-                  contentFit="cover"
-                />
-              ) : (
-                <Text style={styles.avatarEmoji}>🙂</Text>
-              )}
-            </View>
-            <View style={styles.camBadge}>
-              <Text style={styles.camEmoji}>📷</Text>
-            </View>
-          </Pressable>
+          <ProfilePhotoPicker
+            imageUri={profileImageUri}
+            placeholderEmoji="🙂"
+            sheetSubtitle="보호자 프로필 사진을 등록해주세요"
+            onChange={setProfileImageUri}
+            badgeBorderColor={colors.background}
+            style={styles.photoPicker}
+          />
 
           <GuardianProfileFields
             values={values}
@@ -186,21 +147,6 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
           </View>
         </View>
       </View>
-
-      <BottomSheet
-        visible={photoSheetVisible}
-        onClose={() => setPhotoSheetVisible(false)}
-        title="프로필 사진 추가"
-        subtitle="보호자 프로필 사진을 등록해주세요"
-        options={[
-          { icon: '📷', label: '카메라로 촬영', onPress: handlePickFromCamera },
-          {
-            icon: '🖼️',
-            label: '갤러리에서 선택',
-            onPress: handlePickFromLibrary,
-          },
-        ]}
-      />
     </>
   );
 }
@@ -262,53 +208,14 @@ const styles = StyleSheet.create({
     color: colors.grey,
     marginBottom: spacing.md,
   },
+  photoPicker: { marginTop: spacing.sm },
   editSubtitle: {
     fontSize: fontSize.md,
     color: colors.grey,
     marginBottom: spacing.md,
     marginTop: spacing.xs,
   },
-  avatarWrap: {
-    alignSelf: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
-    position: 'relative',
-  },
-  avatar: {
-    width: PROFILE_AVATAR_SIZE,
-    height: PROFILE_AVATAR_SIZE,
-    borderRadius: radius.full,
-    backgroundColor: colors.clay,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: borderWidth.heavy,
-    borderColor: colors.white,
-    borderStyle: 'dashed',
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-  },
-  avatarEmoji: {
-    fontSize: emojiSize.md,
-  },
-  camBadge: {
-    position: 'absolute',
-    right: -spacing.xxs,
-    bottom: -spacing.xxs,
-    width: PROFILE_CAMERA_BADGE_SIZE,
-    height: PROFILE_CAMERA_BADGE_SIZE,
-    borderRadius: radius.full,
-    backgroundColor: colors.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: borderWidth.thick,
-    borderColor: colors.background,
-  },
-  camEmoji: {
-    fontSize: fontSize.md,
-  },
+
   footer: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,

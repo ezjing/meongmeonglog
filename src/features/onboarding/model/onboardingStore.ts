@@ -2,6 +2,20 @@ import { create } from 'zustand';
 
 import type { DogGender } from '@/shared/api/database';
 
+/** 강아지 등록·수정 폼 입력값 */
+export type OnboardingForm = Pick<
+  OnboardingStore,
+  | 'name'
+  | 'breed'
+  | 'birthDate'
+  | 'gender'
+  | 'weightKg'
+  | 'personality'
+  | 'speechStyle'
+  | 'customPersonality'
+  | 'customSpeechStyle'
+>;
+
 interface OnboardingStore {
   name: string;
   breed: string;

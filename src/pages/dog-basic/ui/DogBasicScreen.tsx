@@ -1,25 +1,14 @@
-import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { DEFAULT_DOG_NAME, useDogs } from '@/entities/dog';
 import { BreedPicker, useOnboardingStore } from '@/features/onboarding';
-import { PROFILE_AVATAR_SIZE, PROFILE_CAMERA_BADGE_SIZE } from '@/shared/config/layout';
-import {
-  colors,
-  spacing,
-  radius,
-  fontSize,
-  emojiSize,
-  fontWeight,
-  borderWidth,
-} from '@/shared/config/theme';
-import { pickImageFromCamera, pickImageFromLibrary } from '@/shared/lib/pickImage';
+import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
 import { LoadingPaws } from '@/shared/ui/LoadingPaws';
-import { BottomSheet } from '@/shared/ui/overlay/index';
 import { PawProgress } from '@/shared/ui/PawProgress';
+import { ProfilePhotoPicker } from '@/shared/ui/ProfilePhotoPicker';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
 
 export function DogBasicScreen() {
@@ -40,7 +29,6 @@ export function DogBasicScreen() {
     setPersonality,
     reset,
   } = useOnboardingStore();
-  const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
 
   // 수정 모드를 저장 없이 나가면 입력하던 값이 store에 남으므로, 다음 진입 때 서버 값을 다시 채우도록 비운다
   useEffect(() => {
@@ -70,26 +58,6 @@ export function DogBasicScreen() {
   const isStoreSyncedWithDog = !isEditMode || (dog != null && syncedDogId === dog.dogId);
 
   const canNext = name.trim().length > 0;
-
-  const handlePickFromLibrary = async () => {
-    const uris = await pickImageFromLibrary({
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (uris?.[0]) {
-      setBasic({ profileImageUri: uris[0] });
-    }
-  };
-
-  const handlePickFromCamera = async () => {
-    const uris = await pickImageFromCamera({
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (uris?.[0]) {
-      setBasic({ profileImageUri: uris[0] });
-    }
-  };
 
   if (isEditMode && (isDogsLoading || !isStoreSyncedWithDog)) {
     return (
@@ -128,22 +96,12 @@ export function DogBasicScreen() {
             <Text style={styles.editSubtitle}>기본 정보를 수정할 수 있어요</Text>
           )}
 
-          <Pressable style={styles.avatarWrap} onPress={() => setPhotoSheetVisible(true)}>
-            <View style={styles.avatar}>
-              {profileImageUri ? (
-                <Image
-                  source={{ uri: profileImageUri }}
-                  style={styles.avatarImage}
-                  contentFit="cover"
-                />
-              ) : (
-                <Text style={styles.avatarEmoji}>🐶</Text>
-              )}
-            </View>
-            <View style={styles.camBadge}>
-              <Text style={styles.camEmoji}>📷</Text>
-            </View>
-          </Pressable>
+          <ProfilePhotoPicker
+            imageUri={profileImageUri}
+            placeholderEmoji="🐶"
+            sheetSubtitle="강아지 프로필 사진을 등록해주세요"
+            onChange={(uri) => setBasic({ profileImageUri: uri })}
+          />
 
           <Text style={styles.label}>이름</Text>
           <TextInput
@@ -214,21 +172,6 @@ export function DogBasicScreen() {
           </View>
         </ScrollView>
       </View>
-
-      <BottomSheet
-        visible={photoSheetVisible}
-        onClose={() => setPhotoSheetVisible(false)}
-        title="프로필 사진 추가"
-        subtitle="강아지 프로필 사진을 등록해주세요"
-        options={[
-          { icon: '📷', label: '카메라로 촬영', onPress: handlePickFromCamera },
-          {
-            icon: '🖼️',
-            label: '갤러리에서 선택',
-            onPress: handlePickFromLibrary,
-          },
-        ]}
-      />
     </>
   );
 }
@@ -251,39 +194,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     marginTop: spacing.xs,
   },
-  avatarWrap: {
-    alignSelf: 'center',
-    marginBottom: spacing.md,
-    position: 'relative',
-  },
-  avatar: {
-    width: PROFILE_AVATAR_SIZE,
-    height: PROFILE_AVATAR_SIZE,
-    borderRadius: radius.full,
-    backgroundColor: colors.clay,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: borderWidth.heavy,
-    borderColor: colors.white,
-    borderStyle: 'dashed',
-    overflow: 'hidden',
-  },
-  avatarImage: { width: '100%', height: '100%' },
-  avatarEmoji: { fontSize: emojiSize.md },
-  camBadge: {
-    position: 'absolute',
-    right: -spacing.xxs,
-    bottom: -spacing.xxs,
-    width: PROFILE_CAMERA_BADGE_SIZE,
-    height: PROFILE_CAMERA_BADGE_SIZE,
-    borderRadius: radius.full,
-    backgroundColor: colors.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: borderWidth.thick,
-    borderColor: colors.white,
-  },
-  camEmoji: { fontSize: fontSize.md },
+
   label: {
     fontSize: fontSize.sm,
     fontWeight: fontWeight.bold,

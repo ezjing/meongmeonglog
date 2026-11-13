@@ -6,3 +6,4 @@ export type { DogBreedOption } from './config/dogBreedLabels';
 export { personalityOptions, speechStyleOptions } from './config/personalityOptions';
 export { useDiaryDogName, useDogDisplayName } from './model/useDogName';
 export { DogAvatar } from './ui/DogAvatar';
+export type { CreateDogInput } from './model/types';
