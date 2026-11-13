@@ -15,6 +15,8 @@ export interface PersistedWalkState {
   walkPath: WalkCoord[];
   lastLatitude: number | null;
   lastLongitude: number | null;
+  /** 마지막으로 채택한 좌표의 측정 시각(ms). 이전 버전 저장분에는 없을 수 있음 */
+  lastTimestamp?: number | null;
   pendingDbLocations: WalkCoord[];
   frozenElapsedSec: number | null;
 }
@@ -70,6 +72,7 @@ export function createInitialWalkState(activeWalk: WalkSession): PersistedWalkSt
     walkPath: [],
     lastLatitude: null,
     lastLongitude: null,
+    lastTimestamp: null,
     pendingDbLocations: [],
     frozenElapsedSec: null,
   };

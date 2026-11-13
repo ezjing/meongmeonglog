@@ -8,27 +8,41 @@ import {
   type WalkCoord,
 } from '@/lib/walk/walkSessionStorage';
 
-function applyLocationDelta(
-  lastLatitude: number | null,
-  lastLongitude: number | null,
-  latitude: number,
-  longitude: number,
-  distanceMeter: number,
-): { distanceMeter: number; lastLatitude: number; lastLongitude: number } {
-  if (lastLatitude == null || lastLongitude == null) {
-    return { distanceMeter, lastLatitude: latitude, lastLongitude: longitude };
-  }
+/** 오차 반경이 이보다 크면 Wi-Fi·기지국 추정 위치로 보고 버린다 */
+const MAX_ACCURACY_M = 30;
+/** 직전 좌표 대비 이보다 빠르면 튄 좌표로 보고 버린다 (25km/h) */
+const MAX_SPEED_MPS = 25_000 / 3600;
+/** 이보다 작은 이동은 제자리 흔들림으로 보고 거리에 더하지 않는다 */
+const MIN_DISTANCE_DELTA_M = 2;
 
-  const delta = haversineDistance(lastLatitude, lastLongitude, latitude, longitude);
-  if (delta > 2 && delta < 100) {
-    return {
-      distanceMeter: distanceMeter + delta,
-      lastLatitude: latitude,
-      lastLongitude: longitude,
-    };
-  }
+interface AcceptedPoint {
+  latitude: number;
+  longitude: number;
+  timestamp: number | null;
+}
 
-  return { distanceMeter, lastLatitude: latitude, lastLongitude: longitude };
+function isAcceptableLocation(
+  location: LocationObject,
+  walkStartedAtMs: number,
+  last: AcceptedPoint | null,
+): boolean {
+  const { latitude, longitude, accuracy } = location.coords;
+
+  // 산책 시작 전에 측정된 캐시 위치
+  if (location.timestamp < walkStartedAtMs) return false;
+
+  if (accuracy == null || accuracy > MAX_ACCURACY_M) return false;
+
+  if (!last) return true;
+
+  // 이전 버전에서 시각 없이 저장된 좌표 뒤에는 속도 검사를 건너뛴다
+  if (last.timestamp == null) return true;
+
+  const elapsedSec = (location.timestamp - last.timestamp) / 1000;
+  if (elapsedSec <= 0) return false;
+
+  const delta = haversineDistance(last.latitude, last.longitude, latitude, longitude);
+  return delta / elapsedSec <= MAX_SPEED_MPS;
 }
 
 async function flushPendingDbLocations(
@@ -52,34 +66,43 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
   const state = await loadPersistedWalkState();
   if (!state?.activeWalk) return;
 
+  const walkStartedAtMs = new Date(state.activeWalk.startedAt).getTime();
+
   const updated = await updatePersistedWalkState(state.activeWalk.walkId, (current) => {
-    let { distanceMeter, walkPath, lastLatitude, lastLongitude, pendingDbLocations } = current;
+    let { distanceMeter, walkPath, pendingDbLocations } = current;
+    let last: AcceptedPoint | null =
+      current.lastLatitude != null && current.lastLongitude != null
+        ? {
+            latitude: current.lastLatitude,
+            longitude: current.lastLongitude,
+            timestamp: current.lastTimestamp ?? null,
+          }
+        : null;
 
     for (const location of locations) {
+      if (!isAcceptableLocation(location, walkStartedAtMs, last)) continue;
+
       const { latitude, longitude } = location.coords;
       const coord: WalkCoord = { latitude, longitude };
 
       walkPath = [...walkPath, coord];
       pendingDbLocations = [...pendingDbLocations, coord];
 
-      const next = applyLocationDelta(
-        lastLatitude,
-        lastLongitude,
-        latitude,
-        longitude,
-        distanceMeter,
-      );
-      distanceMeter = next.distanceMeter;
-      lastLatitude = next.lastLatitude;
-      lastLongitude = next.lastLongitude;
+      if (last) {
+        const delta = haversineDistance(last.latitude, last.longitude, latitude, longitude);
+        if (delta > MIN_DISTANCE_DELTA_M) distanceMeter += delta;
+      }
+
+      last = { latitude, longitude, timestamp: location.timestamp };
     }
 
     return {
       ...current,
       distanceMeter,
       walkPath,
-      lastLatitude,
-      lastLongitude,
+      lastLatitude: last?.latitude ?? null,
+      lastLongitude: last?.longitude ?? null,
+      lastTimestamp: last?.timestamp ?? null,
       pendingDbLocations,
     };
   });

@@ -12,7 +12,8 @@ import {
 } from '@/lib/walk/walkSessionStorage';
 import type { WalkSession } from '@/types/domain';
 
-const LOCATION_INTERVAL_MS = 15_000;
+const LOCATION_INTERVAL_MS = 5_000;
+const LOCATION_DISTANCE_INTERVAL_M = 5;
 
 async function requestAndroidNotificationPermission(): Promise<boolean> {
   if (Platform.OS !== 'android' || Platform.Version < 33) return true;
@@ -56,9 +57,9 @@ export async function startWalkTracking(activeWalk: WalkSession): Promise<void> 
   if (alreadyRunning) return;
 
   const commonOptions = {
-    accuracy: Location.Accuracy.Balanced,
+    accuracy: Location.Accuracy.Highest,
     timeInterval: LOCATION_INTERVAL_MS,
-    distanceInterval: 10,
+    distanceInterval: LOCATION_DISTANCE_INTERVAL_M,
     pausesUpdatesAutomatically: false,
   };
 
@@ -77,6 +78,7 @@ export async function startWalkTracking(activeWalk: WalkSession): Promise<void> 
 
     await Location.startLocationUpdatesAsync(BACKGROUND_WALK_TASK, {
       ...commonOptions,
+      activityType: Location.LocationActivityType.Fitness,
       showsBackgroundLocationIndicator: true,
     });
   } catch (error) {
