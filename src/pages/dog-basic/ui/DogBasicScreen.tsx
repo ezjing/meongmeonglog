@@ -1,12 +1,16 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useShallow } from 'zustand/react/shallow';
 
 import { DEFAULT_DOG_NAME, useDogs } from '@/entities/dog';
 import { BreedPicker, useOnboardingStore } from '@/features/onboarding';
 import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
+import {
+  KeyboardAwareScrollView,
+  useScrollToEndOnFocus,
+} from '@/shared/ui/KeyboardAwareScrollView';
 import { LoadingPaws } from '@/shared/ui/LoadingPaws';
 import { PawProgress } from '@/shared/ui/PawProgress';
 import { ProfilePhotoPicker } from '@/shared/ui/ProfilePhotoPicker';
@@ -17,6 +21,7 @@ export function DogBasicScreen() {
   const isEditMode = mode === 'edit';
   const { data: dogs, isLoading: isDogsLoading } = useDogs();
   const dog = dogs?.[0];
+  const { ref: scrollRef, scrollToEnd } = useScrollToEndOnFocus();
   const {
     name,
     breed,
@@ -98,7 +103,11 @@ export function DogBasicScreen() {
         {isEditMode ? (
           <StackAppBar title="강아지 정보 관리" onBackPress={() => router.back()} />
         ) : null}
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <KeyboardAwareScrollView
+          ref={scrollRef}
+          style={styles.container}
+          contentContainerStyle={styles.content}
+        >
           {!isEditMode ? (
             <>
               <View style={styles.progressWrap}>
@@ -147,6 +156,7 @@ export function DogBasicScreen() {
             placeholder="3.5"
             placeholderTextColor={colors.fgSubtle}
             keyboardType="decimal-pad"
+            onFocus={scrollToEnd}
           />
 
           <Text style={styles.label}>성별</Text>
@@ -185,7 +195,7 @@ export function DogBasicScreen() {
               style={isEditMode ? styles.singleBtn : styles.nextBtn}
             />
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
     </>
   );

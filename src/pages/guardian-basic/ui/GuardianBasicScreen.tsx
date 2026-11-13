@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import {
   GuardianProfileFields,
@@ -13,6 +13,10 @@ import { resolveDogOnboardingRoute } from '@/features/onboarding';
 import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
+import {
+  KeyboardAwareScrollView,
+  useScrollToEndOnFocus,
+} from '@/shared/ui/KeyboardAwareScrollView';
 import { LoadingPaws } from '@/shared/ui/LoadingPaws';
 import { useOverlay } from '@/shared/ui/overlay/index';
 import { PawProgress } from '@/shared/ui/PawProgress';
@@ -29,6 +33,7 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
   const userId = useAuthStore((s) => s.userId);
   const updateProfile = useUpdateGuardianProfile();
   const { showAlert, showToast } = useOverlay();
+  const { ref: scrollRef, scrollToEnd } = useScrollToEndOnFocus();
   const [values, setValues] = useState({
     guardianTitle: initialProfile?.guardianTitle ?? '',
     parentingStyle: initialProfile?.parentingStyle ?? '',
@@ -97,10 +102,30 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
         {isEditMode ? (
           <StackAppBar title="보호자 정보 관리" onBackPress={() => router.back()} />
         ) : null}
-        <ScrollView
+        <KeyboardAwareScrollView
+          ref={scrollRef}
           style={styles.container}
           contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
+          footer={
+            <View style={styles.footer}>
+              <View style={styles.btnRow}>
+                {!isEditMode ? (
+                  <Button
+                    label="이전"
+                    variant="soft"
+                    onPress={handleCancel}
+                    style={styles.prevBtn}
+                  />
+                ) : null}
+                <Button
+                  label={isEditMode ? '저장' : '다음'}
+                  disabled={!canNext || updateProfile.isPending}
+                  onPress={handleNext}
+                  style={isEditMode ? styles.singleBtn : styles.nextBtn}
+                />
+              </View>
+            </View>
+          }
         >
           {!isEditMode ? (
             <View style={styles.progressWrap}>
@@ -131,22 +156,9 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
           <GuardianProfileFields
             values={values}
             onChange={(next) => setValues((prev) => ({ ...prev, ...next }))}
+            onFieldFocus={scrollToEnd}
           />
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <View style={styles.btnRow}>
-            {!isEditMode ? (
-              <Button label="이전" variant="soft" onPress={handleCancel} style={styles.prevBtn} />
-            ) : null}
-            <Button
-              label={isEditMode ? '저장' : '다음'}
-              disabled={!canNext || updateProfile.isPending}
-              onPress={handleNext}
-              style={isEditMode ? styles.singleBtn : styles.nextBtn}
-            />
-          </View>
-        </View>
+        </KeyboardAwareScrollView>
       </View>
     </>
   );

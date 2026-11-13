@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { useShallow } from 'zustand/react/shallow';
 
 import {
@@ -16,6 +16,10 @@ import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/sh
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
 import { Chip } from '@/shared/ui/Chip';
+import {
+  KeyboardAwareScrollView,
+  useScrollToEndOnFocus,
+} from '@/shared/ui/KeyboardAwareScrollView';
 import { useOverlay } from '@/shared/ui/overlay/index';
 import { PawProgress } from '@/shared/ui/PawProgress';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
@@ -33,6 +37,7 @@ export function DogPersonalityScreen() {
   const userId = useAuthStore((s) => s.userId);
   const { data: dogs } = useDogs();
   const dog = dogs?.[0];
+  const { ref: scrollRef, scrollToEnd } = useScrollToEndOnFocus();
   const updateDog = useUpdateDog();
   const { showToast } = useOverlay();
   const {
@@ -121,7 +126,11 @@ export function DogPersonalityScreen() {
       {isEditMode ? (
         <StackAppBar title="강아지 정보 관리" onBackPress={() => router.back()} />
       ) : null}
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <KeyboardAwareScrollView
+        ref={scrollRef}
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
         {!isEditMode ? (
           <View style={styles.progressWrap}>
             <PawProgress currentStep={3} />
@@ -151,6 +160,7 @@ export function DogPersonalityScreen() {
             placeholder="예: 산책만 나가면 신나서 뛰어다녀요"
             placeholderTextColor={colors.fgSubtle}
             maxLength={CUSTOM_INPUT_MAX_LENGTH}
+            onFocus={scrollToEnd}
           />
         ) : null}
 
@@ -173,6 +183,7 @@ export function DogPersonalityScreen() {
             placeholder="예: 문장 끝에 '~멍!'을 붙여요"
             placeholderTextColor={colors.fgSubtle}
             maxLength={CUSTOM_INPUT_MAX_LENGTH}
+            onFocus={scrollToEnd}
           />
         ) : null}
 
@@ -197,7 +208,7 @@ export function DogPersonalityScreen() {
             style={styles.nextBtn}
           />
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

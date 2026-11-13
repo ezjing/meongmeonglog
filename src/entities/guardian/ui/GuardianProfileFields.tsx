@@ -21,9 +21,15 @@ interface GuardianProfileFormValues {
 interface GuardianProfileFieldsProps {
   values: GuardianProfileFormValues;
   onChange: (values: Partial<GuardianProfileFormValues>) => void;
+  /** 입력칸에 포커스될 때 (키보드에 가리지 않게 스크롤할 때 사용) */
+  onFieldFocus?: () => void;
 }
 
-export function GuardianProfileFields({ values, onChange }: GuardianProfileFieldsProps) {
+export function GuardianProfileFields({
+  values,
+  onChange,
+  onFieldFocus,
+}: GuardianProfileFieldsProps) {
   const displayTitle = values.guardianTitle.trim() || '엄마';
 
   return (
@@ -34,6 +40,7 @@ export function GuardianProfileFields({ values, onChange }: GuardianProfileField
           style={styles.input}
           value={values.guardianTitle}
           onChangeText={(text) => onChange({ guardianTitle: text })}
+          onFocus={onFieldFocus}
           placeholder="엄마, 아빠, 언니, OO님"
           placeholderTextColor={colors.fgSubtle}
         />
@@ -45,6 +52,7 @@ export function GuardianProfileFields({ values, onChange }: GuardianProfileField
           style={styles.input}
           value={values.parentingStyle}
           onChangeText={(text) => onChange({ parentingStyle: text })}
+          onFocus={onFieldFocus}
           placeholder="자유로운 영혼, 엄격한 훈련파, 사랑 듬뿍 애정파"
           placeholderTextColor={colors.fgSubtle}
         />
@@ -56,6 +64,7 @@ export function GuardianProfileFields({ values, onChange }: GuardianProfileField
           style={[styles.input, styles.multilineInput]}
           value={values.currentConcern}
           onChangeText={(text) => onChange({ currentConcern: text })}
+          onFocus={onFieldFocus}
           placeholder="분리불안, 산책 매너, 편식"
           placeholderTextColor={colors.fgSubtle}
           multiline
