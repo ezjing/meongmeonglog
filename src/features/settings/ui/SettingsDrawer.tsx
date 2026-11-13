@@ -1,8 +1,8 @@
-import { router } from 'expo-router';
 import { useMemo } from 'react';
 
 import { useDogs } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
+import { openDogEdit, openGuardianEdit } from '@/shared/lib/navigation';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Drawer, type DrawerItem, useOverlay } from '@/shared/ui/overlay';
 
@@ -26,20 +26,12 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
       {
         icon: '🙂',
         label: '보호자 정보 관리',
-        onPress: () =>
-          router.push({
-            pathname: '/(onboarding)/guardianBasic',
-            params: { mode: 'edit' },
-          }),
+        onPress: openGuardianEdit,
       },
       {
         icon: '🐶',
         label: '강아지 정보 관리',
-        onPress: () =>
-          router.push({
-            pathname: '/(onboarding)/dogBasic',
-            params: { mode: 'edit' },
-          }),
+        onPress: openDogEdit,
       },
       {
         icon: '🔔',

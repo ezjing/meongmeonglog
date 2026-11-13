@@ -7,6 +7,7 @@ import { useGuardianProfile } from '@/entities/guardian';
 import { PROVIDER_LABEL, useAccountEmail, useAuthSession, useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
 import { colors, spacing, fontSize, fontWeight, lineHeight } from '@/shared/config/theme';
+import { openDogEdit, openGuardianEdit } from '@/shared/lib/navigation';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -68,12 +69,7 @@ export function SettingsScreen() {
           <Button
             label="보호자 정보 수정"
             variant="soft"
-            onPress={() =>
-              router.push({
-                pathname: '/(onboarding)/guardianBasic',
-                params: { mode: 'edit' },
-              })
-            }
+            onPress={openGuardianEdit}
             style={styles.btn}
           />
         </Card>
@@ -88,12 +84,7 @@ export function SettingsScreen() {
               <Button
                 label="강아지 정보 수정"
                 variant="soft"
-                onPress={() =>
-                  router.push({
-                    pathname: '/(onboarding)/dogBasic',
-                    params: { mode: 'edit' },
-                  })
-                }
+                onPress={openDogEdit}
                 style={styles.btn}
               />
             </>

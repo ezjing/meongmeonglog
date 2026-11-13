@@ -21,20 +21,20 @@ function toGuardianProfile(
   };
 }
 
+const EMPTY_GUARDIAN_PROFILE: GuardianProfile = {
+  guardianTitle: null,
+  parentingStyle: null,
+  currentConcern: null,
+  guardianProfileImageUrl: null,
+};
+
 export function isGuardianProfileComplete(profile: GuardianProfile): boolean {
   return !!profile.guardianTitle?.trim();
 }
 
 export async function fetchGuardianProfile(userId: string): Promise<GuardianProfile> {
   if (!isSupabaseConfigured) {
-    return (
-      mockProfiles.get(userId) ?? {
-        guardianTitle: null,
-        parentingStyle: null,
-        currentConcern: null,
-        guardianProfileImageUrl: null,
-      }
-    );
+    return mockProfiles.get(userId) ?? EMPTY_GUARDIAN_PROFILE;
   }
 
   const { data, error } = await supabase
@@ -45,12 +45,7 @@ export async function fetchGuardianProfile(userId: string): Promise<GuardianProf
 
   if (error) throw new AppError('fetch_guardian_profile_failed', error.message);
   if (!data) {
-    return {
-      guardianTitle: null,
-      parentingStyle: null,
-      currentConcern: null,
-      guardianProfileImageUrl: null,
-    };
+    return EMPTY_GUARDIAN_PROFILE;
   }
 
   return toGuardianProfile(data as UserRow);
