@@ -1,16 +1,14 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
-import { DiaryThumbnail, useDiaryList } from '@/entities/diary';
+import { DiaryListCard, useDiaryList } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
-import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
-import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
+import { colors, spacing } from '@/shared/config/theme';
 import { getLocalDateKey } from '@/shared/lib/localDate';
-import { Card } from '@/shared/ui/Card';
 import { Chip } from '@/shared/ui/Chip';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
 
@@ -23,33 +21,29 @@ export function ListScreen() {
   const { data: diaries, isLoading } = useDiaryList();
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
 
-  const sorted = [...(diaries ?? [])].sort((a, b) => {
-    if (sortByDate) {
-      return getLocalDateKey(a.createdAt).localeCompare(getLocalDateKey(b.createdAt));
-    }
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  // 서버가 최신순으로 정렬해서 주므로 '날짜별'일 때만 다시 정렬한다
+  const sorted = sortByDate
+    ? [...(diaries ?? [])].sort((a, b) =>
+        getLocalDateKey(a.createdAt).localeCompare(getLocalDateKey(b.createdAt)),
+      )
+    : (diaries ?? []);
 
-  const renderItem = ({ item }: { item: DiaryListItem }) => (
-    <Pressable onPress={() => router.push(`/diary/${item.diaryId}`)}>
-      <Card style={styles.card}>
-        <DiaryThumbnail
-          diary={item}
-          pendingPhotosByWalkId={pendingPhotosByWalkId}
-          size={THUMBNAIL_SIZE}
-        />
-        <View style={styles.body}>
-          <Text style={styles.meta}>
-            {formatDate(item.createdAt)}
-            {item.durationSec ? ` · ${formatDuration(item.durationSec)}` : ''}
-            {item.distanceMeter ? ` · ${formatDistance(item.distanceMeter)}` : ''}
-          </Text>
-          <Text style={styles.quote} numberOfLines={1}>
-            {item.dailyQuote}
-          </Text>
-        </View>
-      </Card>
-    </Pressable>
+  const openDiary = useCallback(
+    (diary: DiaryListItem) => router.push(`/diary/${diary.diaryId}`),
+    [],
+  );
+  const renderItem = useCallback(
+    ({ item }: { item: DiaryListItem }) => (
+      <DiaryListCard
+        diary={item}
+        pendingPhotosByWalkId={pendingPhotosByWalkId}
+        thumbnailSize={THUMBNAIL_SIZE}
+        showWalkMeta
+        onPress={openDiary}
+        style={styles.card}
+      />
+    ),
+    [openDiary, pendingPhotosByWalkId],
   );
 
   return (
@@ -88,14 +82,6 @@ const styles = StyleSheet.create({
   headerArea: { paddingHorizontal: spacing.md, paddingTop: spacing.md },
   sortRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.xs },
   list: { padding: spacing.md, paddingTop: spacing.xs, gap: spacing.sm },
-  card: {
-    flexDirection: 'row',
-    gap: spacing.ms,
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  body: { flex: 1 },
-  meta: { fontSize: fontSize.xs, color: colors.grey, marginBottom: spacing.xs },
-  quote: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, color: colors.ink },
+  card: { marginBottom: spacing.sm },
   empty: { textAlign: 'center', color: colors.grey, marginTop: spacing.xl },
 });

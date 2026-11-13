@@ -1,16 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { QuoteCard, useDiary } from '@/entities/diary';
+import { DiaryContentView, useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
-import { WalkPhotoCarousel } from '@/entities/walk';
 import { useDiaryWalkPhotos } from '@/features/walk-session';
-import { colors, spacing, radius, fontSize, fontWeight, lineHeight } from '@/shared/config/theme';
+import { colors, spacing } from '@/shared/config/theme';
 import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { goBackOrHome } from '@/shared/lib/navigation';
-import { Card } from '@/shared/ui/Card';
-import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
 
 export function DiaryDetailScreen() {
@@ -18,9 +14,6 @@ export function DiaryDetailScreen() {
   const { data: diary, isLoading } = useDiary(id ?? '');
   const dogName = useDiaryDogName(diary?.dogName);
   const photos = useDiaryWalkPhotos(diary?.walkId, diary?.thumbnailUrl);
-  const { width, height: screenHeight } = useWindowDimensions();
-  const photoHeight = Math.round(screenHeight * 0.3);
-  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   if (isLoading || !diary) {
     return (
@@ -38,41 +31,18 @@ export function DiaryDetailScreen() {
         onSharePress={() => router.push(`/share/${diary.diaryId}`)}
       />
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <View style={styles.heroWrap}>
-          <WalkPhotoCarousel
-            photos={photos}
-            width={width}
-            height={photoHeight}
-            onPhotoPress={(_, index) => setPreviewIndex(index)}
-          />
-        </View>
-
-        <Card>
-          <Text style={styles.title}>
-            {dogName}의 일기 · {formatDate(diary.createdAt)}
-          </Text>
-          <Text style={styles.body}>{diary.content}</Text>
-        </Card>
-
-        <QuoteCard quote={diary.dailyQuote} />
-
-        <View style={styles.metaRow}>
-          {diary.distanceMeter ? (
-            <Text style={styles.meta}>🚶 {formatDistance(diary.distanceMeter)}</Text>
-          ) : null}
-          {diary.durationSec ? (
-            <Text style={styles.meta}>⏱ {formatDuration(diary.durationSec)}</Text>
-          ) : null}
-          {photos.length > 0 ? <Text style={styles.meta}>📷 {photos.length}장</Text> : null}
-        </View>
+        <DiaryContentView
+          photos={photos}
+          title={`${dogName}의 일기 · ${formatDate(diary.createdAt)}`}
+          content={diary.content}
+          quote={diary.dailyQuote}
+          chips={[
+            diary.distanceMeter ? `🚶 ${formatDistance(diary.distanceMeter)}` : null,
+            diary.durationSec ? `⏱ ${formatDuration(diary.durationSec)}` : null,
+            photos.length > 0 ? `📷 ${photos.length}장` : null,
+          ].filter((chip): chip is string => chip != null)}
+        />
       </ScrollView>
-
-      <ImagePreviewModal
-        visible={previewIndex != null}
-        imageUris={photos.map((photo) => photo.imageUrl)}
-        initialIndex={previewIndex ?? 0}
-        onClose={() => setPreviewIndex(null)}
-      />
     </View>
   );
 }
@@ -83,28 +53,4 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: colors.grey },
-  heroWrap: {
-    marginHorizontal: -spacing.md,
-    marginBottom: spacing.md,
-  },
-  title: {
-    fontWeight: fontWeight.extrabold,
-    fontSize: fontSize.base,
-    color: colors.ink,
-    marginBottom: spacing.sm,
-  },
-  body: { fontSize: fontSize.base, lineHeight: lineHeight.lg, color: colors.ink },
-  metaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  meta: {
-    fontSize: fontSize.sm,
-    backgroundColor: colors.white,
-    paddingHorizontal: spacing.ms,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
-  },
 });

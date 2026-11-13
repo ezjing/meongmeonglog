@@ -105,20 +105,25 @@ export async function fetchDiary(diaryId: string): Promise<DiaryListItem | null>
   return mapDiaryRow(data as Record<string, unknown>);
 }
 
-export async function fetchCalendar(year: number, month: number): Promise<CalendarDay[]> {
-  const start = `${year}-${String(month).padStart(2, '0')}-01`;
-  const endDate = new Date(year, month, 0);
-  const end = `${year}-${String(month).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+function buildCalendarDays(year: number, month: number, diaryDates: Set<string>): CalendarDay[] {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  return Array.from({ length: daysInMonth }, (_, i) => {
+    const date = getLocalDateKey(new Date(year, month - 1, i + 1));
+    return { date, hasDiary: diaryDates.has(date) };
+  });
+}
 
+export async function fetchCalendar(year: number, month: number): Promise<CalendarDay[]> {
   if (!isSupabaseConfigured) {
-    const daysInMonth = endDate.getDate();
-    const diaryDates = new Set(mockDiaries.map((d) => d.createdAt.slice(0, 10)));
-    return Array.from({ length: daysInMonth }, (_, i) => {
-      const date = `${year}-${String(month).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
-      return { date, hasDiary: diaryDates.has(date) };
-    });
+    return buildCalendarDays(
+      year,
+      month,
+      new Set(mockDiaries.map((d) => getLocalDateKey(d.createdAt))),
+    );
   }
 
+  const start = getLocalDateKey(new Date(year, month - 1, 1));
+  const end = getLocalDateKey(new Date(year, month, 0));
   const { from, to } = getLocalDateRangeIso(start, end);
   const { data, error } = await supabase
     .from('diaries')
@@ -128,12 +133,11 @@ export async function fetchCalendar(year: number, month: number): Promise<Calend
 
   if (error) throw new AppError('fetch_calendar_failed', error.message);
 
-  const diaryDates = new Set((data ?? []).map((d) => getLocalDateKey(d.created_at)));
-  const daysInMonth = endDate.getDate();
-  return Array.from({ length: daysInMonth }, (_, i) => {
-    const date = `${year}-${String(month).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
-    return { date, hasDiary: diaryDates.has(date) };
-  });
+  return buildCalendarDays(
+    year,
+    month,
+    new Set((data ?? []).map((d) => getLocalDateKey(d.created_at))),
+  );
 }
 
 export async function generateDiary(walkId: string): Promise<Diary> {

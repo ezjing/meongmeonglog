@@ -1,16 +1,14 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { DiaryThumbnail, useCalendar, useDiaryList } from '@/entities/diary';
+import { DiaryListCard, useCalendar, useDiaryList } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
 import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/shared/config/theme';
-import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { getLocalDateKey } from '@/shared/lib/localDate';
-import { Card } from '@/shared/ui/Card';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -38,22 +36,9 @@ export function CalendarScreen() {
     ...(calendarDays ?? []),
   ];
 
-  const renderDiaryCard = (diary: DiaryListItem) => (
-    <Pressable key={diary.diaryId} onPress={() => router.push(`/diary/${diary.diaryId}`)}>
-      <Card style={styles.sheet}>
-        <DiaryThumbnail diary={diary} pendingPhotosByWalkId={pendingPhotosByWalkId} />
-        <View style={styles.sheetBody}>
-          <Text style={styles.sheetMeta}>
-            {formatDate(diary.createdAt)}
-            {diary.durationSec ? ` · ${formatDuration(diary.durationSec)}` : ''}
-            {diary.distanceMeter ? ` · ${formatDistance(diary.distanceMeter)}` : ''}
-          </Text>
-          <Text style={styles.sheetQuote} numberOfLines={1}>
-            {diary.dailyQuote}
-          </Text>
-        </View>
-      </Card>
-    </Pressable>
+  const openDiary = useCallback(
+    (diary: DiaryListItem) => router.push(`/diary/${diary.diaryId}`),
+    [],
   );
 
   return (
@@ -123,7 +108,15 @@ export function CalendarScreen() {
               contentContainerStyle={styles.sheetList}
               showsVerticalScrollIndicator={false}
             >
-              {dayDiaries.map(renderDiaryCard)}
+              {dayDiaries.map((diary) => (
+                <DiaryListCard
+                  key={diary.diaryId}
+                  diary={diary}
+                  pendingPhotosByWalkId={pendingPhotosByWalkId}
+                  showWalkMeta
+                  onPress={openDiary}
+                />
+              ))}
             </ScrollView>
           ) : (
             <Text style={styles.noDiary}>이 날짜에는 산책 기록이 없어요</Text>
@@ -176,10 +169,6 @@ const styles = StyleSheet.create({
   paw: { fontSize: fontSize.xxs, marginTop: spacing.xxs },
   sheetListScroll: { flex: 1, marginTop: spacing.md },
   sheetList: { gap: spacing.sm, paddingBottom: spacing.md },
-  sheet: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center' },
-  sheetBody: { flex: 1 },
-  sheetMeta: { fontSize: fontSize.xs, color: colors.grey, marginBottom: spacing.xs },
-  sheetQuote: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, color: colors.ink },
   noDiary: {
     textAlign: 'center',
     color: colors.grey,

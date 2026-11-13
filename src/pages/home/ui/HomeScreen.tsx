@@ -11,13 +11,12 @@ import {
   View,
 } from 'react-native';
 
-import { DiaryThumbnail, useDiaryList } from '@/entities/diary';
+import { DiaryListCard, useDiaryList } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { DogAvatar, useDogs } from '@/entities/dog';
 import { stopWalkTracking, useStartWalk, useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
-import {} from '@/features/walk-session';
 import {
   colors,
   spacing,
@@ -28,7 +27,7 @@ import {
   shadows,
   scale,
 } from '@/shared/config/theme';
-import { formatDate, formatDistance, calculateAge } from '@/shared/lib/formatDistance';
+import { formatDistance, calculateAge } from '@/shared/lib/formatDistance';
 import { getLocalDateKey } from '@/shared/lib/localDate';
 import { requestWalkLocationPermissions } from '@/shared/lib/locationPermission';
 import { Card } from '@/shared/ui/Card';
@@ -39,11 +38,6 @@ import { TabAppBar } from '@/shared/ui/TabAppBar';
 
 const WALK_CTA_SIZE = 118;
 const EXIT_CONFIRM_WINDOW_MS = 2000;
-
-function isDiaryToday(diary: DiaryListItem) {
-  const created = new Date(diary.createdAt);
-  return getLocalDateKey(created) === getLocalDateKey();
-}
 
 function getTodayWalkStatus(
   activeWalk: ReturnType<typeof useWalkStore.getState>['activeWalk'],
@@ -107,11 +101,16 @@ export function HomeScreen() {
   );
 
   const dog = dogs?.[0];
-  const sortedDiaries = [...(diaries ?? [])].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  // 서버가 최신순으로 정렬해서 준다
+  const todayKey = getLocalDateKey();
+  const todayDiaries = (diaries ?? []).filter(
+    (diary) => getLocalDateKey(diary.createdAt) === todayKey,
   );
-  const todayDiaries = sortedDiaries.filter(isDiaryToday);
-  const recentDiaries = sortedDiaries.slice(0, 5);
+  const recentDiaries = (diaries ?? []).slice(0, 5);
+  const openDiary = useCallback(
+    (diary: DiaryListItem) => router.push(`/diary/${diary.diaryId}`),
+    [],
+  );
   const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries);
 
   const handleStartWalk = async () => {
@@ -198,17 +197,13 @@ export function HomeScreen() {
         <Text style={styles.sectionTitle}>최근 일기</Text>
         {recentDiaries.length > 0 ? (
           recentDiaries.map((diary) => (
-            <Pressable key={diary.diaryId} onPress={() => router.push(`/diary/${diary.diaryId}`)}>
-              <Card style={styles.recentCard}>
-                <DiaryThumbnail diary={diary} pendingPhotosByWalkId={pendingPhotosByWalkId} />
-                <View style={styles.recentBody}>
-                  <Text style={styles.recentDate}>{formatDate(diary.createdAt)}</Text>
-                  <Text style={styles.recentQuote} numberOfLines={1}>
-                    {diary.dailyQuote}
-                  </Text>
-                </View>
-              </Card>
-            </Pressable>
+            <DiaryListCard
+              key={diary.diaryId}
+              diary={diary}
+              pendingPhotosByWalkId={pendingPhotosByWalkId}
+              onPress={openDiary}
+              style={styles.recentCard}
+            />
           ))
         ) : (
           <Text style={styles.emptyText}>아직 작성된 일기가 없어요</Text>
@@ -272,14 +267,6 @@ const styles = StyleSheet.create({
     color: colors.grey,
     marginBottom: spacing.sm,
   },
-  recentCard: {
-    flexDirection: 'row',
-    gap: spacing.ms,
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  recentBody: { flex: 1 },
-  recentDate: { fontSize: fontSize.xs, color: colors.grey, marginBottom: spacing.xxs },
-  recentQuote: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, color: colors.ink },
+  recentCard: { marginBottom: spacing.sm },
   emptyText: { fontSize: fontSize.md, color: colors.grey },
 });
