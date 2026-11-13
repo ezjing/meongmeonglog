@@ -1,11 +1,13 @@
 import NaverLogin from '@react-native-seoul/naver-login';
 import { Platform } from 'react-native';
 
+import { toSdkNotLinkedError } from './sdkError';
+import { DEV_AUTH } from '../config/devAuth';
 import { NAVER_URL_SCHEME } from '../config/naver';
 
-const DEV_AUTH = process.env.EXPO_PUBLIC_DEV_AUTH === 'true';
 const NAVER_CLIENT_ID = process.env.EXPO_PUBLIC_NAVER_CLIENT_ID ?? '';
 const NAVER_CLIENT_SECRET = process.env.EXPO_PUBLIC_NAVER_CLIENT_SECRET ?? '';
+const isNaverConfigured = Boolean(NAVER_CLIENT_ID) && Boolean(NAVER_CLIENT_SECRET);
 
 interface NaverInitOptions {
   disableNaverAppAuthIOS?: boolean;
@@ -27,7 +29,7 @@ function assertNaverConfig() {
 
 export function initNaverSdk(options: NaverInitOptions = {}) {
   if (Platform.OS === 'web') return;
-  if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return;
+  if (!isNaverConfigured) return;
 
   const disableNaverAppAuthIOS = options.disableNaverAppAuthIOS ?? false;
   if (lastDisableNaverAppAuthIOS === disableNaverAppAuthIOS) return;
@@ -59,7 +61,7 @@ async function clearNaverSdkSession() {
 /** 회원 탈퇴 시 네이버 연동 해제 (실패해도 탈퇴 흐름은 계속 진행) */
 export async function unlinkNaverAccount(): Promise<void> {
   if (DEV_AUTH || Platform.OS === 'web') return;
-  if (!NAVER_CLIENT_ID || !NAVER_CLIENT_SECRET) return;
+  if (!isNaverConfigured) return;
 
   initNaverSdk();
   await clearNaverSdkSession();
@@ -98,10 +100,7 @@ export async function getNaverAccessToken(options: NaverAccessTokenOptions = {})
 
     return successResponse.accessToken;
   } catch (error) {
-    if (error instanceof Error && error.message.includes("doesn't seem to be linked")) {
-      throw new Error('Dev Client로 앱을 빌드해주세요. (npx expo run:ios 또는 run:android)');
-    }
-    throw error;
+    throw toSdkNotLinkedError(error) ?? error;
   } finally {
     if (useWebAuthForAccountPicker) {
       initNaverSdk({ disableNaverAppAuthIOS: false });

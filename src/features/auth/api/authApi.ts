@@ -5,12 +5,11 @@ import type { AuthProvider } from '@/shared/api/database';
 import { supabase, isSupabaseConfigured } from '@/shared/api/supabase';
 import { AppError } from '@/shared/lib/AppError';
 
+import { DEV_AUTH } from '../config/devAuth';
 import { persistAuthSession, clearAuthSession, loadAuthSession } from '../lib/authStorage';
 import { unlinkKakaoAccount } from '../lib/kakaoAuth';
 import { unlinkNaverAccount } from '../lib/naverAuth';
 import type { AuthSession } from '../model/types';
-
-const DEV_AUTH = process.env.EXPO_PUBLIC_DEV_AUTH === 'true';
 
 export async function signInWithProvider(
   provider: AuthProvider,
@@ -97,8 +96,7 @@ export async function clearLocalAuth(): Promise<void> {
 }
 
 export async function signOut(): Promise<void> {
-  await clearWalkSession();
-  await clearAuthSession();
+  await clearLocalAuth();
   if (isSupabaseConfigured) {
     await supabase.auth.signOut();
   }
@@ -124,11 +122,7 @@ export async function deleteAccount(): Promise<void> {
     await unlinkKakaoAccount();
   }
 
-  await clearWalkSession();
-  await clearAuthSession();
-  if (isSupabaseConfigured) {
-    await supabase.auth.signOut();
-  }
+  await signOut();
 }
 
 /**

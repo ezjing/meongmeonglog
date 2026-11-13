@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import type { AuthProvider } from '@/shared/api/database';
+
 const AUTH_STORAGE_KEY = 'meongmeonglog.auth';
 
 interface StoredAuth {
   userId: string;
-  provider: 'kakao' | 'naver';
+  provider: AuthProvider;
 }
 
 export async function persistAuthSession(session: StoredAuth): Promise<void> {

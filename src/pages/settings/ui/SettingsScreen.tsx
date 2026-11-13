@@ -4,20 +4,14 @@ import { ScrollView, StyleSheet, Text } from 'react-native';
 
 import { useDogs } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
-import { useAccountEmail, useAuthSession, useConfirmLogout } from '@/features/auth';
+import { PROVIDER_LABEL, useAccountEmail, useAuthSession, useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
-import type { AuthProvider } from '@/shared/api/database';
 import { colors, spacing, fontSize, fontWeight, lineHeight } from '@/shared/config/theme';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { useOverlay } from '@/shared/ui/overlay/index';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
-
-const PROVIDER_LABEL: Record<AuthProvider, string> = {
-  kakao: '카카오',
-  naver: '네이버',
-};
 
 export function SettingsScreen() {
   const { provider, deleteAccount, isDeletingAccount } = useAuthSession();

@@ -1,4 +1,6 @@
-export { checkSupabaseSession, clearLocalAuth } from './api/authApi';
+export { checkSupabaseSession } from './api/authApi';
+export { PROVIDER_LABEL } from './config/providers';
+export { handleSessionLost } from './lib/authSessionSync';
 export { subscribeAuthSessionSync } from './lib/authSessionSync';
 export { loadAuthSession } from './lib/authStorage';
 export { getKakaoAccessToken, initKakaoSdk } from './lib/kakaoAuth';

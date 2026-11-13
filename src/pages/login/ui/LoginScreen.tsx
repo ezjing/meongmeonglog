@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   KakaoIcon,
   NaverIcon,
+  PROVIDER_LABEL,
   useAuthSession,
   getKakaoAccessToken,
   getNaverAccessToken,
@@ -56,7 +57,7 @@ export function LoginScreen() {
   };
 
   const handleProviderLogin = async (provider: AuthProvider, forceAccountPicker = false) => {
-    const providerLabel = provider === 'kakao' ? '카카오' : '네이버';
+    const providerLabel = PROVIDER_LABEL[provider];
 
     try {
       const accessToken =

@@ -1,14 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { useWalkStore } from '@/entities/walk';
 import type { AuthProvider } from '@/shared/api/database';
 import { useAuthStore } from '@/shared/session/sessionStore';
 
 import { signInWithProvider, signOut, deleteAccount, getCurrentUserEmail } from '../api/authApi';
+import { resetClientAuthState } from '../lib/resetClientAuthState';
 
 export function useAuthSession() {
   const queryClient = useQueryClient();
-  const { userId, provider, setSession, clearSession } = useAuthStore();
+  const userId = useAuthStore((s) => s.userId);
+  const provider = useAuthStore((s) => s.provider);
+  const setSession = useAuthStore((s) => s.setSession);
 
   const loginMutation = useMutation({
     mutationFn: ({ provider, accessToken }: { provider: AuthProvider; accessToken: string }) =>
@@ -21,20 +23,12 @@ export function useAuthSession() {
 
   const logoutMutation = useMutation({
     mutationFn: signOut,
-    onSuccess: () => {
-      clearSession();
-      useWalkStore.getState().reset();
-      queryClient.clear();
-    },
+    onSuccess: resetClientAuthState,
   });
 
   const deleteAccountMutation = useMutation({
     mutationFn: deleteAccount,
-    onSuccess: () => {
-      clearSession();
-      useWalkStore.getState().reset();
-      queryClient.clear();
-    },
+    onSuccess: resetClientAuthState,
   });
 
   return {

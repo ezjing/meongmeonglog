@@ -7,20 +7,23 @@ import {
 } from '@react-native-kakao/user';
 import { Platform } from 'react-native';
 
-const DEV_AUTH = process.env.EXPO_PUBLIC_DEV_AUTH === 'true';
+import { toSdkNotLinkedError } from './sdkError';
+import { DEV_AUTH } from '../config/devAuth';
+
 const KAKAO_APP_KEY = process.env.EXPO_PUBLIC_KAKAO_APP_KEY ?? '';
+const isKakaoConfigured = Boolean(KAKAO_APP_KEY) && KAKAO_APP_KEY !== 'your-kakao-app-key';
 
 let sdkInitialized = false;
 
 function assertKakaoAppKey() {
-  if (!KAKAO_APP_KEY || KAKAO_APP_KEY === 'your-kakao-app-key') {
+  if (!isKakaoConfigured) {
     throw new Error('EXPO_PUBLIC_KAKAO_APP_KEY를 설정해주세요.');
   }
 }
 
 export function initKakaoSdk() {
   if (sdkInitialized || Platform.OS === 'web') return;
-  if (!KAKAO_APP_KEY || KAKAO_APP_KEY === 'your-kakao-app-key') return;
+  if (!isKakaoConfigured) return;
 
   initializeKakaoSDK(KAKAO_APP_KEY);
   sdkInitialized = true;
@@ -29,7 +32,7 @@ export function initKakaoSdk() {
 /** 회원 탈퇴 시 카카오 연결 끊기 (실패해도 탈퇴 흐름은 계속 진행) */
 export async function unlinkKakaoAccount(): Promise<void> {
   if (DEV_AUTH || Platform.OS === 'web') return;
-  if (!KAKAO_APP_KEY || KAKAO_APP_KEY === 'your-kakao-app-key') return;
+  if (!isKakaoConfigured) return;
 
   initKakaoSdk();
   try {
@@ -85,9 +88,8 @@ export async function getKakaoAccessToken(options: KakaoAccessTokenOptions = {})
 
     return result.accessToken;
   } catch (error) {
-    if (error instanceof Error && error.message.includes("doesn't seem to be linked")) {
-      throw new Error('Dev Client로 앱을 빌드해주세요. (npx expo run:ios 또는 run:android)');
-    }
+    const sdkError = toSdkNotLinkedError(error);
+    if (sdkError) throw sdkError;
     if (isKakaoLoginCancelled(error)) {
       throw new Error('로그인이 취소되었습니다.');
     }

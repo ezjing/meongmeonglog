@@ -1,20 +1,17 @@
 import { AppState } from 'react-native';
 
-import { useWalkStore } from '@/entities/walk';
-import { queryClient } from '@/shared/api/queryClient';
 import { isSupabaseConfigured, supabase } from '@/shared/api/supabase';
 import { useAuthStore } from '@/shared/session/sessionStore';
 
 import { loadAuthSession } from './authStorage';
+import { resetClientAuthState } from './resetClientAuthState';
 import { checkSupabaseSession, clearLocalAuth } from '../api/authApi';
 
 /** 세션이 끊긴 기기의 로그인 상태를 정리한다. userId가 비워지면 Stack.Protected가 로그인 화면으로 보낸다 */
-async function handleSessionLost() {
+export async function handleSessionLost() {
   await clearLocalAuth();
   useAuthStore.getState().setSessionEndedElsewhere(true);
-  useAuthStore.getState().clearSession();
-  useWalkStore.getState().reset();
-  queryClient.clear();
+  resetClientAuthState();
 }
 
 /**
