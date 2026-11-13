@@ -1,7 +1,7 @@
 /// <reference path="./deno.d.ts" />
 
-export const GROQ_VISION_MODEL = "qwen/qwen3.8-27b";
-export const GROQ_TEXT_MODEL = "qwen/qwen3.8-27b";
+/** 사진 유무와 관계없이 같은 모델(비전 지원)을 쓴다 */
+export const GROQ_MODEL = "qwen/qwen3.8-27b";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MAX_BASE64_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -174,7 +174,7 @@ export async function generateGroqContent(options: {
     }
   }
 
-  const model = imageInput ? GROQ_VISION_MODEL : GROQ_TEXT_MODEL;
+  const model = GROQ_MODEL;
   const userContent: MessageContent = [{ type: "text", text: userPrompt }];
 
   if (imageInput) {
