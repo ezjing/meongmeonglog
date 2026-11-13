@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useShallow } from 'zustand/react/shallow';
 
 import {
   DogAvatar,
@@ -34,7 +35,6 @@ export function DogPersonalityScreen() {
   const dog = dogs?.[0];
   const updateDog = useUpdateDog();
   const { showToast } = useOverlay();
-  const store = useOnboardingStore();
   const {
     name,
     personality,
@@ -44,7 +44,18 @@ export function DogPersonalityScreen() {
     profileImageUri,
     setPersonality,
     reset,
-  } = store;
+  } = useOnboardingStore(
+    useShallow((s) => ({
+      name: s.name,
+      personality: s.personality,
+      speechStyle: s.speechStyle,
+      customPersonality: s.customPersonality,
+      customSpeechStyle: s.customSpeechStyle,
+      profileImageUri: s.profileImageUri,
+      setPersonality: s.setPersonality,
+      reset: s.reset,
+    })),
+  );
 
   const isOtherPersonality = personality.includes(OTHER_OPTION);
   const isOtherSpeechStyle = speechStyle === OTHER_OPTION;
@@ -86,7 +97,7 @@ export function DogPersonalityScreen() {
 
       await updateDog.mutateAsync({
         dogId: dog.dogId,
-        input: toDogInput(store, profileImageUrl),
+        input: toDogInput(useOnboardingStore.getState(), profileImageUrl),
       });
       reset();
       showToast({ message: '강아지 정보를 저장했어요', variant: 'success' });

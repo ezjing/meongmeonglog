@@ -60,25 +60,26 @@ export async function updateGuardianProfile(
   userId: string,
   input: UpdateGuardianProfileInput,
 ): Promise<GuardianProfile> {
-  const existing = await fetchGuardianProfile(userId);
-
-  let guardianProfileImageUrl =
-    input.guardianProfileImageUrl !== undefined
-      ? input.guardianProfileImageUrl
-      : existing.guardianProfileImageUrl;
-
+  // 사진은 바꿀 때만 갱신한다 (기존 값을 알기 위한 사전 조회 없이)
+  let guardianProfileImageUrl = input.guardianProfileImageUrl;
   if (input.profileImageUri) {
     guardianProfileImageUrl = await uploadGuardianProfileImage(userId, input.profileImageUri);
   }
 
-  const profile: GuardianProfile = {
+  const fields = {
     guardianTitle: input.guardianTitle.trim(),
     parentingStyle: input.parentingStyle?.trim() || null,
     currentConcern: input.currentConcern?.trim() || null,
-    guardianProfileImageUrl,
   };
 
   if (!isSupabaseConfigured) {
+    const profile: GuardianProfile = {
+      ...fields,
+      guardianProfileImageUrl:
+        guardianProfileImageUrl !== undefined
+          ? guardianProfileImageUrl
+          : (mockProfiles.get(userId)?.guardianProfileImageUrl ?? null),
+    };
     mockProfiles.set(userId, profile);
     return profile;
   }
@@ -86,10 +87,12 @@ export async function updateGuardianProfile(
   const { data, error } = await supabase
     .from('users')
     .update({
-      guardian_title: profile.guardianTitle,
-      parenting_style: profile.parentingStyle,
-      current_concern: profile.currentConcern,
-      guardian_profile_image: profile.guardianProfileImageUrl,
+      guardian_title: fields.guardianTitle,
+      parenting_style: fields.parentingStyle,
+      current_concern: fields.currentConcern,
+      ...(guardianProfileImageUrl !== undefined
+        ? { guardian_profile_image: guardianProfileImageUrl }
+        : {}),
     })
     .eq('id', userId)
     .select('guardian_title, parenting_style, current_concern, guardian_profile_image')

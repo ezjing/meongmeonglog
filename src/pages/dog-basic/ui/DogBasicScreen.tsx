@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useShallow } from 'zustand/react/shallow';
 
 import { DEFAULT_DOG_NAME, useDogs } from '@/entities/dog';
 import { BreedPicker, useOnboardingStore } from '@/features/onboarding';
@@ -28,7 +29,21 @@ export function DogBasicScreen() {
     setBasic,
     setPersonality,
     reset,
-  } = useOnboardingStore();
+  } = useOnboardingStore(
+    useShallow((s) => ({
+      name: s.name,
+      breed: s.breed,
+      birthDate: s.birthDate,
+      gender: s.gender,
+      weightKg: s.weightKg,
+      profileImageUri: s.profileImageUri,
+      syncedDogId: s.syncedDogId,
+      setSyncedDogId: s.setSyncedDogId,
+      setBasic: s.setBasic,
+      setPersonality: s.setPersonality,
+      reset: s.reset,
+    })),
+  );
 
   // 수정 모드를 저장 없이 나가면 입력하던 값이 store에 남으므로, 다음 진입 때 서버 값을 다시 채우도록 비운다
   useEffect(() => {

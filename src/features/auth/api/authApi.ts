@@ -129,11 +129,8 @@ export async function deleteAccount(): Promise<void> {
  * 소셜 로그인으로 받은 실제 이메일 (public.users.email).
  * Auth 이메일은 소셜 고유 ID 기반 대체 주소라 표시용으로 쓰지 않는다.
  */
-export async function getCurrentUserEmail(): Promise<string | null> {
+export async function getCurrentUserEmail(userId: string): Promise<string | null> {
   if (!isSupabaseConfigured) return null;
-  const { data: authData } = await supabase.auth.getUser();
-  const userId = authData.user?.id;
-  if (!userId) return null;
 
   const { data } = await supabase.from('users').select('email').eq('id', userId).maybeSingle();
   const email = (data?.email as string | null | undefined) ?? null;

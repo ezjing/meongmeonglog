@@ -104,15 +104,5 @@ export async function updateDog(
 }
 
 export async function uploadDogProfileImage(userId: string, uri: string): Promise<string> {
-  const { data: authData } = await supabase.auth.getUser();
-  const authUserId = authData.user?.id;
-
-  if (authUserId && authUserId !== userId) {
-    throw new AppError('storage_user_mismatch', '로그인 사용자와 업로드 경로가 일치하지 않습니다.');
-  }
-
-  const ownerId = authUserId ?? userId;
-  const path = `${ownerId}/profile-${Date.now()}.jpg`;
-
-  return uploadStorageImage('dog-profiles', path, uri);
+  return uploadStorageImage('dog-profiles', `${userId}/profile-${Date.now()}.jpg`, uri);
 }

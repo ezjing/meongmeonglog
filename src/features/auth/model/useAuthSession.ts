@@ -47,7 +47,7 @@ export function useAccountEmail() {
 
   return useQuery({
     queryKey: ['accountEmail', userId],
-    queryFn: getCurrentUserEmail,
+    queryFn: () => getCurrentUserEmail(userId!),
     enabled: !!userId,
   });
 }

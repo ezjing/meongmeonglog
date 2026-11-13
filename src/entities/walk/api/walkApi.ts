@@ -188,8 +188,8 @@ export async function uploadWalkPhotos(walkId: string, uris: string[]): Promise<
   }
 
   const uploaded: WalkPhoto[] = [];
-  const { data: authData } = await supabase.auth.getUser();
-  const ownerId = authData.user?.id;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const ownerId = sessionData.session?.user.id;
   if (!ownerId) {
     throw new AppError('storage_auth_required', '사진 업로드를 위해 로그인이 필요합니다.');
   }

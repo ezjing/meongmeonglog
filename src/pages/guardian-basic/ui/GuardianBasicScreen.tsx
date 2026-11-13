@@ -9,7 +9,7 @@ import {
 } from '@/entities/guardian';
 import type { GuardianProfile } from '@/entities/guardian';
 import { useAuthSession } from '@/features/auth';
-import { resolveOnboardingRoute } from '@/features/onboarding';
+import { resolveDogOnboardingRoute } from '@/features/onboarding';
 import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
@@ -76,7 +76,8 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
         return;
       }
       // 이미 강아지가 등록된 사용자는 강아지 등록을 다시 거치지 않는다 (중복 등록 방지)
-      const nextRoute = userId ? await resolveOnboardingRoute(userId) : '/(onboarding)/dogBasic';
+      // 방금 보호자 정보를 저장했으므로 강아지 등록 여부만 확인한다
+      const nextRoute = userId ? await resolveDogOnboardingRoute(userId) : '/(onboarding)/dogBasic';
       if (nextRoute === '/(tabs)') {
         router.dismissTo('/(tabs)');
         return;

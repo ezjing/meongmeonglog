@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useShallow } from 'zustand/react/shallow';
 
 import { DogAvatar, useCreateDog, uploadDogProfileImage } from '@/entities/dog';
 import { toDogInput, useWelcomeGreeting, useOnboardingStore } from '@/features/onboarding';
@@ -23,7 +24,10 @@ const CHECK_SIZE = 46;
 const AVATAR_SIZE = 64;
 
 export function WelcomeScreen() {
-  const store = useOnboardingStore();
+  // 화면에는 이름·사진만 쓰고, 등록에 쓰는 나머지 입력값은 실행 시점에 getState()로 읽는다
+  const { name, profileImageUri } = useOnboardingStore(
+    useShallow((s) => ({ name: s.name, profileImageUri: s.profileImageUri })),
+  );
   const userId = useAuthStore((s) => s.userId);
   const createDog = useCreateDog();
   const welcomeGreeting = useWelcomeGreeting();
@@ -36,10 +40,10 @@ export function WelcomeScreen() {
   // 등록이 끝나면 홈으로. 이전 단계로 돌아가 다시 진입하면 강아지가 중복 등록되므로 뒤로가기도 홈으로 보낸다
   const goHome = useCallback(() => {
     if (status !== 'done') return;
-    store.reset();
+    useOnboardingStore.getState().reset();
     allowLeaveRef.current?.();
     router.dismissTo('/(tabs)');
-  }, [status, store]);
+  }, [status]);
 
   const { allowLeave } = useBackConfirmAction(goHome);
 
@@ -49,14 +53,15 @@ export function WelcomeScreen() {
 
   // 온보딩 store → 강아지 등록 → 환영 인사 생성
   const registerDog = async () => {
+    const form = useOnboardingStore.getState();
     try {
       if (!dogCreatedRef.current) {
         let profileImageUrl: string | undefined;
-        if (store.profileImageUri && userId) {
-          profileImageUrl = await uploadDogProfileImage(userId, store.profileImageUri);
+        if (form.profileImageUri && userId) {
+          profileImageUrl = await uploadDogProfileImage(userId, form.profileImageUri);
         }
 
-        await createDog.mutateAsync(toDogInput(store, profileImageUrl));
+        await createDog.mutateAsync(toDogInput(form, profileImageUrl));
         dogCreatedRef.current = true;
         trackEvent(AnalyticsEvents.dogRegistered);
       }
@@ -69,13 +74,13 @@ export function WelcomeScreen() {
     let text: string;
     try {
       text = await welcomeGreeting.mutateAsync({
-        dogName: store.name,
-        personality: store.personality,
-        speechStyle: store.speechStyle,
-        customSpeechStyle: store.customSpeechStyle.trim(),
+        dogName: form.name,
+        personality: form.personality,
+        speechStyle: form.speechStyle,
+        customSpeechStyle: form.customSpeechStyle.trim(),
       });
     } catch {
-      text = `안녕! 나는 ${store.name}야. 앞으로 같이 산책 많이 하자!`;
+      text = `안녕! 나는 ${form.name}야. 앞으로 같이 산책 많이 하자!`;
     }
     setGreeting(text);
     setStatus('done');
@@ -104,7 +109,7 @@ export function WelcomeScreen() {
   }
 
   if (status === 'creating' || !greeting) {
-    return <LoadingPaws message={`${store.name}가 인사말을 쓰고 있어요`} />;
+    return <LoadingPaws message={`${name}가 인사말을 쓰고 있어요`} />;
   }
 
   return (
@@ -113,9 +118,9 @@ export function WelcomeScreen() {
         <Text style={styles.checkText}>✓</Text>
       </View>
       <Text style={styles.doneTitle}>강아지 등록 완료!</Text>
-      <Text style={styles.doneSub}>{store.name}의 성격·말투를 반영해 인사말을 쓰고 있어요</Text>
+      <Text style={styles.doneSub}>{name}의 성격·말투를 반영해 인사말을 쓰고 있어요</Text>
 
-      <DogAvatar imageUri={store.profileImageUri} size={AVATAR_SIZE} style={styles.avatar} />
+      <DogAvatar imageUri={profileImageUri} size={AVATAR_SIZE} style={styles.avatar} />
 
       <View style={styles.speech}>
         <Text style={styles.speechText}>&quot;{greeting}&quot;</Text>
