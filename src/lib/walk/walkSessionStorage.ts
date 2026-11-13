@@ -9,6 +9,11 @@ export interface WalkCoord {
   longitude: number;
 }
 
+/** DB 전송 대기 좌표. 이전 버전 저장분에는 측정 시각(ms)이 없을 수 있음 */
+export interface PendingWalkLocation extends WalkCoord {
+  recordedAt?: number;
+}
+
 export interface PersistedWalkState {
   activeWalk: WalkSession;
   distanceMeter: number;
@@ -17,7 +22,7 @@ export interface PersistedWalkState {
   lastLongitude: number | null;
   /** 마지막으로 채택한 좌표의 측정 시각(ms). 이전 버전 저장분에는 없을 수 있음 */
   lastTimestamp?: number | null;
-  pendingDbLocations: WalkCoord[];
+  pendingDbLocations: PendingWalkLocation[];
   frozenElapsedSec: number | null;
 }
 

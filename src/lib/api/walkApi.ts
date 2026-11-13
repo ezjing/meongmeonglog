@@ -94,6 +94,8 @@ export async function saveWalkLocation(
   walkId: string,
   latitude: number,
   longitude: number,
+  /** 측정 시각(ms). 없으면 전송 시각으로 기록 */
+  recordedAt?: number,
 ): Promise<void> {
   if (!isSupabaseConfigured) return;
 
@@ -101,7 +103,7 @@ export async function saveWalkLocation(
     walk_id: walkId,
     latitude,
     longitude,
-    recorded_at: new Date().toISOString(),
+    recorded_at: new Date(recordedAt ?? Date.now()).toISOString(),
   });
 
   if (error) throw new AppError('location_save_failed', error.message);

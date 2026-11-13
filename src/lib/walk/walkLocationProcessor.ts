@@ -5,6 +5,7 @@ import { haversineDistance } from '@/lib/utils/formatDistance';
 import {
   loadPersistedWalkState,
   updatePersistedWalkState,
+  type PendingWalkLocation,
   type WalkCoord,
 } from '@/lib/walk/walkSessionStorage';
 
@@ -47,12 +48,12 @@ function isAcceptableLocation(
 
 async function flushPendingDbLocations(
   walkId: string,
-  pendingDbLocations: WalkCoord[],
-): Promise<WalkCoord[]> {
+  pendingDbLocations: PendingWalkLocation[],
+): Promise<PendingWalkLocation[]> {
   for (let i = 0; i < pendingDbLocations.length; i++) {
     const loc = pendingDbLocations[i];
     try {
-      await saveWalkLocation(walkId, loc.latitude, loc.longitude);
+      await saveWalkLocation(walkId, loc.latitude, loc.longitude, loc.recordedAt);
     } catch {
       return pendingDbLocations.slice(i);
     }
@@ -86,7 +87,7 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
       const coord: WalkCoord = { latitude, longitude };
 
       walkPath = [...walkPath, coord];
-      pendingDbLocations = [...pendingDbLocations, coord];
+      pendingDbLocations = [...pendingDbLocations, { ...coord, recordedAt: location.timestamp }];
 
       if (last) {
         const delta = haversineDistance(last.latitude, last.longitude, latitude, longitude);
