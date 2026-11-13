@@ -3,7 +3,6 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryContentView, useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
-import { useDiaryWalkPhotos } from '@/features/walk-session';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { goBackOrHome } from '@/shared/lib/navigation';
@@ -13,7 +12,7 @@ export function DiaryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: diary, isLoading } = useDiary(id ?? '');
   const dogName = useDiaryDogName(diary?.dogName);
-  const photos = useDiaryWalkPhotos(diary?.walkId, diary?.thumbnailUrl);
+  const photos = diary?.photos ?? [];
 
   if (isLoading || !diary) {
     return (

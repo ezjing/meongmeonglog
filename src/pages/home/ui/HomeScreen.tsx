@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import { DiaryListCard, useDiaryList } from '@/entities/diary';
+import { DiaryListCard, useDiariesByDate, useRecentDiaries } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { DogAvatar, useDogs } from '@/entities/dog';
 import { stopWalkTracking, useStartWalk, useWalkStore } from '@/entities/walk';
@@ -38,6 +38,7 @@ import { TabAppBar } from '@/shared/ui/TabAppBar';
 
 const WALK_CTA_SIZE = 118;
 const EXIT_CONFIRM_WINDOW_MS = 2000;
+const RECENT_DIARY_COUNT = 5;
 
 function getTodayWalkStatus(
   activeWalk: ReturnType<typeof useWalkStore.getState>['activeWalk'],
@@ -72,7 +73,9 @@ function getTodayWalkStatus(
 
 export function HomeScreen() {
   const { data: dogs } = useDogs();
-  const { data: diaries } = useDiaryList();
+  const todayKey = getLocalDateKey();
+  const { data: todayDiaries = [] } = useDiariesByDate(todayKey);
+  const { data: recentDiaries = [] } = useRecentDiaries(RECENT_DIARY_COUNT);
   const startWalk = useStartWalk();
   const setActiveWalk = useWalkStore((s) => s.setActiveWalk);
   const resetWalk = useWalkStore((s) => s.reset);
@@ -101,12 +104,6 @@ export function HomeScreen() {
   );
 
   const dog = dogs?.[0];
-  // 서버가 최신순으로 정렬해서 준다
-  const todayKey = getLocalDateKey();
-  const todayDiaries = (diaries ?? []).filter(
-    (diary) => getLocalDateKey(diary.createdAt) === todayKey,
-  );
-  const recentDiaries = (diaries ?? []).slice(0, 5);
   const openDiary = useCallback(
     (diary: DiaryListItem) => router.push(`/diary/${diary.diaryId}`),
     [],

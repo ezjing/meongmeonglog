@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import { fetchWalkPhotos, useWalkStore } from '@/entities/walk';
+import { useWalkPhotosQuery, useWalkStore } from '@/entities/walk';
 import type { WalkPhoto } from '@/entities/walk';
 
 import { useFinishWalkStore } from './finishWalkStore';
@@ -14,30 +14,14 @@ function localPhotosFromUris(walkId: string, uris: string[]): WalkPhoto[] {
   }));
 }
 
-export function useDiaryWalkPhotos(
-  walkId: string | undefined,
-  thumbnailUrl?: string | null,
-): WalkPhoto[] {
-  const photos = useWalkPhotos(walkId);
-
-  if (photos.length > 0 || !walkId || !thumbnailUrl) {
-    return photos;
-  }
-
-  return [
-    {
-      id: `thumb-${walkId}`,
-      walkId,
-      imageUrl: thumbnailUrl,
-      sortOrder: 0,
-    },
-  ];
-}
-
+/**
+ * 방금 끝낸 산책의 사진. 서버 사진이 오기 전에는 업로드한 사진(pending)이나
+ * 종료 화면에서 고른 로컬 사진을 먼저 보여준다.
+ */
 export function useWalkPhotos(walkId: string | undefined): WalkPhoto[] {
   const pending = useWalkStore((s) => (walkId ? s.pendingWalkPhotosByWalkId[walkId] : undefined));
   const photoUris = useFinishWalkStore((s) => s.form.photoUris);
-  const [remotePhotosByWalkId, setRemotePhotosByWalkId] = useState<Record<string, WalkPhoto[]>>({});
+  const { data: remotePhotos = [] } = useWalkPhotosQuery(walkId);
 
   const localPhotos = useMemo(() => {
     if (!walkId) return [];
@@ -45,25 +29,11 @@ export function useWalkPhotos(walkId: string | undefined): WalkPhoto[] {
   }, [walkId, pending, photoUris]);
 
   useEffect(() => {
-    if (!walkId) return;
-
-    let cancelled = false;
-
-    fetchWalkPhotos(walkId)
-      .then((fetched) => {
-        if (cancelled || fetched.length === 0) return;
-        setRemotePhotosByWalkId((prev) => ({ ...prev, [walkId]: fetched }));
-        useWalkStore.getState().clearPendingWalkPhotos(walkId);
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-    };
-  }, [walkId]);
+    if (walkId && remotePhotos.length > 0) {
+      useWalkStore.getState().clearPendingWalkPhotos(walkId);
+    }
+  }, [walkId, remotePhotos.length]);
 
   if (!walkId) return [];
-
-  const remotePhotos = remotePhotosByWalkId[walkId] ?? [];
   return remotePhotos.length > 0 ? remotePhotos : localPhotos;
 }

@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { DiaryListCard, useCalendar, useDiaryList } from '@/entities/diary';
+import { DiaryListCard, useCalendar, useDiariesByDate } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
@@ -23,7 +23,7 @@ export function CalendarScreen() {
   const confirmLogout = useConfirmLogout();
 
   const { data: calendarDays } = useCalendar(year, month);
-  const { data: dayDiaries, isLoading: isDayDiariesLoading } = useDiaryList(
+  const { data: dayDiaries, isLoading: isDayDiariesLoading } = useDiariesByDate(
     selectedDate ?? undefined,
   );
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);

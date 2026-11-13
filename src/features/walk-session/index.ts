@@ -6,6 +6,6 @@ export { flushAllPendingDbLocations } from './lib/walkLocationProcessor';
 export { useFinishWalkStore } from './model/finishWalkStore';
 export { useAbandonWalk } from './model/useAbandonWalk';
 export { getWalkElapsedSec } from './model/useElapsedSec';
-export { useDiaryWalkPhotos, useWalkPhotos } from './model/useWalkPhotos';
+export { useWalkPhotos } from './model/useWalkPhotos';
 export { useWalkTracker } from './model/useWalkTracker';
 export { WalkMap } from './ui/WalkMap';

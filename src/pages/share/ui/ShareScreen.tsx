@@ -1,15 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import type { ComponentRef } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 
 import { QuoteCard, useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
 import { WalkPhotoCarousel } from '@/entities/walk';
-import { useShareCard } from '@/features/share-card';
-import { useDiaryWalkPhotos } from '@/features/walk-session';
 import {
   colors,
   spacing,
@@ -29,25 +27,11 @@ export function ShareScreen() {
   const { diaryId } = useLocalSearchParams<{ diaryId: string }>();
   const { data: diary } = useDiary(diaryId ?? '');
   const dogName = useDiaryDogName(diary?.dogName);
-  const shareCard = useShareCard();
   const { showToast } = useOverlay();
   const viewShotRef = useRef<ComponentRef<typeof ViewShot>>(null);
-  const [remoteUrl, setRemoteUrl] = useState<string | null>(null);
-  const photos = useDiaryWalkPhotos(diary?.walkId, diary?.thumbnailUrl);
+  const photos = diary?.photos ?? [];
   const { width } = useWindowDimensions();
   const cardWidth = width - spacing.md * 2;
-
-  const shareStartedRef = useRef(false);
-
-  useEffect(() => {
-    if (!diaryId || shareStartedRef.current) return;
-    shareStartedRef.current = true;
-
-    shareCard
-      .mutateAsync(diaryId)
-      .then(setRemoteUrl)
-      .catch(() => {});
-  }, [diaryId, shareCard]);
 
   const handleSaveAndShare = async () => {
     try {
@@ -96,8 +80,6 @@ export function ShareScreen() {
           </View>
         </View>
       </ViewShot>
-
-      {remoteUrl ? <Text style={styles.remoteHint}>서버 카드 URL 생성됨</Text> : null}
 
       <Text style={styles.sectionLabel}>공유하기</Text>
       <Button
@@ -164,7 +146,6 @@ const styles = StyleSheet.create({
     color: colors.fg,
     marginBottom: spacing.sm,
   },
-  remoteHint: { fontSize: fontSize.xs, color: colors.fgMuted, marginBottom: spacing.sm },
   sectionLabel: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,

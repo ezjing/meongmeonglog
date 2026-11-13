@@ -2,13 +2,12 @@ import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
-import { DiaryListCard, useDiaryList } from '@/entities/diary';
+import { DiaryListCard, useDiaryPages } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
 import { colors, spacing } from '@/shared/config/theme';
-import { getLocalDateKey } from '@/shared/lib/localDate';
 import { Chip } from '@/shared/ui/Chip';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
 
@@ -18,15 +17,12 @@ export function ListScreen() {
   const [sortByDate, setSortByDate] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const confirmLogout = useConfirmLogout();
-  const { data: diaries, isLoading } = useDiaryList();
+  // '날짜별'은 오래된 날짜부터 보여준다
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useDiaryPages({
+    ascending: sortByDate,
+  });
+  const diaries = data?.pages.flat() ?? [];
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
-
-  // 서버가 최신순으로 정렬해서 주므로 '날짜별'일 때만 다시 정렬한다
-  const sorted = sortByDate
-    ? [...(diaries ?? [])].sort((a, b) =>
-        getLocalDateKey(a.createdAt).localeCompare(getLocalDateKey(b.createdAt)),
-      )
-    : (diaries ?? []);
 
   const openDiary = useCallback(
     (diary: DiaryListItem) => router.push(`/diary/${diary.diaryId}`),
@@ -58,9 +54,13 @@ export function ListScreen() {
         </View>
 
         <FlatList
-          data={sorted}
+          data={diaries}
           keyExtractor={(item) => item.diaryId}
           renderItem={renderItem}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          onEndReachedThreshold={0.5}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <Text style={styles.empty}>{isLoading ? '불러오는 중...' : '일기가 없어요'}</Text>

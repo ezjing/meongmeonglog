@@ -9,6 +9,7 @@ import {
   saveWalkEvent,
   uploadWalkPhotos,
   fetchWalk,
+  fetchWalkPhotos,
 } from './walkApi';
 import type { WalkEvent } from '../model/types';
 
@@ -63,5 +64,14 @@ export function useUploadWalkPhotos() {
   return useMutation({
     mutationFn: ({ walkId, uris }: { walkId: string; uris: string[] }) =>
       uploadWalkPhotos(walkId, uris),
+  });
+}
+
+/** 산책 사진 (서버). 일기 생성 화면 등에서 같은 walkId면 캐시를 함께 쓴다 */
+export function useWalkPhotosQuery(walkId: string | undefined) {
+  return useQuery({
+    queryKey: walkKeys.photos(walkId ?? ''),
+    queryFn: () => fetchWalkPhotos(walkId!),
+    enabled: !!walkId,
   });
 }

@@ -11,6 +11,7 @@ export {
   useStartWalk,
   useUploadWalkPhotos,
   useWalk,
+  useWalkPhotosQuery,
 } from './api/useWalkMutations';
 export { fetchWalkPhotos, saveWalkLocations, updateWalkWeather } from './api/walkApi';
 export { fetchCurrentWeather, toWalkWeatherPayload } from './api/weatherApi';
@@ -24,6 +25,6 @@ export {
   updatePersistedWalkState,
   withWalkStateLock,
 } from './model/walkSessionStorage';
-export type { PendingWalkLocation, WalkCoord } from './model/walkSessionStorage';
+export type { WalkCoord } from './model/walkSessionStorage';
 export { useWalkStore } from './model/walkStore';
 export { WalkPhotoCarousel } from './ui/WalkPhotoCarousel';
