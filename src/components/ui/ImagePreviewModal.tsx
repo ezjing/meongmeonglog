@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { useEffect, useRef, useState } from 'react';
 import {
   Modal,
@@ -9,7 +8,9 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { ZoomableImage } from '@/components/ui/ZoomableImage';
 import {
   colors,
   spacing,
@@ -47,11 +48,13 @@ export function ImagePreviewModal({
   const resolvedIndex = Math.min(Math.max(initialIndex, 0), Math.max(uris.length - 1, 0));
   const [currentIndex, setCurrentIndex] = useState(resolvedIndex);
   const [prevVisible, setPrevVisible] = useState(visible);
+  const [zoomed, setZoomed] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
-  // 열릴 때마다 누른 사진부터 보여준다
+  // 열릴 때마다 누른 사진부터, 원래 크기로 보여준다
   if (visible !== prevVisible) {
     setPrevVisible(visible);
+    setZoomed(false);
     if (visible) setCurrentIndex(resolvedIndex);
   }
 
@@ -66,12 +69,14 @@ export function ImagePreviewModal({
   const goToIndex = (index: number) => {
     const nextIndex = Math.min(Math.max(index, 0), uris.length - 1);
     setCurrentIndex(nextIndex);
+    setZoomed(false);
     scrollRef.current?.scrollTo({ x: nextIndex * width, animated: true });
   };
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      {/* Modal은 앱 루트 밖에 그려지므로 제스처용 루트를 다시 감싼다 (Android) */}
+      <GestureHandlerRootView style={styles.backdrop}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityRole="button" />
 
         <View style={styles.content} pointerEvents="box-none">
@@ -83,6 +88,7 @@ export function ImagePreviewModal({
                   horizontal
                   pagingEnabled
                   showsHorizontalScrollIndicator={false}
+                  scrollEnabled={!zoomed}
                   style={styles.carousel}
                   onMomentumScrollEnd={(event) => {
                     setCurrentIndex(Math.round(event.nativeEvent.contentOffset.x / width));
@@ -90,10 +96,12 @@ export function ImagePreviewModal({
                 >
                   {uris.map((uri, index) => (
                     <View key={`${uri}-${index}`} style={[styles.page, { width }]}>
-                      <Image
-                        source={{ uri }}
-                        style={[styles.image, { width: imageSize, height: imageSize }]}
-                        contentFit="contain"
+                      <ZoomableImage
+                        uri={uri}
+                        size={imageSize}
+                        isActive={index === currentIndex}
+                        panEnabled={zoomed && index === currentIndex}
+                        onZoomChange={setZoomed}
                       />
                     </View>
                   ))}
@@ -127,10 +135,12 @@ export function ImagePreviewModal({
                 </Pressable>
               </>
             ) : (
-              <Image
-                source={{ uri: uris[0] }}
-                style={[styles.image, { width: imageSize, height: imageSize }]}
-                contentFit="contain"
+              <ZoomableImage
+                uri={uris[0]}
+                size={imageSize}
+                isActive
+                panEnabled={zoomed}
+                onZoomChange={setZoomed}
               />
             )
           ) : (
@@ -145,7 +155,7 @@ export function ImagePreviewModal({
             {currentIndex + 1} / {uris.length}
           </Text>
         ) : null}
-      </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
@@ -168,9 +178,6 @@ const styles = StyleSheet.create({
   page: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  image: {
-    borderRadius: radius.lg,
   },
   placeholder: {
     borderRadius: radius.lg,
