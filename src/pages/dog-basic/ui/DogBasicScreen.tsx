@@ -178,7 +178,7 @@ export function DogBasicScreen() {
             {!isEditMode ? (
               <Button
                 label="이전"
-                variant="soft"
+                variant="secondary"
                 onPress={() => router.back()}
                 style={styles.prevBtn}
               />

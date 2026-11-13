@@ -7,6 +7,7 @@ import { StyleSheet } from 'react-native';
  * - 1단계 팔레트(tokens/primitive.ts, palette.json)는 화면 코드에서 import하지 않는다
  */
 export { colors, radius, shadows, sizes } from './tokens/semantic';
+export { buttonTokens, type ButtonVariant } from './tokens/component';
 
 export const spacing = {
   xxs: 2,

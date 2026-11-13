@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import {
   KakaoIcon,
@@ -21,7 +21,6 @@ import {
   iconSize,
   fontWeight,
   lineHeight,
-  opacity,
   hitSlop,
 } from '@/shared/config/theme';
 import { AnalyticsEvents, trackEvent } from '@/shared/lib/analytics';
@@ -101,17 +100,14 @@ export function LoginScreen() {
         />
       </View>
 
-      <Pressable
+      <Button
+        label="다른 계정으로 로그인"
+        variant="text"
         onPress={() => setAccountSheetVisible(true)}
         disabled={isLoggingIn}
         hitSlop={hitSlop}
-        accessibilityRole="button"
-        accessibilityLabel="다른 계정으로 로그인"
-      >
-        <Text style={[styles.otherAccount, isLoggingIn && styles.otherAccountDisabled]}>
-          다른 계정으로 로그인
-        </Text>
-      </Pressable>
+        style={styles.otherAccount}
+      />
 
       <Text style={styles.footer}>
         계속 진행하면 이용약관 및 개인정보 처리방침에{'\n'}동의하는 것으로 간주됩니다
@@ -177,16 +173,7 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: spacing.sm,
   },
-  otherAccount: {
-    marginTop: spacing.md,
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.bold,
-    color: colors.fgMuted,
-    textDecorationLine: 'underline',
-  },
-  otherAccountDisabled: {
-    opacity: opacity.disabled,
-  },
+  otherAccount: { marginTop: spacing.md },
   footer: {
     marginTop: spacing.lg,
     fontSize: fontSize.xs,

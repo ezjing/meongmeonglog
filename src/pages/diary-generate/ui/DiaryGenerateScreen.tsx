@@ -111,7 +111,7 @@ export function DiaryGenerateScreen() {
             <View style={styles.actions}>
               <Button
                 label="저장만 하기"
-                variant="soft"
+                variant="secondary"
                 style={styles.actionBtn}
                 onPress={goHome}
               />

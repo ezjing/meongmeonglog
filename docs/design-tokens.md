@@ -111,7 +111,44 @@
 
 ## 3단계 — 컴포넌트
 
-현재 없음. 같은 2단계 토큰을 쓰던 컴포넌트 중 하나만 다른 값이 필요해지면 `tokens/component.ts`에 추가한다(파일 주석의 규칙 참고).
+`tokens/component.ts`. 같은 2단계 토큰을 쓰던 컴포넌트 중 하나만 다른 값이 필요해지면 여기에 추가한다(파일 주석의 규칙 참고).
+
+### 버튼 (`buttonTokens`)
+
+| variant | 배경 | 글자 | 테두리 |
+|---|---|---|---|
+| `primary` | `primary` | `fgOnPrimary` | — |
+| `secondary` | `surface` | `fg` | `border` |
+| `danger` | `surface` | `danger` | `danger` |
+| `dangerFilled` | `danger` | `fgOnPrimary` | — |
+| `text` | 없음 | `fgMuted` (밑줄) | — |
+| `kakao` / `naver` / `instagram` | 서비스 색 | 서비스 글자색 | — |
+
+## 버튼 역할
+
+버튼은 **모양이 아니라 역할로** 고른다. `@/shared/ui/Button`의 `variant`로 지정한다.
+
+| 역할 | variant | 규칙 | 예 |
+|---|---|---|---|
+| 주요 행동 | `primary` | **화면당 1개.** 그 화면의 목적인 행동 | 다음, 저장, 산책 종료, AI 일기 만들기, 다시 시도 |
+| 보조 행동 | `secondary` | 주요 행동 옆의 대안·이동 | 이전, 저장만 하기, 정보 수정, 위치 권한 확인, 로그아웃 |
+| 위험 행동 | `danger` | 되돌릴 수 없는 행동. **반드시 확인 다이얼로그를 거친다** | 회원 탈퇴, 산책 취소 |
+| 위험 행동 확인 | `dangerFilled` | 위험 행동 확인 다이얼로그의 확인 버튼 (AlertDialog `destructive`) | 탈퇴하기, 취소하기 |
+| 텍스트 버튼 | `text` | 눈에 덜 띄어야 하는 이탈·부가 행동 | 그만두고 홈으로, 다른 계정으로 로그인 |
+| 외부 서비스 | `kakao` `naver` `instagram` | 각 서비스 가이드 색 고정 | 소셜 로그인, 공유 |
+
+- 크기: `size="lg"`(화면, 기본) · `size="md"`(다이얼로그)
+- 처리 중에는 `disabled` 대신 `loading`을 쓴다 (스피너 표시 + 다시 누르기 방지)
+
+## 토스트 종류
+
+`showToast({ message, variant })`의 `variant`는 필수다.
+
+| variant | 색 | 쓰는 경우 |
+|---|---|---|
+| `success` | `success` (초록) | 저장·완료 |
+| `warning` | `warning` (주황) | 사용법 안내, 입력값 확인, 권한 필요, 준비 중 |
+| `error` | `danger` (빨강) | 요청 실패 (서버·네트워크 오류) |
 
 ## 토큰 추가·변경 체크리스트
 

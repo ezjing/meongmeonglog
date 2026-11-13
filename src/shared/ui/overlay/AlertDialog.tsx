@@ -1,4 +1,4 @@
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import {
   colors,
@@ -7,10 +7,10 @@ import {
   fontSize,
   fontWeight,
   lineHeight,
-  borderWidth,
   shadows,
 } from '@/shared/config/theme';
 
+import { Button } from '../Button';
 import { OverlayBackdrop } from './OverlayBackdrop';
 import type { AlertDialogOptions } from './types';
 
@@ -43,15 +43,20 @@ export function AlertDialog({
           <Text style={styles.title}>{title}</Text>
           {message ? <Text style={styles.message}>{message}</Text> : null}
           <View style={styles.actions}>
-            <Pressable style={[styles.btn, styles.btnSoft]} onPress={onCancel}>
-              <Text style={styles.btnSoftText}>{cancelLabel}</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.btn, destructive ? styles.btnDanger : styles.btnPrimary]}
+            <Button
+              label={cancelLabel}
+              variant="secondary"
+              size="md"
+              onPress={onCancel}
+              style={styles.btn}
+            />
+            <Button
+              label={confirmLabel}
+              variant={destructive ? 'dangerFilled' : 'primary'}
+              size="md"
               onPress={onConfirm}
-            >
-              <Text style={styles.btnPrimaryText}>{confirmLabel}</Text>
-            </Pressable>
+              style={styles.btn}
+            />
           </View>
         </View>
       </OverlayBackdrop>
@@ -106,32 +111,5 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: spacing.sm,
   },
-  btn: {
-    flex: 1,
-    borderRadius: radius.controlLg,
-    paddingVertical: spacing.ms,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  btnSoft: {
-    backgroundColor: colors.surface,
-    borderWidth: borderWidth.thin,
-    borderColor: colors.border,
-  },
-  btnSoftText: {
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.bold,
-    color: colors.fg,
-  },
-  btnPrimary: {
-    backgroundColor: colors.primary,
-  },
-  btnDanger: {
-    backgroundColor: colors.danger,
-  },
-  btnPrimaryText: {
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.bold,
-    color: colors.fgOnPrimary,
-  },
+  btn: { flex: 1 },
 });

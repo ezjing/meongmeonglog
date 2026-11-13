@@ -68,7 +68,7 @@ export function SettingsScreen() {
           )}
           <Button
             label="보호자 정보 수정"
-            variant="soft"
+            variant="secondary"
             onPress={openGuardianEdit}
             style={styles.btn}
           />
@@ -83,7 +83,7 @@ export function SettingsScreen() {
               </Text>
               <Button
                 label="강아지 정보 수정"
-                variant="soft"
+                variant="secondary"
                 onPress={openDogEdit}
                 style={styles.btn}
               />
@@ -103,16 +103,21 @@ export function SettingsScreen() {
 
         <Card style={styles.section}>
           <Text style={styles.sectionTitle}>앱 권한</Text>
-          <Button label="위치 권한 확인" variant="outline" onPress={checkLocationPermission} />
+          <Button label="위치 권한 확인" variant="secondary" onPress={checkLocationPermission} />
           <Text style={styles.hint}>산책 기록을 위해 위치·카메라(사진) 권한이 필요합니다.</Text>
         </Card>
 
-        <Button label="로그아웃" variant="outline" onPress={confirmLogout} style={styles.logout} />
+        <Button
+          label="로그아웃"
+          variant="secondary"
+          onPress={confirmLogout}
+          style={styles.logout}
+        />
         <Button
           label="회원 탈퇴"
-          variant="outline"
+          variant="danger"
           onPress={handleDeleteAccount}
-          disabled={isDeletingAccount}
+          loading={isDeletingAccount}
           style={styles.deleteAccount}
         />
       </ScrollView>
@@ -145,5 +150,5 @@ const styles = StyleSheet.create({
     lineHeight: lineHeight.sm,
   },
   logout: { marginTop: spacing.lg },
-  deleteAccount: { marginTop: spacing.sm, borderColor: colors.danger },
+  deleteAccount: { marginTop: spacing.sm },
 });

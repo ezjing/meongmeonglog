@@ -197,13 +197,14 @@ export function DogPersonalityScreen() {
         <View style={styles.btnRow}>
           <Button
             label="이전"
-            variant="soft"
+            variant="secondary"
             onPress={() => router.back()}
             style={styles.prevBtn}
           />
           <Button
             label={isEditMode ? '저장' : '다음'}
-            disabled={personality.length === 0 || isCustomInputMissing || updateDog.isPending}
+            disabled={personality.length === 0 || isCustomInputMissing}
+            loading={updateDog.isPending}
             onPress={handleNext}
             style={styles.nextBtn}
           />

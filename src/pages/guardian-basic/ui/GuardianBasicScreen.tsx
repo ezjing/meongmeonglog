@@ -112,14 +112,15 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
                 {!isEditMode ? (
                   <Button
                     label="이전"
-                    variant="soft"
+                    variant="secondary"
                     onPress={handleCancel}
                     style={styles.prevBtn}
                   />
                 ) : null}
                 <Button
                   label={isEditMode ? '저장' : '다음'}
-                  disabled={!canNext || updateProfile.isPending}
+                  disabled={!canNext}
+                  loading={updateProfile.isPending}
                   onPress={handleNext}
                   style={isEditMode ? styles.singleBtn : styles.nextBtn}
                 />

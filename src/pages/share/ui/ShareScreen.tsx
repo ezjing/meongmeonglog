@@ -88,17 +88,22 @@ export function ShareScreen() {
         onPress={handleSaveAndShare}
         style={styles.shareBtn}
       />
-      <Button label="📷  인스타그램 공유" onPress={handleSaveAndShare} style={styles.instaBtn} />
+      <Button
+        label="📷  인스타그램 공유"
+        variant="instagram"
+        onPress={handleSaveAndShare}
+        style={styles.instaBtn}
+      />
       <Button
         label="⬇️  이미지 저장 후 공유"
-        variant="soft"
+        variant="secondary"
         onPress={handleSaveAndShare}
         style={styles.shareBtn}
       />
 
       <Button
         label="완료"
-        variant="outline"
+        variant="secondary"
         onPress={() => router.dismissTo('/(tabs)')}
         style={styles.done}
       />
@@ -153,6 +158,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   shareBtn: { marginBottom: spacing.sm },
-  instaBtn: { backgroundColor: colors.instagram, marginBottom: spacing.sm },
+  instaBtn: { marginBottom: spacing.sm },
   done: { marginTop: spacing.sm },
 });

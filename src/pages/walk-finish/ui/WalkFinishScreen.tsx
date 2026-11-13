@@ -28,7 +28,6 @@ import {
   fontWeight,
   lineHeight,
   borderWidth,
-  opacity,
 } from '@/shared/config/theme';
 import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { pickImageFromCamera, pickImageFromLibrary } from '@/shared/lib/pickImage';
@@ -305,17 +304,13 @@ export function WalkFinishScreen() {
           style={styles.cta}
         />
 
-        <Pressable
-          style={styles.skipLinkWrap}
+        <Button
+          label="그만두고 홈으로 돌아가기"
+          variant="text"
           onPress={handleGoHomeLater}
           disabled={isAbandoning}
-          accessibilityRole="button"
-          accessibilityLabel="그만두고 홈으로 돌아가기"
-        >
-          <Text style={[styles.skipLink, isAbandoning && styles.skipLinkDisabled]}>
-            그만두고 홈으로 돌아가기
-          </Text>
-        </Pressable>
+          style={styles.skipLink}
+        />
       </KeyboardAwareScrollView>
 
       <BottomSheet
@@ -422,18 +417,5 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   cta: { marginTop: spacing.sm },
-  skipLinkWrap: {
-    alignItems: 'center',
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
-  },
-  skipLink: {
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.semibold,
-    color: colors.fgMuted,
-    borderBottomWidth: borderWidth.thin,
-    borderBottomColor: colors.border,
-    paddingBottom: spacing.xxs,
-  },
-  skipLinkDisabled: { opacity: opacity.disabled },
+  skipLink: { marginVertical: spacing.sm },
 });

@@ -120,7 +120,7 @@ export function WalkActiveScreen() {
       <View style={styles.actions}>
         <Button
           label="산책 취소"
-          variant="soft"
+          variant="danger"
           onPress={handleCancelPress}
           disabled={isAbandoning}
           style={styles.cancelBtn}
