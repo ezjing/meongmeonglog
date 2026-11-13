@@ -16,7 +16,8 @@ async function fetchNaverProfile(accessToken: string): Promise<SocialProfile> {
     provider: 'naver',
     providerUserId: String(naverUser.id),
     email: naverUser.email ?? null,
-    nickname: naverUser.nickname ?? naverUser.name ?? '네이버 사용자',
+    // 실명(name)은 앱에서 쓰지 않으므로 닉네임이 없어도 저장하지 않는다
+    nickname: naverUser.nickname ?? '네이버 사용자',
     profileImage: naverUser.profile_image ?? null,
   };
 }
