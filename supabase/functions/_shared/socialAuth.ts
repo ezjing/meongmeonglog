@@ -1,4 +1,9 @@
+/// <reference path="./deno.d.ts" />
+
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+import { serveJson } from './http.ts';
+import { createAdminClient } from './requestUser.ts';
 
 export type SocialProvider = 'kakao' | 'naver';
 
@@ -11,11 +16,6 @@ export interface SocialProfile {
   nickname: string;
   profileImage: string | null;
 }
-
-export const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 /** 소셜 고유 ID 기반 Supabase Auth 이메일 (provider 간 계정이 합쳐지지 않도록) */
 function toAuthEmail(provider: SocialProvider, providerUserId: string) {
@@ -142,9 +142,33 @@ export async function createSocialSession(supabaseAdmin: SupabaseClient, profile
   };
 }
 
-export function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+const DEV_NICKNAME: Record<SocialProvider, string> = {
+  kakao: '카카오 사용자',
+  naver: '네이버 사용자',
+};
+
+/**
+ * 소셜 로그인 함수 공통 처리: 소셜 토큰으로 프로필을 확인해 Supabase 세션을 발급한다.
+ * DEV_AUTH 환경에서는 토큰 확인 없이 개발용 프로필을 쓴다.
+ */
+export function serveSocialAuth(
+  provider: SocialProvider,
+  fetchProfile: (accessToken: string) => Promise<SocialProfile>,
+) {
+  serveJson(async (req) => {
+    const { accessToken } = await req.json();
+    const devAuth = Deno.env.get('DEV_AUTH') === 'true';
+
+    const profile: SocialProfile = devAuth
+      ? {
+          provider,
+          providerUserId: 'dev',
+          email: null,
+          nickname: DEV_NICKNAME[provider],
+          profileImage: null,
+        }
+      : await fetchProfile(accessToken);
+
+    return createSocialSession(createAdminClient(), profile);
   });
 }

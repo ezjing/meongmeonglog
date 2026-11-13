@@ -1,11 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-import {
-  corsHeaders,
-  createSocialSession,
-  jsonResponse,
-  type SocialProfile,
-} from '../_shared/socialAuth.ts';
+import { serveSocialAuth, type SocialProfile } from '../_shared/socialAuth.ts';
 
 /** 카카오디벨로퍼스 멍멍로그 앱 ID — 다른 앱에서 발급된 토큰 차단용 */
 const KAKAO_APP_ID = 1496855;
@@ -37,33 +30,4 @@ async function fetchKakaoProfile(accessToken: string): Promise<SocialProfile> {
   };
 }
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
-  try {
-    const { accessToken } = await req.json();
-    const devAuth = Deno.env.get('DEV_AUTH') === 'true';
-
-    const profile: SocialProfile = devAuth
-      ? {
-          provider: 'kakao',
-          providerUserId: 'dev',
-          email: null,
-          nickname: '카카오 사용자',
-          profileImage: null,
-        }
-      : await fetchKakaoProfile(accessToken);
-
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    );
-
-    const session = await createSocialSession(supabaseAdmin, profile);
-    return jsonResponse(session);
-  } catch (error) {
-    return jsonResponse({ error: (error as Error).message }, 400);
-  }
-});
+serveSocialAuth('kakao', fetchKakaoProfile);
