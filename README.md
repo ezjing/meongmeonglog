@@ -173,6 +173,19 @@ npm run prebuild:clean
 npm run ios   # 또는 npm run android
 ```
 
+## 정책 페이지 (GitHub Pages)
+
+`docs/`의 문서가 GitHub Pages로 공개됩니다. `main`에 push하면 1~2분 뒤 반영됩니다.
+앱(설정 드로어)에서는 `src/shared/config/links.ts`의 주소로 엽니다. 스토어 등록 정보에도 같은 주소를 씁니다.
+
+| 페이지 | URL | 원본 |
+|---|---|---|
+| 이용약관 | https://ezjing.github.io/meongmeonglog/terms-of-service | `docs/terms-of-service.md` |
+| 개인정보처리방침 | https://ezjing.github.io/meongmeonglog/privacy-policy | `docs/privacy-policy.md` |
+| 계정 삭제 안내 | https://ezjing.github.io/meongmeonglog/account-deletion | `docs/account-deletion.md` |
+
+> `docs/`는 공개 폴더라 개발 문서(architecture, design-tokens, web-plan)도 함께 공개됩니다. 보안 약점 등 민감한 내용은 적지 않습니다.
+
 ## 배포 (Android)
 
 서버 로직(LLM 모델/프롬프트 등)만 바뀐 경우와 클라이언트 코드가 바뀐 경우를 구분한다.
