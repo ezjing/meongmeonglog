@@ -127,20 +127,20 @@ export function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   section: { marginBottom: spacing.md },
   sectionTitle: {
     fontSize: fontSize.base,
     fontWeight: fontWeight.bold,
-    color: colors.ink,
+    color: colors.fg,
     marginBottom: spacing.sm,
   },
-  row: { fontSize: fontSize.base, color: colors.inkSoft, marginBottom: spacing.sm },
+  row: { fontSize: fontSize.base, color: colors.fgSecondary, marginBottom: spacing.sm },
   btn: { marginTop: spacing.xs },
   hint: {
     fontSize: fontSize.sm,
-    color: colors.grey,
+    color: colors.fgMuted,
     marginTop: spacing.sm,
     lineHeight: lineHeight.sm,
   },

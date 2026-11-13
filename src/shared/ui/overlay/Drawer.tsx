@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   drawer: {
     width: '76%',
     height: '100%',
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     paddingHorizontal: spacing.ml,
     ...shadows.drawer,
   },
@@ -135,14 +135,14 @@ const styles = StyleSheet.create({
     width: CLOSE_BUTTON_SIZE,
     height: CLOSE_BUTTON_SIZE,
     borderRadius: radius.full,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: zIndex.base,
   },
   closeText: {
     fontSize: fontSize.md,
-    color: colors.ink,
+    color: colors.fg,
     fontWeight: fontWeight.bold,
   },
   profile: {
@@ -153,13 +153,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     marginTop: spacing.sm,
     borderBottomWidth: borderWidth.hairline,
-    borderBottomColor: colors.line,
+    borderBottomColor: colors.border,
   },
   avatar: {
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: radius.full,
-    backgroundColor: colors.apricot,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -178,11 +178,11 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: fontSize.base,
     fontWeight: fontWeight.extrabold,
-    color: colors.ink,
+    color: colors.fg,
   },
   profileSub: {
     fontSize: fontSize.sm,
-    color: colors.grey,
+    color: colors.fgMuted,
     marginTop: spacing.xxs,
   },
   item: {
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   itemDanger: {
     marginTop: spacing.sm,
     borderTopWidth: borderWidth.hairline,
-    borderTopColor: colors.line,
+    borderTopColor: colors.border,
     paddingTop: spacing.md,
   },
   itemIcon: {
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   itemLabel: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
-    color: colors.ink,
+    color: colors.fg,
   },
   itemLabelDanger: {
     color: colors.danger,

@@ -31,12 +31,12 @@ export function IconButton({ children, pressedFeedback = true, style, ...props }
 
 const styles = StyleSheet.create({
   base: {
-    width: sizes.control,
-    height: sizes.control,
+    width: sizes.iconButton,
+    height: sizes.iconButton,
     borderRadius: radius.full,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: borderWidth.thin,
-    borderColor: colors.line,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },

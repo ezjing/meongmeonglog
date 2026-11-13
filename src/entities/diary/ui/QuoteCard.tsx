@@ -12,16 +12,16 @@ export function QuoteCard({ quote }: { quote: string }) {
 
 const quoteStyles = StyleSheet.create({
   card: {
-    backgroundColor: colors.quoteBg,
+    backgroundColor: colors.primarySubtle,
     borderLeftWidth: borderWidth.heavy,
-    borderLeftColor: colors.apricot,
-    borderRadius: radius.md,
+    borderLeftColor: colors.primary,
+    borderRadius: radius.cardSm,
     padding: spacing.ms,
     marginVertical: spacing.sm,
   },
   text: {
     fontSize: fontSize.base,
     fontWeight: fontWeight.bold,
-    color: colors.apricotDark,
+    color: colors.primaryFg,
   },
 });

@@ -49,7 +49,7 @@ export function LaunchScreen() {
   if (!ready) {
     return (
       <SafeAreaView style={styles.loading}>
-        <ActivityIndicator color={colors.apricot} />
+        <ActivityIndicator color={colors.primary} />
       </SafeAreaView>
     );
   }
@@ -66,6 +66,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
 });

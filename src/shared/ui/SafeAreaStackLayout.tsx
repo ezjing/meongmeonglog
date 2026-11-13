@@ -16,7 +16,7 @@ export function SafeAreaStackLayout({
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.bg },
         }}
       />
     </SafeAreaView>
@@ -24,5 +24,5 @@ export function SafeAreaStackLayout({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.bg },
 });

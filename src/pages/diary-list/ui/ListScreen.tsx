@@ -78,10 +78,10 @@ export function ListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.bg },
   headerArea: { paddingHorizontal: spacing.md, paddingTop: spacing.md },
   sortRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.xs },
   list: { padding: spacing.md, paddingTop: spacing.xs, gap: spacing.sm },
   card: { marginBottom: spacing.sm },
-  empty: { textAlign: 'center', color: colors.grey, marginTop: spacing.xl },
+  empty: { textAlign: 'center', color: colors.fgMuted, marginTop: spacing.xl },
 });

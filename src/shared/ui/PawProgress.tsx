@@ -35,10 +35,10 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: LINE_HEIGHT,
-    backgroundColor: colors.line,
+    backgroundColor: colors.border,
   },
   lineActive: {
-    backgroundColor: colors.apricot,
+    backgroundColor: colors.primary,
   },
   paw: {
     fontSize: fontSize.md,

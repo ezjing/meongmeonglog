@@ -25,11 +25,11 @@ export function DiaryThumbnail({
   const thumbUrl = resolveDiaryThumbnail(diary, pendingPhotosByWalkId);
 
   return (
-    <View style={[styles.thumb, { width: size, height: size, borderRadius: radius.md }, style]}>
+    <View style={[styles.thumb, { width: size, height: size, borderRadius: radius.cardSm }, style]}>
       {thumbUrl ? (
         <Image
           source={{ uri: thumbUrl }}
-          style={{ width: size, height: size, borderRadius: radius.md }}
+          style={{ width: size, height: size, borderRadius: radius.cardSm }}
           contentFit="cover"
         />
       ) : null}
@@ -39,7 +39,7 @@ export function DiaryThumbnail({
 
 const styles = StyleSheet.create({
   thumb: {
-    backgroundColor: colors.clay,
+    backgroundColor: colors.surfacePlaceholder,
     overflow: 'hidden',
   },
 });

@@ -282,7 +282,7 @@ export function WalkFinishScreen() {
         <TextInput
           style={styles.memo}
           placeholder="산책 중 재미있었던 일이나 기억에 남는 순간을 들려주세요! 🐾"
-          placeholderTextColor={colors.grey}
+          placeholderTextColor={colors.fgSubtle}
           value={form.memo}
           onChangeText={setMemo}
           multiline
@@ -334,7 +334,7 @@ export function WalkFinishScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   summaryBar: {
     flexDirection: 'row',
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
-    color: colors.grey,
+    color: colors.fgMuted,
     marginBottom: spacing.sm,
   },
   photoGrid: {
@@ -356,8 +356,8 @@ const styles = StyleSheet.create({
   photo: {
     width: PHOTO_SIZE,
     height: PHOTO_SIZE,
-    borderRadius: radius.sm,
-    backgroundColor: colors.clay,
+    borderRadius: radius.controlSm,
+    backgroundColor: colors.surfacePlaceholder,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   photoRemoveText: {
-    color: colors.white,
+    color: colors.fgInverse,
     fontSize: fontSize.base,
     fontWeight: fontWeight.bold,
     lineHeight: lineHeight.sm,
@@ -384,15 +384,15 @@ const styles = StyleSheet.create({
   photoAdd: {
     width: PHOTO_SIZE,
     height: PHOTO_SIZE,
-    borderRadius: radius.sm,
-    backgroundColor: colors.white,
+    borderRadius: radius.controlSm,
+    backgroundColor: colors.surface,
     borderWidth: borderWidth.medium,
     borderStyle: 'dashed',
-    borderColor: colors.line,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  photoAddText: { fontSize: fontSize.lg, color: colors.grey, fontWeight: fontWeight.bold },
+  photoAddText: { fontSize: fontSize.lg, color: colors.fgMuted, fontWeight: fontWeight.bold },
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -400,14 +400,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   memo: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: borderWidth.medium,
-    borderColor: colors.line,
-    borderRadius: radius.md,
+    borderColor: colors.border,
+    borderRadius: radius.control,
     padding: spacing.ms,
     minHeight: MEMO_MIN_HEIGHT,
     fontSize: fontSize.md,
-    color: colors.ink,
+    color: colors.fg,
     marginBottom: spacing.lg,
     textAlignVertical: 'top',
   },
@@ -420,9 +420,9 @@ const styles = StyleSheet.create({
   skipLink: {
     fontSize: fontSize.base,
     fontWeight: fontWeight.semibold,
-    color: colors.grey,
+    color: colors.fgMuted,
     borderBottomWidth: borderWidth.thin,
-    borderBottomColor: colors.line,
+    borderBottomColor: colors.border,
     paddingBottom: spacing.xxs,
   },
   skipLinkDisabled: { opacity: opacity.disabled },

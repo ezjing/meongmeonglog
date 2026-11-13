@@ -21,16 +21,16 @@ interface ToastViewProps extends ToastOptions {
 
 const variantStyles: Record<ToastVariant, { container: object; text: object; chip?: boolean }> = {
   default: {
-    container: { backgroundColor: colors.ink },
-    text: { color: colors.white },
+    container: { backgroundColor: colors.surfaceInverse },
+    text: { color: colors.fgInverse },
   },
   success: {
-    container: { backgroundColor: colors.moss },
-    text: { color: colors.white },
+    container: { backgroundColor: colors.success },
+    text: { color: colors.fgOnPrimary },
   },
   warning: {
     container: { backgroundColor: colors.danger, borderRadius: radius.full },
-    text: { color: colors.white },
+    text: { color: colors.fgOnPrimary },
     chip: true,
   },
 };
@@ -72,10 +72,10 @@ const styles = StyleSheet.create({
     left: spacing.md,
     right: spacing.md,
     zIndex: zIndex.toast,
-    ...shadows.overlay,
+    ...shadows.modal,
   },
   barWrap: {
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     paddingVertical: spacing.ms,
     paddingHorizontal: spacing.md,
   },

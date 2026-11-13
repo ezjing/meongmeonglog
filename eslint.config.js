@@ -70,6 +70,13 @@ const supabaseZones = uiDirs.map((target) => ({
   message: '화면·UI에서 supabase client 직접 import 금지. api 세그먼트의 함수나 hook을 사용하세요.',
 }));
 
+// 디자인 토큰은 @/shared/config/theme 으로만 쓴다 (1단계 팔레트 직접 사용 금지, docs/design-tokens.md)
+const tokenPattern = {
+  regex: '^@/shared/config/tokens',
+  message:
+    '디자인 토큰은 @/shared/config/theme 에서 import하세요. 팔레트(1단계)는 화면에서 쓰지 않습니다.',
+};
+
 const publicApiPattern = {
   regex: '^@/(pages|features|entities)/[^/]+/(?!@x/).+',
   message: 'FSD: 다른 slice는 public API(@/<layer>/<slice>)로만 import하세요.',
@@ -84,9 +91,15 @@ const selfImportBlocks = SLICED_LAYERS.flatMap((layer) =>
         {
           patterns: [
             publicApiPattern,
+            tokenPattern,
             ...(layer === 'entities'
               ? []
-              : [{ regex: '^@/entities/[^/]+/@x/', message: 'FSD: @x는 entities끼리만 사용합니다.' }]),
+              : [
+                  {
+                    regex: '^@/entities/[^/]+/@x/',
+                    message: 'FSD: @x는 entities끼리만 사용합니다.',
+                  },
+                ]),
             {
               regex: `^@/${layer}/${slice}$`,
               message: 'FSD: 같은 slice 안에서는 상대 경로로 import하세요 (순환 import 방지).',
@@ -132,6 +145,7 @@ module.exports = defineConfig([
         {
           patterns: [
             publicApiPattern,
+            tokenPattern,
             { regex: '^@/entities/[^/]+/@x/', message: 'FSD: @x는 entities끼리만 사용합니다.' },
           ],
         },

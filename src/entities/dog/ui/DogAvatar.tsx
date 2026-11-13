@@ -29,7 +29,7 @@ export function DogAvatar({ imageUri, size = DEFAULT_SIZE, style }: DogAvatarPro
 
 const styles = StyleSheet.create({
   avatar: {
-    backgroundColor: colors.apricot,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',

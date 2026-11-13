@@ -1,9 +1,12 @@
-import { StyleSheet, type ViewStyle } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-// 색상 원본은 app.config.ts(Node)에서도 읽을 수 있도록 JSON으로 관리한다
-import palette from './colors.json';
-
-export const colors: Readonly<typeof palette> = palette;
+/**
+ * 화면 코드가 쓰는 디자인 토큰 입구 (명세: docs/design-tokens.md)
+ * - 색·모서리·그림자·고정 크기: 2단계 의미 토큰 (tokens/semantic.ts)
+ * - 간격·글자 크기 등 아래 스케일: 의미 없이 단계만 있는 기본값으로 화면에서 직접 쓴다
+ * - 1단계 팔레트(tokens/primitive.ts, palette.json)는 화면 코드에서 import하지 않는다
+ */
+export { colors, radius, shadows, sizes } from './tokens/semantic';
 
 export const spacing = {
   xxs: 2,
@@ -14,14 +17,6 @@ export const spacing = {
   ml: 20,
   lg: 24,
   xl: 32,
-} as const;
-
-export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  full: 999,
 } as const;
 
 export const fontSize = {
@@ -43,12 +38,6 @@ export const iconSize = {
   sm: 16,
   md: 18,
   lg: 20,
-} as const;
-
-/** 여러 컴포넌트가 공유하는 고정 크기 */
-export const sizes = {
-  /** 원형 아이콘 버튼 */
-  control: 36,
 } as const;
 
 /** 작은 터치 대상의 터치 영역 확장 */
@@ -100,63 +89,3 @@ export const opacity = {
 export const scale = {
   pressed: 0.96,
 } as const;
-
-type ShadowStyle = Pick<
-  ViewStyle,
-  'shadowColor' | 'shadowOffset' | 'shadowOpacity' | 'shadowRadius' | 'elevation'
->;
-
-export const shadows = {
-  /** 지도 위 작은 버튼 */
-  sm: {
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  card: {
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    elevation: 2,
-  },
-  raised: {
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    elevation: 4,
-  },
-  /** 로딩 카드·다이얼로그·토스트 */
-  overlay: {
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.35,
-    shadowRadius: 22,
-    elevation: 8,
-  },
-  sheet: {
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: -8 },
-    shadowOpacity: 0.28,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  drawer: {
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 10, height: 0 },
-    shadowOpacity: 0.28,
-    shadowRadius: 15,
-    elevation: 12,
-  },
-  /** 산책 시작 원형 CTA */
-  cta: {
-    shadowColor: colors.apricot,
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.4,
-    shadowRadius: 28,
-    elevation: 6,
-  },
-} as const satisfies Record<string, ShadowStyle>;

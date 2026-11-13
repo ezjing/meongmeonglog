@@ -181,8 +181,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   placeholder: {
-    borderRadius: radius.lg,
-    backgroundColor: colors.apricot,
+    borderRadius: radius.card,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: emojiSize.lg,
-    color: colors.white,
+    color: colors.fgInverse,
     fontWeight: fontWeight.light,
   },
   navTextDisabled: {
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   counter: {
     position: 'absolute',
     bottom: spacing.xl * 2,
-    color: colors.white,
+    color: colors.fgInverse,
     fontSize: fontSize.base,
     fontWeight: fontWeight.semibold,
   },

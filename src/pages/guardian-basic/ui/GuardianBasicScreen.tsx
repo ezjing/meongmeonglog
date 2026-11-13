@@ -123,7 +123,7 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
             placeholderEmoji="🙂"
             sheetSubtitle="보호자 프로필 사진을 등록해주세요"
             onChange={setProfileImageUri}
-            badgeBorderColor={colors.background}
+            badgeBorderColor={colors.bg}
             style={styles.photoPicker}
           />
 
@@ -186,7 +186,7 @@ export function GuardianBasicScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   container: {
     flex: 1,
@@ -199,19 +199,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
-    color: colors.ink,
+    color: colors.fg,
     marginTop: spacing.sm,
     marginBottom: spacing.xs,
   },
   subtitle: {
     fontSize: fontSize.md,
-    color: colors.grey,
+    color: colors.fgMuted,
     marginBottom: spacing.md,
   },
   photoPicker: { marginTop: spacing.sm },
   editSubtitle: {
     fontSize: fontSize.md,
-    color: colors.grey,
+    color: colors.fgMuted,
     marginBottom: spacing.md,
     marginTop: spacing.xs,
   },
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   footer: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   btnRow: {
     flexDirection: 'row',

@@ -80,14 +80,14 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: fontWeight.extrabold,
     fontSize: fontSize.base,
-    color: colors.ink,
+    color: colors.fg,
     marginBottom: spacing.sm,
   },
-  body: { fontSize: fontSize.base, lineHeight: lineHeight.lg, color: colors.ink },
+  body: { fontSize: fontSize.base, lineHeight: lineHeight.lg, color: colors.fg },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginVertical: spacing.sm },
   chip: {
     fontSize: fontSize.sm,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     paddingHorizontal: spacing.ms,
     paddingVertical: spacing.xs,
     borderRadius: radius.full,

@@ -54,6 +54,6 @@ export const DiaryListCard = memo(function DiaryListCard({
 const styles = StyleSheet.create({
   card: { flexDirection: 'row', gap: spacing.ms, alignItems: 'center' },
   body: { flex: 1 },
-  meta: { fontSize: fontSize.xs, color: colors.grey, marginBottom: spacing.xs },
-  quote: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, color: colors.ink },
+  meta: { fontSize: fontSize.xs, color: colors.fgMuted, marginBottom: spacing.xs },
+  quote: { fontSize: fontSize.md, fontWeight: fontWeight.semibold, color: colors.fg },
 });

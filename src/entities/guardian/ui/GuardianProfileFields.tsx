@@ -35,7 +35,7 @@ export function GuardianProfileFields({ values, onChange }: GuardianProfileField
           value={values.guardianTitle}
           onChangeText={(text) => onChange({ guardianTitle: text })}
           placeholder="엄마, 아빠, 언니, OO님"
-          placeholderTextColor={colors.grey}
+          placeholderTextColor={colors.fgSubtle}
         />
       </View>
 
@@ -46,7 +46,7 @@ export function GuardianProfileFields({ values, onChange }: GuardianProfileField
           value={values.parentingStyle}
           onChangeText={(text) => onChange({ parentingStyle: text })}
           placeholder="자유로운 영혼, 엄격한 훈련파, 사랑 듬뿍 애정파"
-          placeholderTextColor={colors.grey}
+          placeholderTextColor={colors.fgSubtle}
         />
       </View>
 
@@ -57,7 +57,7 @@ export function GuardianProfileFields({ values, onChange }: GuardianProfileField
           value={values.currentConcern}
           onChangeText={(text) => onChange({ currentConcern: text })}
           placeholder="분리불안, 산책 매너, 편식"
-          placeholderTextColor={colors.grey}
+          placeholderTextColor={colors.fgSubtle}
           multiline
         />
       </View>
@@ -79,33 +79,33 @@ const styles = StyleSheet.create({
   label: {
     fontSize: fontSize.sm,
     fontWeight: fontWeight.bold,
-    color: colors.inkSoft,
+    color: colors.fgSecondary,
     marginBottom: spacing.xs,
   },
   input: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: borderWidth.medium,
-    borderColor: colors.line,
-    borderRadius: radius.md,
+    borderColor: colors.border,
+    borderRadius: radius.control,
     paddingVertical: spacing.ms,
     paddingHorizontal: spacing.ms,
     fontSize: fontSize.md,
-    color: colors.ink,
+    color: colors.fg,
   },
   multilineInput: {
     minHeight: MULTILINE_MIN_HEIGHT,
     textAlignVertical: 'top',
   },
   relationNote: {
-    backgroundColor: colors.quoteBg,
-    borderRadius: radius.md,
+    backgroundColor: colors.primarySubtle,
+    borderRadius: radius.cardSm,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.ms,
     marginTop: spacing.xxs,
   },
   relationNoteText: {
     fontSize: fontSize.xs,
-    color: colors.apricotDark,
+    color: colors.primaryFg,
     lineHeight: lineHeight.sm,
   },
 });

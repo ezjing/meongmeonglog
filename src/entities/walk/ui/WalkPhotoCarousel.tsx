@@ -26,7 +26,7 @@ export function WalkPhotoCarousel({
   const [photoIndex, setPhotoIndex] = useState(0);
 
   return (
-    <View style={[styles.container, { width, height, backgroundColor: colors.clay }]}>
+    <View style={[styles.container, { width, height, backgroundColor: colors.surfacePlaceholder }]}>
       {photos.length > 0 ? (
         <ScrollView
           horizontal
@@ -95,9 +95,9 @@ const styles = StyleSheet.create({
     width: DOT_SIZE,
     height: DOT_SIZE,
     borderRadius: radius.full,
-    backgroundColor: colors.whiteAlpha50,
+    backgroundColor: colors.fgOnMediaMuted,
   },
   dotActive: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.fgOnMedia,
   },
 });

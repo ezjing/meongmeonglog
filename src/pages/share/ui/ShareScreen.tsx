@@ -125,19 +125,19 @@ export function ShareScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loading: { color: colors.grey },
+  loading: { color: colors.fgMuted },
   title: {
     fontSize: fontSize.lg,
     fontWeight: fontWeight.extrabold,
-    color: colors.ink,
+    color: colors.fg,
     marginBottom: spacing.md,
   },
   card: {
-    backgroundColor: colors.white,
-    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+    borderRadius: radius.cardLg,
     overflow: 'hidden',
     marginBottom: spacing.md,
     ...shadows.raised,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   tag: {
     alignSelf: 'flex-start',
     backgroundColor: colors.scrim,
-    color: colors.white,
+    color: colors.fgInverse,
     fontSize: fontSize.xs,
     paddingHorizontal: spacing.ms,
     paddingVertical: spacing.xs,
@@ -161,14 +161,14 @@ const styles = StyleSheet.create({
   summary: {
     fontSize: fontSize.md,
     lineHeight: lineHeight.md,
-    color: colors.ink,
+    color: colors.fg,
     marginBottom: spacing.sm,
   },
-  remoteHint: { fontSize: fontSize.xs, color: colors.grey, marginBottom: spacing.sm },
+  remoteHint: { fontSize: fontSize.xs, color: colors.fgMuted, marginBottom: spacing.sm },
   sectionLabel: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
-    color: colors.grey,
+    color: colors.fgMuted,
     marginBottom: spacing.sm,
   },
   shareBtn: { marginBottom: spacing.sm },

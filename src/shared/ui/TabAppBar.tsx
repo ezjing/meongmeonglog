@@ -42,10 +42,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize.xxl,
     fontWeight: fontWeight.extrabold,
-    color: colors.ink,
+    color: colors.fg,
   },
   menuBtnText: {
     fontSize: fontSize.lg,
-    color: colors.ink,
+    color: colors.fg,
   },
 });

@@ -20,21 +20,21 @@ const styles = StyleSheet.create({
   chip: {
     borderRadius: radius.full,
     borderWidth: borderWidth.medium,
-    borderColor: colors.line,
-    backgroundColor: colors.white,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     paddingHorizontal: spacing.ms,
     paddingVertical: spacing.sm,
   },
   selected: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
+    backgroundColor: colors.surfaceInverse,
+    borderColor: colors.borderStrong,
   },
   label: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.semibold,
-    color: colors.inkSoft,
+    color: colors.fgSecondary,
   },
   selectedLabel: {
-    color: colors.white,
+    color: colors.fgInverse,
   },
 });

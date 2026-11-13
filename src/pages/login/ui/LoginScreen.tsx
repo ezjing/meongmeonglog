@@ -144,7 +144,7 @@ export function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
@@ -152,8 +152,8 @@ const styles = StyleSheet.create({
   logo: {
     width: LOGO_SIZE,
     height: LOGO_SIZE,
-    borderRadius: radius.xl,
-    backgroundColor: colors.apricot,
+    borderRadius: radius.cardLg,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
@@ -165,12 +165,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize.display,
     fontWeight: fontWeight.extrabold,
-    color: colors.ink,
+    color: colors.fg,
     marginBottom: spacing.xs,
   },
   subtitle: {
     fontSize: fontSize.md,
-    color: colors.grey,
+    color: colors.fgMuted,
     marginBottom: spacing.xl,
   },
   buttons: {
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
-    color: colors.grey,
+    color: colors.fgMuted,
     textDecorationLine: 'underline',
   },
   otherAccountDisabled: {
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: spacing.lg,
     fontSize: fontSize.xs,
-    color: colors.grey,
+    color: colors.fgMuted,
     textAlign: 'center',
     lineHeight: lineHeight.sm,
   },

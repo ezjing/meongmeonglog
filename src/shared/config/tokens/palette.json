@@ -1,0 +1,29 @@
+{
+  "white": "#FFFFFF",
+  "black": "#000000",
+
+  "apricot100": "#FFE9DC",
+  "apricot300": "#E8B4A0",
+  "apricot500": "#FF8A5B",
+  "apricot600": "#E96F3E",
+
+  "cream200": "#F3E8D5",
+  "cream300": "#E3D9C4",
+
+  "ink400": "#8A8A93",
+  "ink600": "#5B5B66",
+  "ink900": "#2B2B3D",
+  "ink900Alpha46": "rgba(43,43,61,0.46)",
+  "ink900Alpha72": "rgba(43,43,61,0.72)",
+
+  "blackAlpha35": "rgba(0,0,0,0.35)",
+  "blackAlpha85": "rgba(0,0,0,0.85)",
+  "whiteAlpha50": "rgba(255,255,255,0.5)",
+
+  "moss500": "#6B8F71",
+  "red500": "#D9534F",
+
+  "kakaoYellow": "#FEE500",
+  "naverGreen": "#03C75A",
+  "instagramPink": "#E1306C"
+}

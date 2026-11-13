@@ -138,7 +138,7 @@ export function DogPersonalityScreen() {
             value={customPersonality}
             onChangeText={(text) => setPersonality({ customPersonality: text })}
             placeholder="예: 산책만 나가면 신나서 뛰어다녀요"
-            placeholderTextColor={colors.grey}
+            placeholderTextColor={colors.fgSubtle}
             maxLength={CUSTOM_INPUT_MAX_LENGTH}
           />
         ) : null}
@@ -160,7 +160,7 @@ export function DogPersonalityScreen() {
             value={customSpeechStyle}
             onChangeText={(text) => setPersonality({ customSpeechStyle: text })}
             placeholder="예: 문장 끝에 '~멍!'을 붙여요"
-            placeholderTextColor={colors.grey}
+            placeholderTextColor={colors.fgSubtle}
             maxLength={CUSTOM_INPUT_MAX_LENGTH}
           />
         ) : null}
@@ -192,18 +192,18 @@ export function DogPersonalityScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  container: { flex: 1, backgroundColor: colors.background },
+  screen: { flex: 1, backgroundColor: colors.bg },
+  container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
   avatar: { alignSelf: 'center', marginVertical: spacing.sm },
   title: {
     fontSize: fontSize.xl,
     fontWeight: fontWeight.extrabold,
-    color: colors.ink,
+    color: colors.fg,
     marginTop: spacing.sm,
   },
-  subtitle: { fontSize: fontSize.md, color: colors.grey, marginBottom: spacing.md },
+  subtitle: { fontSize: fontSize.md, color: colors.fgMuted, marginBottom: spacing.md },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -211,24 +211,24 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   input: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: borderWidth.medium,
-    borderColor: colors.line,
-    borderRadius: radius.md,
+    borderColor: colors.border,
+    borderRadius: radius.control,
     padding: spacing.ms,
     fontSize: fontSize.base,
-    color: colors.ink,
+    color: colors.fg,
     marginBottom: spacing.md,
   },
   bubble: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: borderWidth.medium,
-    borderColor: colors.line,
-    borderRadius: radius.md,
+    borderColor: colors.border,
+    borderRadius: radius.cardSm,
     padding: spacing.ms,
     marginBottom: spacing.lg,
   },
-  bubbleText: { fontSize: fontSize.md, color: colors.inkSoft },
+  bubbleText: { fontSize: fontSize.md, color: colors.fgSecondary },
   btnRow: {
     flexDirection: 'row',
     gap: spacing.sm,

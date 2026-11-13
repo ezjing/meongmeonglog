@@ -80,6 +80,10 @@ slice 안은 목적별 세그먼트로 나눈다. 필요한 것만 만든다.
 | 한 화면에서만 쓰는 조합 | `pages/<화면>` |
 | 로그인 사용자 id 등 전역 세션 | `shared/session` |
 
+## 디자인 토큰
+
+색·모서리·그림자는 [docs/design-tokens.md](design-tokens.md)의 3단계 토큰을 따른다. 화면 코드는 `@/shared/config/theme`의 의미(2단계) 토큰만 쓰고, 팔레트나 색 값을 직접 쓰지 않는다 (lint 에러).
+
 ## 플랫폼별 파일 (웹 지원 대비)
 
 플랫폼마다 구현이 다르면 같은 세그먼트에 `.web.tsx` / `.native.tsx`로 나눈다(예: `features/walk-session/ui/WalkMap.web.tsx`). public API는 그대로 유지한다.
@@ -89,4 +93,5 @@ slice 안은 목적별 세그먼트로 나눈다. 필요한 것만 만든다.
 - [ ] 새 파일이 위 표의 올바른 레이어·slice·세그먼트에 있다
 - [ ] 다른 slice에서 쓰는 이름을 그 slice의 `index.ts`에 명시해서 추가했다
 - [ ] 쓰지 않게 된 public API export를 지웠다
+- [ ] 색·모서리·그림자는 `@/shared/config/theme`의 의미 토큰을 용도에 맞게 썼다
 - [ ] `npx tsc --noEmit`, `npm run lint`가 통과한다

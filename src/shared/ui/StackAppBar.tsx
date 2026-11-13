@@ -22,7 +22,7 @@ interface StackAppBarProps {
 }
 
 const APP_BAR_HEIGHT = 44;
-const sideSize = sizes.control;
+const sideSize = sizes.iconButton;
 
 export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAppBarProps) {
   return (
@@ -44,7 +44,7 @@ export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAp
           <SymbolView
             name={{ ios: 'square.and.arrow.up', android: 'share', web: 'share' }}
             size={iconSize.sm}
-            tintColor={colors.ink}
+            tintColor={colors.fg}
           />
         </IconButton>
       ) : (
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
     position: 'relative',
   },
   raised: { zIndex: zIndex.base },
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.display,
     lineHeight: lineHeight.lg,
     fontWeight: fontWeight.bold,
-    color: colors.ink,
+    color: colors.fg,
     marginTop: -spacing.xxs,
   },
   title: {
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: fontWeight.bold,
     fontSize: fontSize.base,
-    color: colors.ink,
+    color: colors.fg,
   },
   sidePlaceholder: {
     width: sideSize,

@@ -228,11 +228,11 @@ export function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   headerMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms },
-  dogName: { fontSize: fontSize.lg, fontWeight: fontWeight.extrabold, color: colors.ink },
-  dogBreed: { fontSize: fontSize.sm, color: colors.grey },
+  dogName: { fontSize: fontSize.lg, fontWeight: fontWeight.extrabold, color: colors.fg },
+  dogBreed: { fontSize: fontSize.sm, color: colors.fgMuted },
   statusCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -240,13 +240,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   statusBody: { flex: 1, marginRight: spacing.sm },
-  statusText: { fontSize: fontSize.md, color: colors.inkSoft },
-  statusSubtext: { fontSize: fontSize.sm, color: colors.grey, marginTop: spacing.xxs },
+  statusText: { fontSize: fontSize.md, color: colors.fgSecondary },
+  statusSubtext: { fontSize: fontSize.sm, color: colors.fgMuted, marginTop: spacing.xxs },
   walkCta: {
     width: WALK_CTA_SIZE,
     height: WALK_CTA_SIZE,
     borderRadius: radius.full,
-    backgroundColor: colors.apricot,
+    backgroundColor: colors.primary,
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   walkCtaPressed: { opacity: opacity.pressed, transform: [{ scale: scale.pressed }] },
   walkCtaEmoji: { fontSize: fontSize.displayLg },
   walkCtaLabel: {
-    color: colors.white,
+    color: colors.fgOnPrimary,
     fontWeight: fontWeight.bold,
     fontSize: fontSize.base,
     marginTop: spacing.xs,
@@ -264,9 +264,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
-    color: colors.grey,
+    color: colors.fgMuted,
     marginBottom: spacing.sm,
   },
   recentCard: { marginBottom: spacing.sm },
-  emptyText: { fontSize: fontSize.md, color: colors.grey },
+  emptyText: { fontSize: fontSize.md, color: colors.fgMuted },
 });

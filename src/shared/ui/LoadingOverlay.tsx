@@ -172,7 +172,7 @@ export function LoadingOverlayScreen({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   backdrop: {
     flex: 1,
@@ -193,32 +193,32 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '78%',
-    backgroundColor: colors.white,
-    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+    borderRadius: radius.modal,
     paddingVertical: spacing.xl,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
-    ...shadows.overlay,
+    ...shadows.modal,
   },
   spinner: {
     width: SPINNER_SIZE,
     height: SPINNER_SIZE,
     borderRadius: radius.full,
     borderWidth: borderWidth.heavy,
-    borderColor: colors.line,
-    borderTopColor: colors.apricot,
+    borderColor: colors.border,
+    borderTopColor: colors.primary,
   },
   title: {
     marginTop: spacing.md,
     marginBottom: spacing.xs,
     fontSize: fontSize.base,
     fontWeight: fontWeight.extrabold,
-    color: colors.ink,
+    color: colors.fg,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: fontSize.sm,
-    color: colors.grey,
+    color: colors.fgMuted,
     textAlign: 'center',
   },
   pawRow: {

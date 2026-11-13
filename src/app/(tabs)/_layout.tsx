@@ -31,8 +31,8 @@ export default function TabsLayout() {
             height: TAB_BAR_HEIGHT + insets.bottom,
             paddingBottom: insets.bottom,
           },
-          tabBarActiveTintColor: colors.apricotDark,
-          tabBarInactiveTintColor: colors.grey,
+          tabBarActiveTintColor: colors.primaryFg,
+          tabBarInactiveTintColor: colors.fgMuted,
           tabBarLabelStyle: styles.tabLabel,
         }}
       >
@@ -74,11 +74,11 @@ const styles = StyleSheet.create({
   tabIconInactive: { opacity: opacity.disabled },
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   tabBar: {
-    backgroundColor: colors.white,
-    borderTopColor: colors.line,
+    backgroundColor: colors.surface,
+    borderTopColor: colors.border,
   },
   tabLabel: {
     fontSize: fontSize.xs,

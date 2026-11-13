@@ -31,32 +31,32 @@ interface ButtonProps extends PressableProps {
 
 const variantStyles: Record<ButtonVariant, { container: ViewStyle; text: { color: string } }> = {
   primary: {
-    container: { backgroundColor: colors.apricot },
-    text: { color: colors.white },
+    container: { backgroundColor: colors.primary },
+    text: { color: colors.fgOnPrimary },
   },
   outline: {
     container: {
       backgroundColor: 'transparent',
       borderWidth: borderWidth.medium,
-      borderColor: colors.ink,
+      borderColor: colors.borderStrong,
     },
-    text: { color: colors.ink },
+    text: { color: colors.fg },
   },
   soft: {
     container: {
-      backgroundColor: colors.white,
+      backgroundColor: colors.surface,
       borderWidth: borderWidth.thin,
-      borderColor: colors.line,
+      borderColor: colors.border,
     },
-    text: { color: colors.ink },
+    text: { color: colors.fg },
   },
   kakao: {
-    container: { backgroundColor: colors.kakao, borderRadius: radius.md },
-    text: { color: colors.kakaoText },
+    container: { backgroundColor: colors.kakao, borderRadius: radius.control },
+    text: { color: colors.kakaoFg },
   },
   naver: {
-    container: { backgroundColor: colors.naver, borderRadius: radius.md },
-    text: { color: colors.white },
+    container: { backgroundColor: colors.naver, borderRadius: radius.control },
+    text: { color: colors.naverFg },
   },
 };
 
@@ -91,7 +91,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: radius.lg,
+    borderRadius: radius.controlLg,
     paddingVertical: spacing.ms,
     paddingHorizontal: spacing.md,
     alignItems: 'center',

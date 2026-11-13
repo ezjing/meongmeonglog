@@ -89,7 +89,7 @@ export function WalkMap({ routePath }: WalkMapProps) {
         {routePath.length > 1 && (
           <Polyline
             coordinates={routePath}
-            strokeColor={colors.apricot}
+            strokeColor={colors.primary}
             strokeWidth={ROUTE_STROKE_WIDTH}
           />
         )}
@@ -112,18 +112,18 @@ export function WalkMap({ routePath }: WalkMapProps) {
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
-  map: { flex: 1, backgroundColor: colors.background },
+  map: { flex: 1, backgroundColor: colors.bg },
   recenterBtn: {
     position: 'absolute',
     right: spacing.ms,
     bottom: spacing.ms,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radius.full,
-    width: sizes.control,
-    height: sizes.control,
+    width: sizes.iconButton,
+    height: sizes.iconButton,
     alignItems: 'center',
     justifyContent: 'center',
-    ...shadows.sm,
+    ...shadows.control,
   },
   recenterText: { fontSize: fontSize.lg },
 });

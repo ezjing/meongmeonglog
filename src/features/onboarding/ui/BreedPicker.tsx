@@ -49,7 +49,7 @@ export function BreedPicker({ value, onSelect }: BreedPickerProps) {
           value={query}
           onChangeText={setQuery}
           placeholder="품종 검색"
-          placeholderTextColor={colors.grey}
+          placeholderTextColor={colors.fgSubtle}
           autoCorrect={false}
         />
 
@@ -79,24 +79,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: borderWidth.medium,
-    borderColor: colors.line,
-    borderRadius: radius.md,
+    borderColor: colors.border,
+    borderRadius: radius.control,
     padding: spacing.ms,
     marginBottom: spacing.ms,
   },
-  triggerText: { fontSize: fontSize.base, color: colors.ink, flex: 1 },
-  placeholder: { color: colors.grey },
-  chevron: { fontSize: fontSize.lg, color: colors.grey, marginLeft: spacing.sm },
+  triggerText: { fontSize: fontSize.base, color: colors.fg, flex: 1 },
+  placeholder: { color: colors.fgMuted },
+  chevron: { fontSize: fontSize.lg, color: colors.fgMuted, marginLeft: spacing.sm },
   search: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.surfaceMuted,
     borderWidth: borderWidth.medium,
-    borderColor: colors.line,
-    borderRadius: radius.md,
+    borderColor: colors.border,
+    borderRadius: radius.control,
     padding: spacing.ms,
     fontSize: fontSize.base,
-    color: colors.ink,
+    color: colors.fg,
     marginBottom: spacing.sm,
   },
   list: {
@@ -107,9 +107,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
     paddingVertical: spacing.md,
     borderBottomWidth: borderWidth.hairline,
-    borderBottomColor: colors.line,
+    borderBottomColor: colors.border,
   },
-  optionActive: { backgroundColor: colors.quoteBg },
-  optionText: { fontSize: fontSize.base, color: colors.ink },
+  optionActive: { backgroundColor: colors.primarySubtle },
+  optionText: { fontSize: fontSize.base, color: colors.fg },
   optionTextActive: { fontWeight: fontWeight.bold },
 });

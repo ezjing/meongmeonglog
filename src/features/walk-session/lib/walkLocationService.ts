@@ -42,7 +42,7 @@ export async function startWalkTracking(activeWalk: WalkSession): Promise<void> 
         foregroundService: {
           notificationTitle: '멍멍로그',
           notificationBody: '산책 경로를 기록하고 있어요',
-          notificationColor: colors.apricot,
+          notificationColor: colors.primary,
         },
       });
       return;

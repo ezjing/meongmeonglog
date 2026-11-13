@@ -109,7 +109,7 @@ export function DogBasicScreen() {
             value={name}
             onChangeText={(text) => setBasic({ name: text })}
             placeholder={DEFAULT_DOG_NAME}
-            placeholderTextColor={colors.grey}
+            placeholderTextColor={colors.fgSubtle}
           />
 
           <Text style={styles.label}>품종</Text>
@@ -121,7 +121,7 @@ export function DogBasicScreen() {
             value={birthDate}
             onChangeText={(text) => setBasic({ birthDate: text })}
             placeholder="2023-05-12"
-            placeholderTextColor={colors.grey}
+            placeholderTextColor={colors.fgSubtle}
           />
 
           <Text style={styles.label}>몸무게 (kg)</Text>
@@ -130,7 +130,7 @@ export function DogBasicScreen() {
             value={weightKg}
             onChangeText={(text) => setBasic({ weightKg: text.replace(/[^0-9.]/g, '') })}
             placeholder="3.5"
-            placeholderTextColor={colors.grey}
+            placeholderTextColor={colors.fgSubtle}
             keyboardType="decimal-pad"
           />
 
@@ -177,20 +177,20 @@ export function DogBasicScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  container: { flex: 1, backgroundColor: colors.background },
+  screen: { flex: 1, backgroundColor: colors.bg },
+  container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   progressWrap: { marginBottom: spacing.sm, paddingHorizontal: spacing.xs },
   title: {
     fontSize: fontSize.xl,
     fontWeight: fontWeight.extrabold,
-    color: colors.ink,
+    color: colors.fg,
     marginTop: spacing.sm,
   },
-  subtitle: { fontSize: fontSize.md, color: colors.grey, marginBottom: spacing.md },
+  subtitle: { fontSize: fontSize.md, color: colors.fgMuted, marginBottom: spacing.md },
   editSubtitle: {
     fontSize: fontSize.md,
-    color: colors.grey,
+    color: colors.fgMuted,
     marginBottom: spacing.md,
     marginTop: spacing.xs,
   },
@@ -198,17 +198,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: fontSize.sm,
     fontWeight: fontWeight.bold,
-    color: colors.inkSoft,
+    color: colors.fgSecondary,
     marginBottom: spacing.xs,
   },
   input: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: borderWidth.medium,
-    borderColor: colors.line,
-    borderRadius: radius.md,
+    borderColor: colors.border,
+    borderRadius: radius.control,
     padding: spacing.ms,
     fontSize: fontSize.base,
-    color: colors.ink,
+    color: colors.fg,
     marginBottom: spacing.ms,
   },
   genderRow: {
@@ -219,15 +219,15 @@ const styles = StyleSheet.create({
   genderBtn: {
     flex: 1,
     paddingVertical: spacing.ms,
-    borderRadius: radius.md,
+    borderRadius: radius.control,
     borderWidth: borderWidth.medium,
-    borderColor: colors.line,
-    backgroundColor: colors.white,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     alignItems: 'center',
   },
-  genderBtnActive: { backgroundColor: colors.ink, borderColor: colors.ink },
-  genderText: { fontSize: fontSize.base, fontWeight: fontWeight.bold, color: colors.inkSoft },
-  genderTextActive: { color: colors.white },
+  genderBtnActive: { backgroundColor: colors.surfaceInverse, borderColor: colors.borderStrong },
+  genderText: { fontSize: fontSize.base, fontWeight: fontWeight.bold, color: colors.fgSecondary },
+  genderTextActive: { color: colors.fgInverse },
   btnRow: {
     flexDirection: 'row',
     gap: spacing.sm,
