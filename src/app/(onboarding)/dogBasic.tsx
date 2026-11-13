@@ -63,6 +63,8 @@ export default function DogBasicScreen() {
     setPersonality({
       personality: dog.personality,
       speechStyle: dog.speechStyle ?? '기본',
+      customPersonality: dog.customPersonality ?? '',
+      customSpeechStyle: dog.customSpeechStyle ?? '',
     });
     setSyncedDogId(dog.dogId);
   }, [isEditMode, dog, syncedDogId, setSyncedDogId, setBasic, setPersonality]);

@@ -72,6 +72,8 @@ export default function WelcomeScreen() {
           gender: store.gender,
           personality: store.personality,
           speechStyle: store.speechStyle,
+          customPersonality: store.customPersonality.trim(),
+          customSpeechStyle: store.customSpeechStyle.trim(),
           weightKg: parseWeightKg(store.weightKg),
           profileImageUrl,
         });
@@ -90,7 +92,7 @@ export default function WelcomeScreen() {
         dogName: store.name,
         personality: store.personality,
         speechStyle: store.speechStyle,
-        customSpeechStyle: store.customSpeechStyle,
+        customSpeechStyle: store.customSpeechStyle.trim(),
       });
     } catch {
       text = `안녕! 나는 ${store.name}야. 앞으로 같이 산책 많이 하자!`;

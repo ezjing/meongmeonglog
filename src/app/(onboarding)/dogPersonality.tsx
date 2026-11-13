@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { DogAvatar } from '@/components/dog/DogAvatar';
 import { Button } from '@/components/ui/Button';
@@ -15,6 +15,10 @@ import { uploadDogProfileImage } from '@/lib/api/dogApi';
 import { useAuthStore, useOnboardingStore } from '@/stores/walkStore';
 
 const AVATAR_SIZE = 64;
+/** '기타'를 고르면 직접 입력칸을 보여준다 */
+const OTHER_OPTION = '기타';
+/** 직접 입력값은 AI 프롬프트에 그대로 들어가므로 길이를 제한한다 */
+const CUSTOM_INPUT_MAX_LENGTH = 50;
 
 function parseWeightKg(value: string): number | null {
   const parsed = Number.parseFloat(value);
@@ -40,16 +44,35 @@ export default function DogPersonalityScreen() {
     weightKg,
     personality,
     speechStyle,
+    customPersonality,
+    customSpeechStyle,
     profileImageUri,
     setPersonality,
     reset,
   } = store;
 
+  const isOtherPersonality = personality.includes(OTHER_OPTION);
+  const isOtherSpeechStyle = speechStyle === OTHER_OPTION;
+  // '기타'를 골랐는데 비워두면 조용히 기본 말투로 바뀌므로 입력해야 넘어갈 수 있다
+  const isCustomInputMissing =
+    (isOtherPersonality && !customPersonality.trim()) ||
+    (isOtherSpeechStyle && !customSpeechStyle.trim());
+  const bubblePersonality = personality.filter((p) => p !== OTHER_OPTION);
+
   const togglePersonality = (item: string) => {
-    const next = personality.includes(item)
-      ? personality.filter((p) => p !== item)
-      : [...personality, item];
-    setPersonality({ personality: next });
+    const isSelected = personality.includes(item);
+    const next = isSelected ? personality.filter((p) => p !== item) : [...personality, item];
+    setPersonality({
+      personality: next,
+      ...(item === OTHER_OPTION && isSelected ? { customPersonality: '' } : {}),
+    });
+  };
+
+  const selectSpeechStyle = (item: string) => {
+    setPersonality({
+      speechStyle: item,
+      ...(item !== OTHER_OPTION ? { customSpeechStyle: '' } : {}),
+    });
   };
 
   const handleNext = async () => {
@@ -75,6 +98,8 @@ export default function DogPersonalityScreen() {
           gender,
           personality,
           speechStyle,
+          customPersonality: isOtherPersonality ? customPersonality.trim() : '',
+          customSpeechStyle: isOtherSpeechStyle ? customSpeechStyle.trim() : '',
           weightKg: parseWeightKg(weightKg),
           profileImageUrl,
         },
@@ -123,6 +148,16 @@ export default function DogPersonalityScreen() {
             />
           ))}
         </View>
+        {isOtherPersonality ? (
+          <TextInput
+            style={styles.input}
+            value={customPersonality}
+            onChangeText={(text) => setPersonality({ customPersonality: text })}
+            placeholder="예: 산책만 나가면 신나서 뛰어다녀요"
+            placeholderTextColor={colors.grey}
+            maxLength={CUSTOM_INPUT_MAX_LENGTH}
+          />
+        ) : null}
 
         <Text style={styles.subtitle}>말투 (선택사항)</Text>
         <View style={styles.chipRow}>
@@ -131,14 +166,24 @@ export default function DogPersonalityScreen() {
               key={item}
               label={item}
               selected={speechStyle === item}
-              onPress={() => setPersonality({ speechStyle: item })}
+              onPress={() => selectSpeechStyle(item)}
             />
           ))}
         </View>
+        {isOtherSpeechStyle ? (
+          <TextInput
+            style={styles.input}
+            value={customSpeechStyle}
+            onChangeText={(text) => setPersonality({ customSpeechStyle: text })}
+            placeholder="예: 문장 끝에 '~멍!'을 붙여요"
+            placeholderTextColor={colors.grey}
+            maxLength={CUSTOM_INPUT_MAX_LENGTH}
+          />
+        ) : null}
 
         <View style={styles.bubble}>
           <Text style={styles.bubbleText}>
-            🐾 &quot;{personality.slice(0, 2).join('하고 ') || '우리 아이'} 말투로 일기를
+            🐾 &quot;{bubblePersonality.slice(0, 2).join('하고 ') || '우리 아이'} 말투로 일기를
             써줄게!&quot;
           </Text>
         </View>
@@ -152,7 +197,7 @@ export default function DogPersonalityScreen() {
           />
           <Button
             label={isEditMode ? '저장' : '다음'}
-            disabled={personality.length === 0 || updateDog.isPending}
+            disabled={personality.length === 0 || isCustomInputMissing || updateDog.isPending}
             onPress={handleNext}
             style={styles.nextBtn}
           />
@@ -179,6 +224,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  input: {
+    backgroundColor: colors.white,
+    borderWidth: borderWidth.medium,
+    borderColor: colors.line,
+    borderRadius: radius.md,
+    padding: spacing.ms,
+    fontSize: fontSize.base,
+    color: colors.ink,
     marginBottom: spacing.md,
   },
   bubble: {
