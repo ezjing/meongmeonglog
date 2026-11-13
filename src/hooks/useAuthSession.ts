@@ -1,12 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import {
-  signInWithProvider,
-  signOut,
-  deleteAccount,
-  getCurrentUserEmail,
-  getCurrentUserId,
-} from '@/lib/api/authApi';
+import { signInWithProvider, signOut, deleteAccount, getCurrentUserEmail } from '@/lib/api/authApi';
 import { fetchDogs, createDog, updateDog } from '@/lib/api/dogApi';
 import { useAuthStore, useWalkStore } from '@/stores/walkStore';
 import type { AuthProvider } from '@/types/database';
@@ -92,10 +86,4 @@ export function useUpdateDog() {
       updateDog(dogId, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dogs'] }),
   });
-}
-
-export async function resolveUserId(): Promise<string | null> {
-  const stored = useAuthStore.getState().userId;
-  if (stored) return stored;
-  return getCurrentUserId();
 }

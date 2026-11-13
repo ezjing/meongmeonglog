@@ -1,4 +1,4 @@
-export type DogBreedDefinition = {
+type DogBreedDefinition = {
   key: string;
   label: string;
   englishName?: string;
@@ -77,15 +77,3 @@ export function filterDogBreeds(breeds: DogBreedOption[], query: string): DogBre
   if (!q) return breeds;
   return breeds.filter((b) => b.label.toLowerCase().includes(q) || b.key.toLowerCase().includes(q));
 }
-
-export const dogBreedLabelByKey = Object.fromEntries(
-  dogBreeds.map((breed) => [breed.key, breed.label]),
-) as Record<string, string>;
-
-export const englishNameToBreedKey = Object.fromEntries(
-  dogBreeds
-    .filter((breed): breed is DogBreedDefinition & { englishName: string } =>
-      Boolean(breed.englishName),
-    )
-    .map((breed) => [breed.englishName, breed.key]),
-) as Record<string, string>;

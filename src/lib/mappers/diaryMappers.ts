@@ -8,8 +8,6 @@ export function toDiary(row: DiaryRow): Diary {
     dogId: row.dog_id,
     content: row.diary_content,
     dailyQuote: row.daily_quote,
-    aiModel: row.ai_model,
-    generatedAt: row.generated_at,
     createdAt: row.created_at,
   };
 }

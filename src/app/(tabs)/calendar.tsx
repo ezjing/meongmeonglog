@@ -34,10 +34,7 @@ export default function CalendarScreen() {
 
   const cells: (null | { date: string; hasDiary: boolean })[] = [
     ...Array(firstDay).fill(null),
-    ...(calendarDays ?? []).map((d) => ({
-      date: d.date,
-      hasDiary: d.hasDiary,
-    })),
+    ...(calendarDays ?? []),
   ];
 
   const renderDiaryCard = (diary: DiaryListItem) => (

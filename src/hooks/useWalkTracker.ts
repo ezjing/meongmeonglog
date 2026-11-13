@@ -150,9 +150,5 @@ export async function requestLocationPermission(): Promise<boolean> {
   return requestWalkLocationPermissions();
 }
 
-export {
-  startWalkTracking,
-  stopWalkTracking,
-  pauseWalkLocationUpdates,
-} from '@/lib/walk/walkLocationService';
+export { stopWalkTracking } from '@/lib/walk/walkLocationService';
 export { freezeWalkSession } from '@/lib/walk/freezeWalkSession';

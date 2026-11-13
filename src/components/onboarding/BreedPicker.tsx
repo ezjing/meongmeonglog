@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/overlay';
-import { filterDogBreeds, type DogBreedOption } from '@/constants/dogBreedLabels';
+import { dogBreedOptions, filterDogBreeds, type DogBreedOption } from '@/constants/dogBreedLabels';
 import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/constants/theme';
-import { useDogBreeds } from '@/hooks/useDogBreeds';
 
 const LIST_MAX_HEIGHT = 280;
 
@@ -16,12 +15,10 @@ interface BreedPickerProps {
 export function BreedPicker({ value, onSelect }: BreedPickerProps) {
   const [visible, setVisible] = useState(false);
   const [query, setQuery] = useState('');
-  const { data: breeds = [], isLoading, isError } = useDogBreeds();
 
-  const filtered = useMemo(() => filterDogBreeds(breeds, query), [breeds, query]);
+  const filtered = useMemo(() => filterDogBreeds(dogBreedOptions, query), [query]);
 
-  const selectedLabel =
-    breeds.find((b) => b.label === value)?.label ?? (value || '품종을 선택해주세요');
+  const selectedLabel = value || '품종을 선택해주세요';
 
   const handleSelect = (option: DogBreedOption) => {
     onSelect(option.label);
@@ -56,28 +53,22 @@ export function BreedPicker({ value, onSelect }: BreedPickerProps) {
           autoCorrect={false}
         />
 
-        {isLoading ? (
-          <ActivityIndicator style={styles.loader} color={colors.ink} />
-        ) : isError ? (
-          <Text style={styles.errorText}>품종 목록을 불러오지 못했습니다.</Text>
-        ) : (
-          <FlatList
-            data={filtered}
-            keyExtractor={(item) => item.key}
-            keyboardShouldPersistTaps="handled"
-            style={styles.list}
-            renderItem={({ item }) => (
-              <Pressable
-                style={[styles.option, value === item.label && styles.optionActive]}
-                onPress={() => handleSelect(item)}
-              >
-                <Text style={[styles.optionText, value === item.label && styles.optionTextActive]}>
-                  {item.label}
-                </Text>
-              </Pressable>
-            )}
-          />
-        )}
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => item.key}
+          keyboardShouldPersistTaps="handled"
+          style={styles.list}
+          renderItem={({ item }) => (
+            <Pressable
+              style={[styles.option, value === item.label && styles.optionActive]}
+              onPress={() => handleSelect(item)}
+            >
+              <Text style={[styles.optionText, value === item.label && styles.optionTextActive]}>
+                {item.label}
+              </Text>
+            </Pressable>
+          )}
+        />
       </BottomSheet>
     </>
   );
@@ -112,8 +103,6 @@ const styles = StyleSheet.create({
     maxHeight: LIST_MAX_HEIGHT,
     marginBottom: spacing.sm,
   },
-  loader: { marginVertical: spacing.lg },
-  errorText: { textAlign: 'center', color: colors.grey, marginVertical: spacing.lg },
   option: {
     paddingHorizontal: spacing.xs,
     paddingVertical: spacing.md,

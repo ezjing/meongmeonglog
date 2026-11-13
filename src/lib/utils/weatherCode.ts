@@ -1,4 +1,4 @@
-export interface WeatherDisplay {
+interface WeatherDisplay {
   condition: string;
   icon: string;
 }

@@ -8,7 +8,6 @@ interface WalkStore {
   activeWalk: WalkSession | null;
   distanceMeter: number;
   frozenElapsedSec: number | null;
-  locationBuffer: { latitude: number; longitude: number }[];
   walkPath: { latitude: number; longitude: number }[];
   pendingWalkPhotosByWalkId: Record<string, WalkPhoto[]>;
   setActiveWalk: (walk: WalkSession | null) => void;
@@ -21,9 +20,6 @@ interface WalkStore {
   }) => void;
   setPendingWalkPhotos: (walkId: string, photos: WalkPhoto[]) => void;
   clearPendingWalkPhotos: (walkId: string) => void;
-  addDistance: (meters: number) => void;
-  addLocation: (latitude: number, longitude: number) => void;
-  flushLocationBuffer: () => { latitude: number; longitude: number }[];
   reset: () => void;
 }
 
@@ -31,7 +27,6 @@ export const useWalkStore = create<WalkStore>((set, get) => ({
   activeWalk: null,
   distanceMeter: 0,
   frozenElapsedSec: null,
-  locationBuffer: [],
   walkPath: [],
   pendingWalkPhotosByWalkId: {},
   setActiveWalk: (walk) => set({ activeWalk: walk }),
@@ -41,7 +36,6 @@ export const useWalkStore = create<WalkStore>((set, get) => ({
       distanceMeter: state.distanceMeter,
       walkPath: state.walkPath,
       frozenElapsedSec: state.frozenElapsedSec ?? null,
-      locationBuffer: [],
     }),
   freezeWalkElapsed: (elapsedSec) => set({ frozenElapsedSec: elapsedSec }),
   updateActiveWalkWeather: (weather) => {
@@ -69,23 +63,11 @@ export const useWalkStore = create<WalkStore>((set, get) => ({
       delete next[walkId];
       return { pendingWalkPhotosByWalkId: next };
     }),
-  addDistance: (meters) => set({ distanceMeter: get().distanceMeter + meters }),
-  addLocation: (latitude, longitude) =>
-    set({
-      locationBuffer: [...get().locationBuffer, { latitude, longitude }],
-      walkPath: [...get().walkPath, { latitude, longitude }],
-    }),
-  flushLocationBuffer: () => {
-    const buffer = get().locationBuffer;
-    set({ locationBuffer: [] });
-    return buffer;
-  },
   reset: () =>
     set({
       activeWalk: null,
       distanceMeter: 0,
       frozenElapsedSec: null,
-      locationBuffer: [],
       walkPath: [],
     }),
 }));
@@ -164,7 +146,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   setSessionEndedElsewhere: (value) => set({ sessionEndedElsewhere: value }),
 }));
 
-export interface FinishWalkForm {
+interface FinishWalkForm {
   photoUris: string[];
   peeSelected: boolean;
   poopSelected: boolean;

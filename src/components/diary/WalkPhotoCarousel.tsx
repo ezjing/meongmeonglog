@@ -11,8 +11,6 @@ interface WalkPhotoCarouselProps {
   photos: WalkPhoto[];
   width: number;
   height: number;
-  borderRadius?: number;
-  showDots?: boolean;
   onPhotoPress?: (photo: WalkPhoto, index: number) => void;
   children?: ReactNode;
 }
@@ -21,15 +19,13 @@ export function WalkPhotoCarousel({
   photos,
   width,
   height,
-  borderRadius = 0,
-  showDots = true,
   onPhotoPress,
   children,
 }: WalkPhotoCarouselProps) {
   const [photoIndex, setPhotoIndex] = useState(0);
 
   return (
-    <View style={[styles.container, { width, height, borderRadius, backgroundColor: colors.clay }]}>
+    <View style={[styles.container, { width, height, backgroundColor: colors.clay }]}>
       {photos.length > 0 ? (
         <ScrollView
           horizontal
@@ -64,7 +60,7 @@ export function WalkPhotoCarousel({
         </View>
       ) : null}
 
-      {showDots && photos.length > 1 ? (
+      {photos.length > 1 ? (
         <View style={styles.dots} pointerEvents="none">
           {photos.map((photo, i) => (
             <View key={photo.id} style={[styles.dot, i === photoIndex && styles.dotActive]} />

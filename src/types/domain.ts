@@ -48,8 +48,6 @@ export interface Diary {
   dogId: string;
   content: string;
   dailyQuote: string;
-  aiModel: string | null;
-  generatedAt: string;
   createdAt: string;
 }
 

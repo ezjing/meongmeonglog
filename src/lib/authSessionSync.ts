@@ -7,7 +7,7 @@ import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { useAuthStore, useWalkStore } from '@/stores/walkStore';
 
 /** 세션이 끊긴 기기의 로그인 상태를 정리한다. userId가 비워지면 Stack.Protected가 로그인 화면으로 보낸다 */
-export async function handleSessionLost() {
+async function handleSessionLost() {
   await clearLocalAuth();
   useAuthStore.getState().setSessionEndedElsewhere(true);
   useAuthStore.getState().clearSession();

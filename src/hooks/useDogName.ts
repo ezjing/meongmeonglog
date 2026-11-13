@@ -1,7 +1,7 @@
 import { DEFAULT_DOG_NAME } from '@/constants/dog';
 import { useDogs } from '@/hooks/useAuthSession';
 
-export function resolveDogDisplayName(...candidates: (string | null | undefined)[]): string {
+function resolveDogDisplayName(...candidates: (string | null | undefined)[]): string {
   for (const name of candidates) {
     const trimmed = name?.trim();
     if (trimmed) return trimmed;
@@ -9,7 +9,7 @@ export function resolveDogDisplayName(...candidates: (string | null | undefined)
   return DEFAULT_DOG_NAME;
 }
 
-export function useRegisteredDogName(): string | undefined {
+function useRegisteredDogName(): string | undefined {
   const { data: dogs } = useDogs();
   return dogs?.[0]?.name?.trim() || undefined;
 }

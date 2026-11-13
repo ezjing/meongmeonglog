@@ -12,7 +12,7 @@ import {
 
 const MULTILINE_MIN_HEIGHT = 72;
 
-export interface GuardianProfileFormValues {
+interface GuardianProfileFormValues {
   guardianTitle: string;
   parentingStyle: string;
   currentConcern: string;

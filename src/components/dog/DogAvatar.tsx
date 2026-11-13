@@ -21,7 +21,7 @@ export function DogAvatar({ imageUri, size = DEFAULT_SIZE, style }: DogAvatarPro
           contentFit="cover"
         />
       ) : (
-        <Text style={[styles.emoji, { fontSize: size * 0.45 }]}>🐶</Text>
+        <Text style={{ fontSize: size * 0.45 }}>🐶</Text>
       )}
     </View>
   );
@@ -34,5 +34,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  emoji: {},
 });

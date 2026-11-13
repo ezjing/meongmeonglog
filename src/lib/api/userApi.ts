@@ -55,7 +55,7 @@ export async function fetchGuardianProfile(userId: string): Promise<GuardianProf
   return toGuardianProfile(data as UserRow);
 }
 
-export async function uploadGuardianProfileImage(userId: string, uri: string): Promise<string> {
+async function uploadGuardianProfileImage(userId: string, uri: string): Promise<string> {
   const path = `${userId}/guardian-${Date.now()}.jpg`;
   return uploadStorageImage('dog-profiles', path, uri);
 }

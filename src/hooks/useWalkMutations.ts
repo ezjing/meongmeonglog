@@ -8,8 +8,6 @@ import {
   saveWalkEvent,
   uploadWalkPhotos,
   fetchWalk,
-  fetchWalkPhotos,
-  type WalkWeatherPayload,
 } from '@/lib/api/walkApi';
 import type { WalkEvent } from '@/types/domain';
 
@@ -29,8 +27,7 @@ export function useWalk(walkId: string | undefined) {
 
 export function useStartWalk() {
   return useMutation({
-    mutationFn: ({ dogId, weather }: { dogId: string; weather?: WalkWeatherPayload }) =>
-      startWalk(dogId, weather),
+    mutationFn: ({ dogId }: { dogId: string }) => startWalk(dogId),
     onSuccess: () => trackEvent(AnalyticsEvents.walkStarted),
   });
 }
@@ -67,5 +64,3 @@ export function useUploadWalkPhotos() {
       uploadWalkPhotos(walkId, uris),
   });
 }
-
-export { fetchWalkPhotos };

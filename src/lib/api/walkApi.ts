@@ -7,7 +7,6 @@ import type { WalkEvent, WalkPhoto, WalkSession } from '@/types/domain';
 
 const mockWalks = new Map<string, WalkSession>();
 const mockPhotos = new Map<string, WalkPhoto[]>();
-const mockEvents = new Map<string, WalkEvent>();
 
 export interface WalkWeatherPayload {
   weatherCondition: string;
@@ -15,7 +14,7 @@ export interface WalkWeatherPayload {
   weatherIcon: string;
 }
 
-export async function startWalk(dogId: string, weather?: WalkWeatherPayload): Promise<WalkSession> {
+export async function startWalk(dogId: string): Promise<WalkSession> {
   if (!isSupabaseConfigured) {
     const walk: WalkSession = {
       walkId: `walk-${Date.now()}`,
@@ -24,9 +23,9 @@ export async function startWalk(dogId: string, weather?: WalkWeatherPayload): Pr
       endedAt: null,
       durationSec: null,
       distanceMeter: null,
-      weatherCondition: weather?.weatherCondition ?? null,
-      weatherTemp: weather?.weatherTemp ?? null,
-      weatherIcon: weather?.weatherIcon ?? null,
+      weatherCondition: null,
+      weatherTemp: null,
+      weatherIcon: null,
     };
     mockWalks.set(walk.walkId, walk);
     return walk;
@@ -37,9 +36,6 @@ export async function startWalk(dogId: string, weather?: WalkWeatherPayload): Pr
     .insert({
       dog_id: dogId,
       started_at: new Date().toISOString(),
-      weather_condition: weather?.weatherCondition,
-      weather_temp: weather?.weatherTemp,
-      weather_icon: weather?.weatherIcon,
     })
     .select()
     .single();
@@ -81,7 +77,6 @@ export async function cancelWalk(walkId: string): Promise<void> {
   if (!isSupabaseConfigured) {
     mockWalks.delete(walkId);
     mockPhotos.delete(walkId);
-    mockEvents.delete(walkId);
     return;
   }
 
@@ -155,10 +150,7 @@ export async function finishWalk(
 }
 
 export async function saveWalkEvent(walkId: string, event: WalkEvent): Promise<void> {
-  if (!isSupabaseConfigured) {
-    mockEvents.set(walkId, event);
-    return;
-  }
+  if (!isSupabaseConfigured) return;
 
   const { error } = await supabase.from('walk_events').upsert({
     walk_id: walkId,
@@ -255,8 +247,4 @@ export async function fetchWalk(walkId: string): Promise<WalkSession | null> {
 
 export function getMockWalk(walkId: string): WalkSession | undefined {
   return mockWalks.get(walkId);
-}
-
-export function getMockEvent(walkId: string): WalkEvent | undefined {
-  return mockEvents.get(walkId);
 }

@@ -65,7 +65,7 @@ async function clearWalkSession(): Promise<void> {
   await stopWalkTracking().catch(() => {});
 }
 
-export type SupabaseSessionStatus = 'valid' | 'missing' | 'unknown';
+type SupabaseSessionStatus = 'valid' | 'missing' | 'unknown';
 
 /**
  * 앱에 저장된 로그인 사용자와 실제 Supabase 인증 세션이 일치하는지 확인한다.
@@ -144,12 +144,4 @@ export async function getCurrentUserEmail(): Promise<string | null> {
   const email = (data?.email as string | null | undefined) ?? null;
   if (!email || email.endsWith('@meongmeonglog.dev')) return null;
   return email;
-}
-
-export async function getCurrentUserId(): Promise<string | null> {
-  if (!isSupabaseConfigured) {
-    return DEV_AUTH ? 'dev-kakao-user' : null;
-  }
-  const { data } = await supabase.auth.getUser();
-  return data.user?.id ?? null;
 }
