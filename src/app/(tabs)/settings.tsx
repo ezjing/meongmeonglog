@@ -19,7 +19,7 @@ const PROVIDER_LABEL: Record<AuthProvider, string> = {
 };
 
 export default function SettingsScreen() {
-  const { provider, logout, deleteAccount } = useAuthSession();
+  const { provider, logout, deleteAccount, isDeletingAccount } = useAuthSession();
   const { data: accountEmail } = useAccountEmail();
   const { data: dogs } = useDogs();
   const { showAlert, showToast } = useOverlay();
@@ -146,6 +146,7 @@ export default function SettingsScreen() {
           label="회원 탈퇴"
           variant="outline"
           onPress={handleDeleteAccount}
+          disabled={isDeletingAccount}
           style={styles.deleteAccount}
         />
       </ScrollView>
