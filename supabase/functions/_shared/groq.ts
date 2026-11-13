@@ -1,5 +1,7 @@
 /// <reference path="./deno.d.ts" />
 
+import { externalApiSignal } from "./http.ts";
+
 /** 사진 유무와 관계없이 같은 모델(비전 지원)을 쓴다 */
 export const GROQ_MODEL = "qwen/qwen3.8-27b";
 
@@ -74,26 +76,51 @@ function isGroqCompatibleMime(mime: string): boolean {
   return GROQ_SUPPORTED_MIMES.has(mime);
 }
 
+/** Content-Range("bytes 0-15/12345") 또는 Content-Length에서 전체 파일 크기 */
+function readTotalSize(response: Response): number | null {
+  const range = response.headers.get("content-range");
+  const total = range?.split("/")[1];
+  if (total && total !== "*") return Number(total);
+  if (response.status === 200) {
+    const length = response.headers.get("content-length");
+    if (length) return Number(length);
+  }
+  return null;
+}
+
 async function prepareGroqImageInput(
   imageUrl: string,
 ): Promise<{ url: string } | null> {
-  const imageResponse = await fetch(imageUrl);
-  if (!imageResponse.ok) {
+  // 형식 판별에 필요한 앞부분만 받는다 (Groq가 URL로 사진을 직접 받으므로 전체를 내려받지 않음)
+  const headResponse = await fetch(imageUrl, {
+    headers: { Range: "bytes=0-15" },
+    signal: externalApiSignal(),
+  });
+  if (!headResponse.ok) {
     throw new Error("산책 사진을 불러오지 못했습니다.");
   }
 
-  const headerContentType = imageResponse.headers.get("content-type") ??
+  const headerContentType = headResponse.headers.get("content-type") ??
     "image/jpeg";
-  const buffer = await imageResponse.arrayBuffer();
-  const mime = detectMimeFromBuffer(buffer, headerContentType, imageUrl);
+  const prefix = await headResponse.arrayBuffer();
+  const mime = detectMimeFromBuffer(prefix, headerContentType, imageUrl);
 
   if (!isGroqCompatibleMime(mime)) {
     return null;
   }
 
-  if (imageUrl.startsWith("https://") && buffer.byteLength <= 20 * 1024 * 1024) {
+  const totalSize = readTotalSize(headResponse);
+  if (
+    imageUrl.startsWith("https://") && totalSize != null &&
+    totalSize <= 20 * 1024 * 1024
+  ) {
     return { url: imageUrl };
   }
+
+  // URL로 넘길 수 없으면 base64로 보낸다. 서버가 Range를 무시했으면 이미 전체를 받은 상태
+  const buffer = headResponse.status === 200 ? prefix : await (await fetch(imageUrl, {
+    signal: externalApiSignal(),
+  })).arrayBuffer();
 
   if (buffer.byteLength > MAX_BASE64_IMAGE_BYTES) {
     throw new Error(
@@ -216,6 +243,7 @@ export async function generateGroqContent(options: {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify(body),
+    signal: externalApiSignal(),
   });
 
   if (!response.ok) {

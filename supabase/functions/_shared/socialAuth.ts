@@ -23,20 +23,29 @@ function toAuthEmail(provider: SocialProvider, providerUserId: string) {
 }
 
 async function findAuthUserIdByEmail(supabaseAdmin: SupabaseClient, email: string) {
+  // 007 마이그레이션의 DB 함수로 한 번에 찾는다
+  const { data, error } = await supabaseAdmin.rpc('find_auth_user_id_by_email', {
+    target_email: email,
+  });
+  if (!error) return (data as string | null) ?? null;
+
+  // 마이그레이션 적용 전이면 이전 방식(전체 사용자 순회)으로 찾는다
+  console.error('[auth] find_auth_user_id_by_email 실패, 전체 조회로 대체', error.message);
   const target = email.toLowerCase();
   let page = 1;
-
   while (true) {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
-    if (error) throw error;
+    const { data: list, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+      page,
+      perPage: 1000,
+    });
+    if (listError) throw listError;
 
-    const existing = data.users.find((user) => user.email?.toLowerCase() === target);
+    const existing = list.users.find((user) => user.email?.toLowerCase() === target);
     if (existing?.id) return existing.id as string;
 
-    if (data.users.length < 1000) break;
+    if (list.users.length < 1000) break;
     page += 1;
   }
-
   return null;
 }
 

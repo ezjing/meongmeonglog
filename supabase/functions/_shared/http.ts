@@ -5,6 +5,20 @@ export const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+/** 외부 API(Groq·카카오·네이버·사진) 호출 제한 시간 */
+const EXTERNAL_API_TIMEOUT_MS = 30_000;
+const TIMEOUT_MESSAGE = '응답이 늦어 요청을 중단했어요. 잠시 후 다시 시도해주세요.';
+
+/** fetch의 signal에 넣는다: fetch(url, { signal: externalApiSignal() }) */
+export function externalApiSignal(): AbortSignal {
+  return AbortSignal.timeout(EXTERNAL_API_TIMEOUT_MS);
+}
+
+function toErrorMessage(error: unknown): string {
+  if (error instanceof DOMException && error.name === 'TimeoutError') return TIMEOUT_MESSAGE;
+  return (error as Error).message;
+}
+
 export function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -25,7 +39,7 @@ export function serveJson(handler: (req: Request) => Promise<unknown>) {
     try {
       return jsonResponse(await handler(req));
     } catch (error) {
-      return jsonResponse({ error: (error as Error).message }, 400);
+      return jsonResponse({ error: toErrorMessage(error) }, 400);
     }
   });
 }

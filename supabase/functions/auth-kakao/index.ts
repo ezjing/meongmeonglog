@@ -1,3 +1,4 @@
+import { externalApiSignal } from '../_shared/http.ts';
 import { serveSocialAuth, type SocialProfile } from '../_shared/socialAuth.ts';
 
 /** 카카오디벨로퍼스 멍멍로그 앱 ID — 다른 앱에서 발급된 토큰 차단용 */
@@ -8,12 +9,16 @@ async function fetchKakaoProfile(accessToken: string): Promise<SocialProfile> {
 
   const tokenInfoRes = await fetch('https://kapi.kakao.com/v1/user/access_token_info', {
     headers,
+    signal: externalApiSignal(),
   });
   if (!tokenInfoRes.ok) throw new Error('Invalid Kakao token');
   const tokenInfo = await tokenInfoRes.json();
   if (tokenInfo.app_id !== KAKAO_APP_ID) throw new Error('Invalid Kakao token');
 
-  const userRes = await fetch('https://kapi.kakao.com/v2/user/me', { headers });
+  const userRes = await fetch('https://kapi.kakao.com/v2/user/me', {
+    headers,
+    signal: externalApiSignal(),
+  });
   if (!userRes.ok) throw new Error('Invalid Kakao token');
   const kakaoUser = await userRes.json();
   if (!kakaoUser.id || kakaoUser.id !== tokenInfo.id) throw new Error('Invalid Kakao token');

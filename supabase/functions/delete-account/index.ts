@@ -44,16 +44,19 @@ async function deleteUserFiles(
   supabaseAdmin: SupabaseClient,
   userId: string,
 ) {
-  for (const bucket of STORAGE_BUCKETS) {
-    const paths = await listAllFilePaths(supabaseAdmin, bucket, userId);
+  // 버킷끼리는 독립적이라 함께 지운다
+  await Promise.all(
+    STORAGE_BUCKETS.map(async (bucket) => {
+      const paths = await listAllFilePaths(supabaseAdmin, bucket, userId);
 
-    for (let i = 0; i < paths.length; i += LIST_PAGE_SIZE) {
-      const { error } = await supabaseAdmin.storage
-        .from(bucket)
-        .remove(paths.slice(i, i + LIST_PAGE_SIZE));
-      if (error) throw error;
-    }
-  }
+      for (let i = 0; i < paths.length; i += LIST_PAGE_SIZE) {
+        const { error } = await supabaseAdmin.storage
+          .from(bucket)
+          .remove(paths.slice(i, i + LIST_PAGE_SIZE));
+        if (error) throw error;
+      }
+    }),
+  );
 }
 
 serveJson(async (req) => {

@@ -14,23 +14,38 @@ serveJson(async (req) => {
   const supabase = createAdminClient();
   const userId = await getRequestUserId(req, supabase);
 
-  const { data: walk, error: walkError } = await supabase
-    .from("walks")
-    .select("*, dogs(*), walk_events(*), walk_photos(*)")
-    .eq("id", walkId)
-    .single();
+  // 산책·기존 일기·보호자 정보는 서로 의존하지 않으므로 함께 조회한다 (보호자 = 요청한 사용자)
+  const [walkResult, existingDiaryResult, guardianResult] = await Promise.all([
+    supabase
+      .from("walks")
+      .select(
+        "duration_sec, distance_meter, weather_condition, weather_temp, " +
+          "dogs(id, user_id, name, breed, personality, custom_personality, speech_style, custom_speech_style), " +
+          "walk_events(pee_count, poop_count, dog_meeting_level, memo), " +
+          "walk_photos(image_url, sort_order)",
+      )
+      .eq("id", walkId)
+      .single(),
+    supabase
+      .from("diaries")
+      .select("id, diary_content, daily_quote, ai_model")
+      .eq("walk_id", walkId)
+      .maybeSingle(),
+    supabase
+      .from("users")
+      .select("guardian_title, parenting_style, current_concern")
+      .eq("id", userId)
+      .maybeSingle(),
+  ]);
 
+  const { data: walk, error: walkError } = walkResult;
   if (walkError || !walk) throw new Error("Walk not found");
 
   const dog = walk.dogs;
   if (dog?.user_id !== userId) throw new Error("Walk not found");
 
   // 재시도 등으로 이미 생성된 일기가 있으면 새로 만들지 않고 그대로 반환
-  const { data: existingDiary } = await supabase
-    .from("diaries")
-    .select("id, diary_content, daily_quote, ai_model")
-    .eq("walk_id", walkId)
-    .maybeSingle();
+  const existingDiary = existingDiaryResult.data;
 
   if (existingDiary) {
     return {
@@ -41,14 +56,12 @@ serveJson(async (req) => {
     };
   }
 
-  const { data: guardian } = await supabase
-    .from("users")
-    .select("guardian_title, parenting_style, current_concern")
-    .eq("id", dog.user_id)
-    .maybeSingle();
-
+  const guardian = guardianResult.data;
   const event = walk.walk_events?.[0] ?? walk.walk_events;
-  const photos = walk.walk_photos ?? [];
+  // 대표 사진은 첫 번째(sort_order가 가장 작은) 사진
+  const photos = [...(walk.walk_photos ?? [])].sort(
+    (a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order,
+  );
 
   const guardianTitle = guardian?.guardian_title?.trim() || "보호자";
 
