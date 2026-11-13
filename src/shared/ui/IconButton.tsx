@@ -1,4 +1,4 @@
-import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import type React from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -7,26 +7,24 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors, radius, iconSize, sizes, borderWidth, opacity } from '@/shared/config/theme';
+import { colors, radius, sizes, borderWidth, opacity } from '@/shared/config/theme';
 
-type IconButtonIcon = 'back' | 'share';
-
-interface IconButtonProps extends Omit<PressableProps, 'style'> {
-  icon: IconButtonIcon;
+interface IconButtonProps extends Omit<PressableProps, 'style' | 'children'> {
+  children: React.ReactNode;
+  /** 눌렀을 때 살짝 흐려지는 효과 */
+  pressedFeedback?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
-const iconNames: Record<IconButtonIcon, SymbolViewProps['name']> = {
-  back: { ios: 'chevron.left', android: 'arrow_back', web: 'arrow_back' },
-  share: { ios: 'square.and.arrow.up', android: 'share', web: 'share' },
-};
-
-export function IconButton({ icon, style, ...props }: IconButtonProps) {
-  const name = iconNames[icon];
-
+/** 앱바 등에 쓰는 흰색 원형 아이콘 버튼 */
+export function IconButton({ children, pressedFeedback = true, style, ...props }: IconButtonProps) {
   return (
-    <Pressable style={({ pressed }) => [styles.base, pressed && styles.pressed, style]} {...props}>
-      <SymbolView name={name} size={iconSize.md} tintColor={colors.ink} />
+    <Pressable
+      style={({ pressed }) => [styles.base, pressedFeedback && pressed && styles.pressed, style]}
+      accessibilityRole="button"
+      {...props}
+    >
+      {children}
     </Pressable>
   );
 }

@@ -1,5 +1,5 @@
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 import {
   colors,
@@ -10,9 +10,9 @@ import {
   zIndex,
   fontWeight,
   lineHeight,
-  borderWidth,
-  opacity,
 } from '@/shared/config/theme';
+
+import { IconButton } from './IconButton';
 
 interface StackAppBarProps {
   title: string;
@@ -27,24 +27,18 @@ const sideSize = sizes.control;
 export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAppBarProps) {
   return (
     <View style={[styles.bar, style]}>
-      <Pressable
-        style={({ pressed }) => [styles.circleBtn, pressed && styles.pressed]}
-        onPress={onBackPress}
-        accessibilityRole="button"
-        accessibilityLabel="뒤로"
-      >
+      <IconButton style={styles.raised} onPress={onBackPress} accessibilityLabel="뒤로">
         <Text style={styles.backIcon}>‹</Text>
-      </Pressable>
+      </IconButton>
 
       <Text style={styles.title} numberOfLines={1}>
         {title}
       </Text>
 
       {onSharePress ? (
-        <Pressable
-          style={({ pressed }) => [styles.circleBtn, styles.rightAction, pressed && styles.pressed]}
+        <IconButton
+          style={[styles.raised, styles.rightAction]}
           onPress={onSharePress}
-          accessibilityRole="button"
           accessibilityLabel="공유"
         >
           <SymbolView
@@ -52,7 +46,7 @@ export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAp
             size={iconSize.sm}
             tintColor={colors.ink}
           />
-        </Pressable>
+        </IconButton>
       ) : (
         <View style={[styles.sidePlaceholder, styles.rightAction]} />
       )}
@@ -69,17 +63,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     position: 'relative',
   },
-  circleBtn: {
-    width: sideSize,
-    height: sideSize,
-    borderRadius: sideSize / 2,
-    backgroundColor: colors.white,
-    borderWidth: borderWidth.thin,
-    borderColor: colors.line,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: zIndex.base,
-  },
+  raised: { zIndex: zIndex.base },
   backIcon: {
     fontSize: fontSize.display,
     lineHeight: lineHeight.lg,
@@ -102,8 +86,5 @@ const styles = StyleSheet.create({
   },
   rightAction: {
     marginLeft: 'auto',
-  },
-  pressed: {
-    opacity: opacity.pressed,
   },
 });

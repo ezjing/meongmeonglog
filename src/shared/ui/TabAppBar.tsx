@@ -1,14 +1,8 @@
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
-import {
-  colors,
-  spacing,
-  radius,
-  fontSize,
-  sizes,
-  fontWeight,
-  borderWidth,
-} from '@/shared/config/theme';
+import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
+
+import { IconButton } from './IconButton';
 
 const APP_BAR_MIN_HEIGHT = 42;
 
@@ -25,9 +19,9 @@ export function TabAppBar({ title, onMenuPress, children, style }: TabAppBarProp
       <View style={styles.headerMain}>
         {children ?? (title ? <Text style={styles.title}>{title}</Text> : null)}
       </View>
-      <Pressable style={styles.menuBtn} onPress={onMenuPress}>
+      <IconButton pressedFeedback={false} onPress={onMenuPress} accessibilityLabel="메뉴">
         <Text style={styles.menuBtnText}>☰</Text>
-      </Pressable>
+      </IconButton>
     </View>
   );
 }
@@ -49,16 +43,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xxl,
     fontWeight: fontWeight.extrabold,
     color: colors.ink,
-  },
-  menuBtn: {
-    width: sizes.control,
-    height: sizes.control,
-    borderRadius: radius.full,
-    backgroundColor: colors.white,
-    borderWidth: borderWidth.thin,
-    borderColor: colors.line,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   menuBtnText: {
     fontSize: fontSize.lg,
