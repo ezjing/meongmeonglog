@@ -42,12 +42,12 @@ export function ShareScreen() {
         } else {
           showToast({
             message: '📶 이 기기에서는 공유 기능을 사용할 수 없어요',
-            variant: 'default',
+            variant: 'warning',
           });
         }
       }
     } catch {
-      showToast({ message: '⚠️ 이미지 저장에 실패했어요', variant: 'warning' });
+      showToast({ message: '⚠️ 이미지 저장에 실패했어요', variant: 'error' });
     }
   };
 

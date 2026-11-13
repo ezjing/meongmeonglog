@@ -42,7 +42,7 @@ export function WalkActiveScreen() {
     } catch {
       showToast({
         message: '⚠️ 산책 취소에 실패했어요. 잠시 후 다시 시도해 주세요.',
-        variant: 'warning',
+        variant: 'error',
       });
     }
   }, [abandonWalk, activeWalk, showAlert, showToast]);

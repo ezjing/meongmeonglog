@@ -67,7 +67,9 @@
 | 브랜드 | `primary` | brand 500 | 주 버튼·강조 면, 지도 경로 |
 | | `primaryFg` | brand 600 | 주황 글자·아이콘·강조 테두리 |
 | | `primarySubtle` | brand 100 | 오늘의 한마디 등 연한 주황 면 |
-| 상태 | `success` / `danger` | moss500 / red500 | |
+| 상태 | `success` | moss500 | 성공 토스트 |
+| | `warning` | brand 600 | 사용법 안내·입력값 확인 토스트 (흰 굵은 글자 대비를 위해 한 톤 진한 주황) |
+| | `danger` | red500 | 요청 실패 토스트, 위험 행동 버튼 |
 | 외부 서비스 | `kakao` `kakaoFg` `kakaoSymbol` `naver` `naverFg` `instagram` | | 각 서비스 가이드 색 고정 |
 | 그림자 | `shadow` / `shadowStrong` | neutral 900 / black | 그림자 색 |
 

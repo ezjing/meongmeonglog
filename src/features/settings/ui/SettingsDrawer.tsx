@@ -41,7 +41,7 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
         onPress: () =>
           showToast({
             message: '알림 설정은 준비 중이에요',
-            variant: 'default',
+            variant: 'warning',
           }),
       },
       {
@@ -50,7 +50,7 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
         onPress: () =>
           showToast({
             message: '테마 설정은 준비 중이에요',
-            variant: 'default',
+            variant: 'warning',
           }),
       },
       {

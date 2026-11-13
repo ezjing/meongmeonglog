@@ -96,7 +96,11 @@ export function HomeScreen() {
         const now = Date.now();
         if (now - lastBackPressRef.current < EXIT_CONFIRM_WINDOW_MS) return false;
         lastBackPressRef.current = now;
-        showToast({ message: '한 번 더 누르면 종료돼요', duration: EXIT_CONFIRM_WINDOW_MS });
+        showToast({
+          message: '한 번 더 누르면 종료돼요',
+          duration: EXIT_CONFIRM_WINDOW_MS,
+          variant: 'warning',
+        });
         return true;
       });
       return () => subscription.remove();
@@ -145,7 +149,7 @@ export function HomeScreen() {
       setActiveWalk(walk);
       router.push('/walk/active');
     } catch {
-      showToast({ message: '⚠️ 산책을 시작하지 못했어요. 다시 시도해주세요.', variant: 'warning' });
+      showToast({ message: '⚠️ 산책을 시작하지 못했어요. 다시 시도해주세요.', variant: 'error' });
     }
   };
 

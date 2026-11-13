@@ -93,7 +93,7 @@ export function WalkFinishScreen() {
       isLeavingRef.current = false;
       showToast({
         message: '⚠️ 나가기에 실패했어요. 잠시 후 다시 시도해 주세요.',
-        variant: 'warning',
+        variant: 'error',
       });
     }
   }, [abandonWalk, activeWalk, isAbandoning, showAlert, showToast]);
@@ -206,7 +206,7 @@ export function WalkFinishScreen() {
       setIsSaving(false);
       showToast({
         message: '⚠️ 저장에 실패했어요. 잠시 후 다시 시도해 주세요.',
-        variant: 'warning',
+        variant: 'error',
       });
     }
   };

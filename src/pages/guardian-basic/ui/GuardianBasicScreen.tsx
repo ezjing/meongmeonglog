@@ -91,7 +91,7 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
     } catch {
       showToast({
         message: '⚠️ 보호자 정보 저장에 실패했어요',
-        variant: 'warning',
+        variant: 'error',
       });
     }
   };

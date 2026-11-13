@@ -19,30 +19,14 @@ interface ToastViewProps extends ToastOptions {
   onHide: () => void;
 }
 
-const variantStyles: Record<ToastVariant, { container: object; text: object; chip?: boolean }> = {
-  default: {
-    container: { backgroundColor: colors.surfaceInverse },
-    text: { color: colors.fgInverse },
-  },
-  success: {
-    container: { backgroundColor: colors.success },
-    text: { color: colors.fgOnPrimary },
-  },
-  warning: {
-    container: { backgroundColor: colors.danger, borderRadius: radius.full },
-    text: { color: colors.fgOnPrimary },
-    chip: true,
-  },
+const variantBackground: Record<ToastVariant, string> = {
+  success: colors.success,
+  warning: colors.warning,
+  error: colors.danger,
 };
 
-export function ToastView({
-  message,
-  variant = 'default',
-  duration = 2800,
-  onHide,
-}: ToastViewProps) {
+export function ToastView({ message, variant, duration = 2800, onHide }: ToastViewProps) {
   const insets = useSafeAreaInsets();
-  const style = variantStyles[variant];
 
   useEffect(() => {
     const timer = setTimeout(onHide, duration);
@@ -56,12 +40,11 @@ export function ToastView({
       style={[
         styles.wrap,
         { bottom: insets.bottom + spacing.ml },
-        style.chip ? styles.chipWrap : styles.barWrap,
-        style.container,
+        { backgroundColor: variantBackground[variant] },
       ]}
       pointerEvents="none"
     >
-      <Text style={[styles.message, style.text]}>{message}</Text>
+      <Text style={styles.message}>{message}</Text>
     </Animated.View>
   );
 }
@@ -72,25 +55,15 @@ const styles = StyleSheet.create({
     left: spacing.md,
     right: spacing.md,
     zIndex: zIndex.toast,
-    ...shadows.modal,
-  },
-  barWrap: {
     borderRadius: radius.card,
     paddingVertical: spacing.ms,
     paddingHorizontal: spacing.md,
-  },
-  chipWrap: {
-    alignSelf: 'center',
-    left: undefined,
-    right: undefined,
-    borderRadius: radius.full,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    maxWidth: '92%',
+    ...shadows.modal,
   },
   message: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
+    color: colors.fgOnPrimary,
     textAlign: 'center',
   },
 });

@@ -71,7 +71,7 @@ export function LoginScreen() {
     } catch (error) {
       showToast({
         message: `⚠️ ${getLoginErrorMessage(error, providerLabel)}`,
-        variant: 'warning',
+        variant: 'error',
       });
     }
   };

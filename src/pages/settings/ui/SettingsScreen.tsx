@@ -42,7 +42,7 @@ export function SettingsScreen() {
       await deleteAccount();
       router.replace('/(auth)/login');
     } catch {
-      showToast({ message: '⚠️ 계정 삭제에 실패했어요. 다시 시도해주세요.', variant: 'warning' });
+      showToast({ message: '⚠️ 계정 삭제에 실패했어요. 다시 시도해주세요.', variant: 'error' });
     }
   };
 

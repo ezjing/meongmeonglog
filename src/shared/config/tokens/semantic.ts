@@ -60,6 +60,8 @@ export const lightColors = {
 
   /* 상태 */
   success: palette.moss500,
+  /** 사용법 안내·입력값 확인·권한 필요 (흰 굵은 글자와 함께 쓸 때 대비를 위해 한 톤 진한 주황) */
+  warning: brand[600],
   danger: palette.red500,
 
   /* 외부 서비스 브랜드 색 (각 서비스 가이드 값 고정) */
