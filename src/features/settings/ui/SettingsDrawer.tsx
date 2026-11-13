@@ -1,7 +1,9 @@
+import { openBrowserAsync } from 'expo-web-browser';
 import { useMemo } from 'react';
 
 import { useDogs } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
+import { EXTERNAL_LINKS } from '@/shared/config/links';
 import { openDogEdit, openGuardianEdit } from '@/shared/lib/navigation';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Drawer, type DrawerItem, useOverlay } from '@/shared/ui/overlay';
@@ -52,13 +54,14 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
           }),
       },
       {
+        icon: '🔒',
+        label: '개인정보처리방침',
+        onPress: () => openBrowserAsync(EXTERNAL_LINKS.privacyPolicy),
+      },
+      {
         icon: '📄',
-        label: '이용약관 · 개인정보',
-        onPress: () =>
-          showToast({
-            message: '약관 페이지는 준비 중이에요',
-            variant: 'default',
-          }),
+        label: '계정 삭제 안내',
+        onPress: () => openBrowserAsync(EXTERNAL_LINKS.accountDeletion),
       },
       {
         icon: '📍',
