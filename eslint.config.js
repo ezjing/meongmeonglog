@@ -111,6 +111,10 @@ module.exports = defineConfig([
   ]),
   expoConfig,
   {
+    files: ['eslint.config.js'],
+    languageOptions: { globals: { __dirname: 'readonly' } },
+  },
+  {
     settings: {
       'import/resolver': {
         typescript: {
