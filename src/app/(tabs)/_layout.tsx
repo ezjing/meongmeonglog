@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { StyleSheet, Text } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, fontSize, fontWeight, opacity } from '@/constants/theme';
+import { colors, fontSize, fontWeight, opacity } from '@/shared/config/theme';
 
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   const icons: Record<string, string> = {

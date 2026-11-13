@@ -1,4 +1,4 @@
-import { SafeAreaStackLayout } from '@/components/ui/SafeAreaStackLayout';
+import { SafeAreaStackLayout } from '@/shared/ui/SafeAreaStackLayout';
 
 export default function OnboardingLayout() {
   return <SafeAreaStackLayout />;

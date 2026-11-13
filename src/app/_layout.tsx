@@ -1,4 +1,4 @@
-import '@/lib/walk/backgroundWalkTask';
+import '@/features/walk-session';
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
@@ -8,13 +8,11 @@ import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { OverlayProvider } from '@/components/ui/overlay';
-import { colors } from '@/constants/theme';
-import { subscribeAuthSessionSync } from '@/lib/authSessionSync';
-import { initKakaoSdk } from '@/lib/kakaoAuth';
-import { initNaverSdk } from '@/lib/naverAuth';
-import { queryClient } from '@/lib/queryClient';
-import { useAuthStore } from '@/stores/walkStore';
+import { subscribeAuthSessionSync, initKakaoSdk, initNaverSdk } from '@/features/auth';
+import { queryClient } from '@/shared/api/queryClient';
+import { colors } from '@/shared/config/theme';
+import { useAuthStore } from '@/shared/session/sessionStore';
+import { OverlayProvider } from '@/shared/ui/overlay/index';
 
 export default function RootLayout() {
   const isLoggedIn = useAuthStore((s) => s.userId != null);

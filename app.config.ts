@@ -1,7 +1,7 @@
 import type { ExpoConfig } from 'expo/config';
 
 import appJson from './app.json';
-import colors from './src/constants/colors.json';
+import colors from './src/shared/config/colors.json';
 
 const naverClientId = process.env.EXPO_PUBLIC_NAVER_CLIENT_ID ?? '';
 const naverUrlScheme = naverClientId ? `naver${naverClientId}` : '';
