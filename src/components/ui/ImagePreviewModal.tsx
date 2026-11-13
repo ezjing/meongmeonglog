@@ -45,21 +45,27 @@ export function ImagePreviewModal({
   const uris = imageUris?.length ? imageUris : imageUri ? [imageUri] : [];
   const hasMultiple = uris.length > 1;
   const resolvedIndex = Math.min(Math.max(initialIndex, 0), Math.max(uris.length - 1, 0));
-  const [trackedIndex, setTrackedIndex] = useState(resolvedIndex);
-  const currentIndex = visible ? resolvedIndex : trackedIndex;
+  const [currentIndex, setCurrentIndex] = useState(resolvedIndex);
+  const [prevVisible, setPrevVisible] = useState(visible);
   const scrollRef = useRef<ScrollView>(null);
+
+  // 열릴 때마다 누른 사진부터 보여준다
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
+    if (visible) setCurrentIndex(resolvedIndex);
+  }
 
   useEffect(() => {
     if (!visible || !hasMultiple) return;
 
     requestAnimationFrame(() => {
-      scrollRef.current?.scrollTo({ x: currentIndex * width, animated: false });
+      scrollRef.current?.scrollTo({ x: resolvedIndex * width, animated: false });
     });
-  }, [visible, currentIndex, hasMultiple, width]);
+  }, [visible, resolvedIndex, hasMultiple, width]);
 
   const goToIndex = (index: number) => {
     const nextIndex = Math.min(Math.max(index, 0), uris.length - 1);
-    setTrackedIndex(nextIndex);
+    setCurrentIndex(nextIndex);
     scrollRef.current?.scrollTo({ x: nextIndex * width, animated: true });
   };
 
@@ -79,7 +85,7 @@ export function ImagePreviewModal({
                   showsHorizontalScrollIndicator={false}
                   style={styles.carousel}
                   onMomentumScrollEnd={(event) => {
-                    setTrackedIndex(Math.round(event.nativeEvent.contentOffset.x / width));
+                    setCurrentIndex(Math.round(event.nativeEvent.contentOffset.x / width));
                   }}
                 >
                   {uris.map((uri, index) => (
