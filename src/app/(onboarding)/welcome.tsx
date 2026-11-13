@@ -37,16 +37,18 @@ export default function WelcomeScreen() {
   const createDog = useCreateDog();
   const welcomeGreeting = useWelcomeGreeting();
   const [greeting, setGreeting] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(true);
+  const [status, setStatus] = useState<'creating' | 'failed' | 'done'>('creating');
+  // 재시도할 때 이미 등록된 강아지를 다시 등록하지 않기 위함
+  const dogCreatedRef = useRef(false);
   const allowLeaveRef = useRef<(() => void) | null>(null);
 
   // 등록이 끝나면 홈으로. 이전 단계로 돌아가 다시 진입하면 강아지가 중복 등록되므로 뒤로가기도 홈으로 보낸다
   const goHome = useCallback(() => {
-    if (isCreating) return;
+    if (status !== 'done') return;
     store.reset();
     allowLeaveRef.current?.();
     router.dismissTo('/(tabs)');
-  }, [isCreating, store]);
+  }, [status, store]);
 
   const { allowLeave } = useBackConfirmAction(goHome);
 
@@ -54,10 +56,10 @@ export default function WelcomeScreen() {
     allowLeaveRef.current = allowLeave;
   }, [allowLeave]);
 
-  useEffect(() => {
-    // 마운트 시 1회: 온보딩 store → 강아지 등록 → 환영 인사 생성
-    (async () => {
-      try {
+  // 온보딩 store → 강아지 등록 → 환영 인사 생성
+  const registerDog = async () => {
+    try {
+      if (!dogCreatedRef.current) {
         let profileImageUrl: string | undefined;
         if (store.profileImageUri && userId) {
           profileImageUrl = await uploadDogProfileImage(userId, store.profileImageUri);
@@ -73,23 +75,53 @@ export default function WelcomeScreen() {
           weightKg: parseWeightKg(store.weightKg),
           profileImageUrl,
         });
+        dogCreatedRef.current = true;
         trackEvent(AnalyticsEvents.dogRegistered);
-
-        const text = await welcomeGreeting.mutateAsync({
-          dogName: store.name,
-          personality: store.personality,
-          speechStyle: store.speechStyle,
-          customSpeechStyle: store.customSpeechStyle,
-        });
-        setGreeting(text);
-      } finally {
-        setIsCreating(false);
       }
+    } catch {
+      setStatus('failed');
+      return;
+    }
+
+    // 강아지는 이미 등록됐으므로 인사말 생성이 실패해도 기본 인사말로 완료 처리한다
+    let text: string;
+    try {
+      text = await welcomeGreeting.mutateAsync({
+        dogName: store.name,
+        personality: store.personality,
+        speechStyle: store.speechStyle,
+        customSpeechStyle: store.customSpeechStyle,
+      });
+    } catch {
+      text = `안녕! 나는 ${store.name}야. 앞으로 같이 산책 많이 하자!`;
+    }
+    setGreeting(text);
+    setStatus('done');
+  };
+
+  const handleRetry = () => {
+    setStatus('creating');
+    registerDog();
+  };
+
+  useEffect(() => {
+    (async () => {
+      await registerDog();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 마운트 시 1회 실행
   }, []);
 
-  if (isCreating || !greeting) {
+  if (status === 'failed') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.doneTitle}>등록 중 문제가 생겼어요</Text>
+        <Text style={styles.doneSub}>잠시 후 다시 시도해주세요</Text>
+        <Button label="다시 시도" onPress={handleRetry} style={styles.cta} />
+      </View>
+    );
+  }
+
+  if (status === 'creating' || !greeting) {
     return <LoadingPaws message={`${store.name}가 인사말을 쓰고 있어요`} />;
   }
 
