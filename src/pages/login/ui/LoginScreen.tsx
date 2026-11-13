@@ -69,7 +69,7 @@ export function LoginScreen() {
       await navigateAfterLogin(session.userId);
     } catch (error) {
       showToast({
-        message: `⚠️ ${getLoginErrorMessage(error, providerLabel)}`,
+        message: getLoginErrorMessage(error, providerLabel),
         variant: 'error',
       });
     }

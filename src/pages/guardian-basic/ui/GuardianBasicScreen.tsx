@@ -90,7 +90,7 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
       router.push('/(onboarding)/dogBasic');
     } catch {
       showToast({
-        message: '⚠️ 보호자 정보 저장에 실패했어요',
+        message: '보호자 정보 저장에 실패했어요',
         variant: 'error',
       });
     }

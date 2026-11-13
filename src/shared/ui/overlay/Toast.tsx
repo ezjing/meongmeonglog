@@ -19,6 +19,13 @@ interface ToastViewProps extends ToastOptions {
   onHide: () => void;
 }
 
+/** 종류별 앞 아이콘 (메시지에는 이모지를 넣지 않는다) */
+const variantIcon: Record<ToastVariant, string> = {
+  success: '✅',
+  warning: '⚠️',
+  error: '❌',
+};
+
 const variantBackground: Record<ToastVariant, string> = {
   success: colors.success,
   warning: colors.warning,
@@ -44,7 +51,9 @@ export function ToastView({ message, variant, duration = 2800, onHide }: ToastVi
       ]}
       pointerEvents="none"
     >
-      <Text style={styles.message}>{message}</Text>
+      <Text style={styles.message}>
+        {variantIcon[variant]} {message}
+      </Text>
     </Animated.View>
   );
 }

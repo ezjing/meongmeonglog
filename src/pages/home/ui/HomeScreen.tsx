@@ -133,8 +133,8 @@ export function HomeScreen() {
       showToast({
         message:
           Platform.OS === 'ios'
-            ? '⚠️ 산책 기록을 위해 위치 "항상 허용"이 필요해요. 설정에서 권한을 확인해 주세요.'
-            : '⚠️ 산책 기록을 위해 위치(앱 사용 중)와 알림 권한을 허용해 주세요.',
+            ? '산책 기록을 위해 위치 "항상 허용"이 필요해요. 설정에서 권한을 확인해 주세요.'
+            : '산책 기록을 위해 위치(앱 사용 중)와 알림 권한을 허용해 주세요.',
         variant: 'warning',
       });
       return;
@@ -149,7 +149,7 @@ export function HomeScreen() {
       setActiveWalk(walk);
       router.push('/walk/active');
     } catch {
-      showToast({ message: '⚠️ 산책을 시작하지 못했어요. 다시 시도해주세요.', variant: 'error' });
+      showToast({ message: '산책을 시작하지 못했어요. 다시 시도해주세요.', variant: 'error' });
     }
   };
 

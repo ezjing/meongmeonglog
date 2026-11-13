@@ -91,7 +91,7 @@ export function WalkFinishScreen() {
     } catch {
       isLeavingRef.current = false;
       showToast({
-        message: '⚠️ 나가기에 실패했어요. 잠시 후 다시 시도해 주세요.',
+        message: '나가기에 실패했어요. 잠시 후 다시 시도해 주세요.',
         variant: 'error',
       });
     }
@@ -153,7 +153,7 @@ export function WalkFinishScreen() {
     if (!activeWalk || isSaving) return;
     if (!canGenerate) {
       showToast({
-        message: '⚠️ 사진을 1장 이상 첨부해주세요',
+        message: '사진을 1장 이상 첨부해주세요',
         variant: 'warning',
       });
       return;
@@ -204,7 +204,7 @@ export function WalkFinishScreen() {
     } catch {
       setIsSaving(false);
       showToast({
-        message: '⚠️ 저장에 실패했어요. 잠시 후 다시 시도해 주세요.',
+        message: '저장에 실패했어요. 잠시 후 다시 시도해 주세요.',
         variant: 'error',
       });
     }

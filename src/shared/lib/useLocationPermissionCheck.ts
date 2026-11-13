@@ -11,7 +11,7 @@ export function useLocationPermissionCheck() {
   return useCallback(async () => {
     const granted = await requestWalkLocationPermissions();
     showToast({
-      message: granted ? '📍 위치 권한이 허용되었어요' : '⚠️ 설정에서 위치 권한을 허용해주세요',
+      message: granted ? '위치 권한이 허용되었어요' : '설정에서 위치 권한을 허용해주세요',
       variant: granted ? 'success' : 'warning',
     });
   }, [showToast]);

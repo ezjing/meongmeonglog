@@ -60,7 +60,7 @@ export function DiaryGenerateScreen() {
 
   const goHome = useCallback(() => {
     if (diary) {
-      showToast({ message: '🐾 일기가 저장되었어요', variant: 'success' });
+      showToast({ message: '일기가 저장되었어요', variant: 'success' });
     }
     allowLeaveRef.current?.();
     router.dismissTo('/(tabs)');
