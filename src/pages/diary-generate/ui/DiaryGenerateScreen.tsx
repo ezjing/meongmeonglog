@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { DiaryContentView } from '@/entities/diary';
 import type { Diary } from '@/entities/diary';
 import { useDogDisplayName } from '@/entities/dog';
-import { useWalk, useWalkStore } from '@/entities/walk';
+import { formatWalkWeather, useWalk, useWalkStore } from '@/entities/walk';
 import { useGenerateDiary } from '@/features/diary-generate';
 import { useWalkPhotos, useFinishWalkStore } from '@/features/walk-session';
 import { colors, spacing } from '@/shared/config/theme';
@@ -101,9 +101,7 @@ export function DiaryGenerateScreen() {
               : [
                   walk?.distanceMeter != null ? `🚶 ${formatDistance(walk.distanceMeter)}` : null,
                   walk?.durationSec != null ? `⏱ ${formatDuration(walk.durationSec)}` : null,
-                  walk?.weatherTemp != null
-                    ? `${walk.weatherIcon ?? '🌡️'} ${walk.weatherTemp}°C`
-                    : null,
+                  formatWalkWeather(walk),
                 ].filter((chip): chip is string => chip != null)
           }
         />

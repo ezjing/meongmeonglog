@@ -1,3 +1,4 @@
+import type { WalkWeatherPayload } from './walkApi';
 import { weatherCodeToDisplay } from '../lib/weatherCode';
 
 export interface WeatherInfo {
@@ -44,5 +45,13 @@ export async function fetchCurrentWeather(
     condition,
     temp: Math.round(temp),
     icon,
+  };
+}
+
+export function toWalkWeatherPayload(weather: WeatherInfo): WalkWeatherPayload {
+  return {
+    weatherCondition: weather.condition,
+    weatherTemp: weather.temp,
+    weatherIcon: weather.icon,
   };
 }

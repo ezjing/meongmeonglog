@@ -5,6 +5,8 @@ import { AppState, Platform } from 'react-native';
 import {
   updateWalkWeather,
   fetchCurrentWeather,
+  toWalkWeatherPayload,
+  type WalkCoord,
   loadPersistedWalkState,
   updatePersistedWalkState,
   useWalkStore,
@@ -17,10 +19,7 @@ import { startWalkTracking } from '../lib/walkLocationService';
 
 const SYNC_INTERVAL_MS = 2_000;
 
-export async function getCurrentCoordinates(): Promise<{
-  latitude: number;
-  longitude: number;
-} | null> {
+export async function getCurrentCoordinates(): Promise<WalkCoord | null> {
   const { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== 'granted') return null;
 
@@ -39,23 +38,13 @@ async function applyWeatherForCoords(
   latitude: number,
   longitude: number,
 ): Promise<void> {
-  const weather = await fetchCurrentWeather(latitude, longitude);
-  const payload = {
-    weatherCondition: weather.condition,
-    weatherTemp: weather.temp,
-    weatherIcon: weather.icon,
-  };
+  const payload = toWalkWeatherPayload(await fetchCurrentWeather(latitude, longitude));
 
   useWalkStore.getState().updateActiveWalkWeather(payload);
 
   await updatePersistedWalkState(walkId, (current) => ({
     ...current,
-    activeWalk: {
-      ...current.activeWalk,
-      weatherCondition: payload.weatherCondition,
-      weatherTemp: payload.weatherTemp,
-      weatherIcon: payload.weatherIcon,
-    },
+    activeWalk: { ...current.activeWalk, ...payload },
   }));
 
   await updateWalkWeather(walkId, payload).catch(() => {});

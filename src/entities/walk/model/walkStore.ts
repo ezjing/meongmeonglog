@@ -1,22 +1,19 @@
 import { create } from 'zustand';
 
 import type { WalkPhoto, WalkSession } from './types';
-import type { PersistedWalkState } from './walkSessionStorage';
+import type { PersistedWalkState, WalkCoord } from './walkSessionStorage';
+import type { WalkWeatherPayload } from '../api/walkApi';
 
 interface WalkStore {
   activeWalk: WalkSession | null;
   distanceMeter: number;
   frozenElapsedSec: number | null;
-  walkPath: { latitude: number; longitude: number }[];
+  walkPath: WalkCoord[];
   pendingWalkPhotosByWalkId: Record<string, WalkPhoto[]>;
   setActiveWalk: (walk: WalkSession | null) => void;
   hydrateFromPersisted: (state: PersistedWalkState) => void;
   freezeWalkElapsed: (elapsedSec: number) => void;
-  updateActiveWalkWeather: (weather: {
-    weatherCondition: string;
-    weatherTemp: number;
-    weatherIcon: string;
-  }) => void;
+  updateActiveWalkWeather: (weather: WalkWeatherPayload) => void;
   setPendingWalkPhotos: (walkId: string, photos: WalkPhoto[]) => void;
   clearPendingWalkPhotos: (walkId: string) => void;
   reset: () => void;
@@ -41,12 +38,7 @@ export const useWalkStore = create<WalkStore>((set, get) => ({
     const walk = get().activeWalk;
     if (!walk) return;
     set({
-      activeWalk: {
-        ...walk,
-        weatherCondition: weather.weatherCondition,
-        weatherTemp: weather.weatherTemp,
-        weatherIcon: weather.weatherIcon,
-      },
+      activeWalk: { ...walk, ...weather },
     });
   },
   setPendingWalkPhotos: (walkId, photos) =>

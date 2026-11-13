@@ -5,8 +5,8 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 
 import { useDogDisplayName } from '@/entities/dog';
 import {
+  formatWalkWeather,
   stopWalkTracking,
-  useCancelWalk,
   useFinishWalk,
   useSaveWalkEvent,
   useUploadWalkPhotos,
@@ -14,7 +14,8 @@ import {
   useWalkStore,
 } from '@/entities/walk';
 import {
-  getElapsedSecFromStartedAt,
+  getWalkElapsedSec,
+  useAbandonWalk,
   flushAllPendingDbLocations,
   useFinishWalkStore,
 } from '@/features/walk-session';
@@ -42,24 +43,20 @@ const PHOTO_SIZE = 56;
 const PHOTO_REMOVE_SIZE = 18;
 const MEMO_MIN_HEIGHT = 50;
 
+/** 산책 한 번에 첨부할 수 있는 사진 수 */
+const MAX_WALK_PHOTOS = 5;
+
 export function WalkFinishScreen() {
   const activeWalk = useWalkStore((s) => s.activeWalk);
   const frozenElapsedSec = useWalkStore((s) => s.frozenElapsedSec);
   const distanceMeter = useWalkStore((s) => s.distanceMeter);
-  const {
-    form,
-    setPhotoUris,
-    togglePee,
-    togglePoop,
-    setDogMeetingLevel,
-    setMemo,
-    reset: resetFinishForm,
-  } = useFinishWalkStore();
+  const { form, setPhotoUris, togglePee, togglePoop, setDogMeetingLevel, setMemo } =
+    useFinishWalkStore();
 
   const finishWalk = useFinishWalk();
   const saveEvent = useSaveWalkEvent();
   const uploadPhotos = useUploadWalkPhotos();
-  const cancelWalk = useCancelWalk();
+  const { abandonWalk, isAbandoning } = useAbandonWalk();
   const { showAlert, showToast } = useOverlay();
   const dogName = useDogDisplayName();
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
@@ -69,7 +66,7 @@ export function WalkFinishScreen() {
   const allowLeaveRef = useRef<(() => void) | null>(null);
 
   const handleGoHomeLater = useCallback(async () => {
-    if (!activeWalk || cancelWalk.isPending || isLeavingRef.current) return;
+    if (!activeWalk || isAbandoning || isLeavingRef.current) return;
 
     const confirmed = await showAlert({
       icon: '🐾',
@@ -85,10 +82,7 @@ export function WalkFinishScreen() {
     allowLeaveRef.current?.();
 
     try {
-      await cancelWalk.mutateAsync(activeWalk.walkId);
-      await stopWalkTracking();
-      useWalkStore.getState().reset();
-      resetFinishForm();
+      await abandonWalk(activeWalk.walkId);
       router.dismissTo('/(tabs)');
     } catch {
       isLeavingRef.current = false;
@@ -97,7 +91,7 @@ export function WalkFinishScreen() {
         variant: 'warning',
       });
     }
-  }, [activeWalk, cancelWalk, resetFinishForm, showAlert, showToast]);
+  }, [abandonWalk, activeWalk, isAbandoning, showAlert, showToast]);
 
   const { allowLeave } = useBackConfirmAction(handleGoHomeLater, !!activeWalk);
 
@@ -125,11 +119,11 @@ export function WalkFinishScreen() {
   }, []);
 
   const canGenerate = form.photoUris.length >= 1;
-  const remainingSlots = Math.max(0, 5 - form.photoUris.length);
+  const remainingSlots = Math.max(0, MAX_WALK_PHOTOS - form.photoUris.length);
 
   const appendPhotos = (uris: string[]) => {
     if (uris.length === 0) return;
-    const merged = [...form.photoUris, ...uris].slice(0, 5);
+    const merged = [...form.photoUris, ...uris].slice(0, MAX_WALK_PHOTOS);
     setPhotoUris(merged);
   };
 
@@ -166,7 +160,7 @@ export function WalkFinishScreen() {
       await flushAllPendingDbLocations();
       const persisted = await loadPersistedWalkState();
       const finalDistance = persisted?.distanceMeter ?? distanceMeter;
-      const finalDuration = frozenElapsedSec ?? getElapsedSecFromStartedAt(activeWalk.startedAt);
+      const finalDuration = getWalkElapsedSec(frozenElapsedSec, activeWalk.startedAt);
 
       await finishWalk.mutateAsync({
         walkId: activeWalk.walkId,
@@ -229,21 +223,14 @@ export function WalkFinishScreen() {
           <Chip label={`🚶 ${formatDistance(distanceMeter)}`} selected />
           <Chip
             label={`⏱ ${formatDuration(
-              frozenElapsedSec ?? getElapsedSecFromStartedAt(activeWalk?.startedAt),
+              getWalkElapsedSec(frozenElapsedSec, activeWalk?.startedAt),
             )}`}
             selected
           />
-          <Chip
-            label={
-              activeWalk?.weatherTemp != null
-                ? `${activeWalk.weatherIcon ?? '🌡️'} ${activeWalk.weatherTemp}°C`
-                : '🌡️ 날씨 조회 중'
-            }
-            selected
-          />
+          <Chip label={formatWalkWeather(activeWalk) ?? '🌡️ 날씨 조회 중'} selected />
         </View>
 
-        <Text style={styles.label}>사진 업로드 (1~5장)</Text>
+        <Text style={styles.label}>사진 업로드 (1~{MAX_WALK_PHOTOS}장)</Text>
         <View style={styles.photoGrid}>
           {form.photoUris.map((uri, i) => (
             <View key={`${uri}-${i}`} style={styles.photo}>
@@ -303,7 +290,7 @@ export function WalkFinishScreen() {
 
         <Button
           label="🐾 AI 일기 만들기"
-          disabled={isSaving || cancelWalk.isPending}
+          disabled={isSaving || isAbandoning}
           onPress={handleGenerate}
           style={styles.cta}
         />
@@ -311,11 +298,11 @@ export function WalkFinishScreen() {
         <Pressable
           style={styles.skipLinkWrap}
           onPress={handleGoHomeLater}
-          disabled={cancelWalk.isPending}
+          disabled={isAbandoning}
           accessibilityRole="button"
           accessibilityLabel="그만두고 홈으로 돌아가기"
         >
-          <Text style={[styles.skipLink, cancelWalk.isPending && styles.skipLinkDisabled]}>
+          <Text style={[styles.skipLink, isAbandoning && styles.skipLinkDisabled]}>
             그만두고 홈으로 돌아가기
           </Text>
         </Pressable>
@@ -325,7 +312,7 @@ export function WalkFinishScreen() {
         visible={photoSheetVisible}
         onClose={() => setPhotoSheetVisible(false)}
         title="사진 추가하기"
-        subtitle="최대 5장까지 첨부할 수 있어요"
+        subtitle={`최대 ${MAX_WALK_PHOTOS}장까지 첨부할 수 있어요`}
         options={[
           { icon: '📷', label: '카메라로 촬영', onPress: handlePickFromCamera },
           {

@@ -2,15 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
+import type { WalkCoord } from '@/entities/walk';
 import { colors, spacing, radius, fontSize, sizes, shadows } from '@/shared/config/theme';
 
-interface MapCoordinate {
-  latitude: number;
-  longitude: number;
-}
-
 interface WalkMapProps {
-  routePath: MapCoordinate[];
+  routePath: WalkCoord[];
 }
 
 /** 서울시청 기준 */

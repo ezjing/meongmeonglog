@@ -1,6 +1,6 @@
-import type { WalkRow } from '@/shared/api/database';
+import type { WalkPhotoRow, WalkRow } from '@/shared/api/database';
 
-import type { WalkSession } from '../model/types';
+import type { WalkPhoto, WalkSession } from '../model/types';
 
 export function toWalkSession(row: WalkRow): WalkSession {
   return {
@@ -13,5 +13,16 @@ export function toWalkSession(row: WalkRow): WalkSession {
     weatherCondition: row.weather_condition,
     weatherTemp: row.weather_temp,
     weatherIcon: row.weather_icon,
+  };
+}
+
+export function toWalkPhoto(
+  row: Pick<WalkPhotoRow, 'id' | 'walk_id' | 'image_url' | 'sort_order'>,
+): WalkPhoto {
+  return {
+    id: row.id,
+    walkId: row.walk_id,
+    imageUrl: row.image_url,
+    sortOrder: row.sort_order,
   };
 }

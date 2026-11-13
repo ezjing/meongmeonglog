@@ -13,7 +13,8 @@ export {
   useWalk,
 } from './api/useWalkMutations';
 export { fetchWalkPhotos, saveWalkLocation, updateWalkWeather } from './api/walkApi';
-export { fetchCurrentWeather } from './api/weatherApi';
+export { fetchCurrentWeather, toWalkWeatherPayload } from './api/weatherApi';
+export { formatWalkWeather } from './lib/weatherCode';
 export type { WalkPhoto, WalkSession } from './model/types';
 export {
   createInitialWalkState,

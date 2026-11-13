@@ -3,7 +3,7 @@ import { uploadStorageImage } from '@/shared/api/storageUpload';
 import { supabase, isSupabaseConfigured } from '@/shared/api/supabase';
 import { AppError } from '@/shared/lib/AppError';
 
-import { toWalkSession } from '../lib/walkMappers';
+import { toWalkPhoto, toWalkSession } from '../lib/walkMappers';
 import type { WalkEvent, WalkPhoto, WalkSession } from '../model/types';
 
 const mockWalks = new Map<string, WalkSession>();
@@ -203,12 +203,7 @@ export async function uploadWalkPhotos(walkId: string, uris: string[]): Promise<
       .single();
 
     if (error) throw new AppError('photo_save_failed', error.message);
-    uploaded.push({
-      id: data.id,
-      walkId,
-      imageUrl: data.image_url,
-      sortOrder: data.sort_order,
-    });
+    uploaded.push(toWalkPhoto(data));
   }
   return uploaded;
 }
@@ -225,12 +220,7 @@ export async function fetchWalkPhotos(walkId: string): Promise<WalkPhoto[]> {
     .order('sort_order');
 
   if (error) throw new AppError('fetch_photos_failed', error.message);
-  return data.map((row) => ({
-    id: row.id,
-    walkId: row.walk_id,
-    imageUrl: row.image_url,
-    sortOrder: row.sort_order,
-  }));
+  return data.map(toWalkPhoto);
 }
 
 export async function fetchWalk(walkId: string): Promise<WalkSession | null> {

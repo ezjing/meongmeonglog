@@ -2,8 +2,13 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { stopWalkTracking, useCancelWalk, useWalkStore } from '@/entities/walk';
-import { WalkMap, useWalkTracker, freezeWalkSession } from '@/features/walk-session';
+import { useWalkStore } from '@/entities/walk';
+import {
+  WalkMap,
+  useAbandonWalk,
+  useWalkTracker,
+  freezeWalkSession,
+} from '@/features/walk-session';
 import { colors, spacing, radius, fontSize, fontWeight } from '@/shared/config/theme';
 import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
@@ -13,9 +18,8 @@ import { useOverlay } from '@/shared/ui/overlay/index';
 export function WalkActiveScreen() {
   const { activeWalk, elapsedSec, distanceMeter, trackingError } = useWalkTracker();
   const walkPath = useWalkStore((s) => s.walkPath);
-  const reset = useWalkStore((s) => s.reset);
   const { showAlert, showToast } = useOverlay();
-  const cancelWalk = useCancelWalk();
+  const { abandonWalk, isAbandoning } = useAbandonWalk();
   const allowLeaveRef = useRef<(() => void) | null>(null);
 
   const handleCancelPress = useCallback(async () => {
@@ -32,9 +36,7 @@ export function WalkActiveScreen() {
     if (!confirmed) return;
 
     try {
-      await cancelWalk.mutateAsync(activeWalk.walkId);
-      await stopWalkTracking();
-      reset();
+      await abandonWalk(activeWalk.walkId);
       allowLeaveRef.current?.();
       router.dismissTo('/(tabs)');
     } catch {
@@ -43,7 +45,7 @@ export function WalkActiveScreen() {
         variant: 'warning',
       });
     }
-  }, [activeWalk, cancelWalk, reset, showAlert, showToast]);
+  }, [abandonWalk, activeWalk, showAlert, showToast]);
 
   const { allowLeave } = useBackConfirmAction(handleCancelPress, !!activeWalk);
 
@@ -120,7 +122,7 @@ export function WalkActiveScreen() {
           label="산책 취소"
           variant="soft"
           onPress={handleCancelPress}
-          disabled={cancelWalk.isPending}
+          disabled={isAbandoning}
           style={styles.cancelBtn}
         />
         <Button

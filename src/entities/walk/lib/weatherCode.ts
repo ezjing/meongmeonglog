@@ -15,3 +15,17 @@ export function weatherCodeToDisplay(code: number): WeatherDisplay {
   if (code <= 86) return { condition: '눈', icon: '🌨️' };
   return { condition: '천둥번개', icon: '⛈️' };
 }
+
+/** 산책 칩에 쓰는 날씨 표시 (예: "☀️ 21°C"). 아직 조회 전이면 null */
+export function formatWalkWeather(
+  walk:
+    | {
+        weatherIcon: string | null;
+        weatherTemp: number | null;
+      }
+    | null
+    | undefined,
+): string | null {
+  if (walk?.weatherTemp == null) return null;
+  return `${walk.weatherIcon ?? '🌡️'} ${walk.weatherTemp}°C`;
+}
