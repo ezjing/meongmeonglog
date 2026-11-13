@@ -54,12 +54,17 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
           }),
       },
       {
+        icon: '📃',
+        label: '이용약관',
+        onPress: () => openBrowserAsync(EXTERNAL_LINKS.termsOfService),
+      },
+      {
         icon: '🔒',
         label: '개인정보처리방침',
         onPress: () => openBrowserAsync(EXTERNAL_LINKS.privacyPolicy),
       },
       {
-        icon: '📄',
+        icon: '🗂️',
         label: '계정 삭제 안내',
         onPress: () => openBrowserAsync(EXTERNAL_LINKS.accountDeletion),
       },
