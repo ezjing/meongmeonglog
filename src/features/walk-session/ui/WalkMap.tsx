@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -24,22 +24,23 @@ const FOLLOW_DELTA = {
   longitudeDelta: 0.005,
 };
 
-export function WalkMap({ routePath }: WalkMapProps) {
+/** 산책 화면의 1초 타이머로 부모가 다시 그려져도 경로가 그대로면 지도는 다시 그리지 않는다 */
+export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
   const mapRef = useRef<MapView>(null);
   const lastPoint = routePath.at(-1);
   const [followUser, setFollowUser] = useState(true);
 
+  const lastLatitude = lastPoint?.latitude;
+  const lastLongitude = lastPoint?.longitude;
+
   useEffect(() => {
-    if (!lastPoint || !followUser) return;
+    if (lastLatitude == null || lastLongitude == null || !followUser) return;
 
     mapRef.current?.animateToRegion(
-      {
-        ...lastPoint,
-        ...FOLLOW_DELTA,
-      },
+      { latitude: lastLatitude, longitude: lastLongitude, ...FOLLOW_DELTA },
       300,
     );
-  }, [lastPoint, followUser]);
+  }, [lastLatitude, lastLongitude, followUser]);
 
   const handleUserMapInteraction = () => {
     setFollowUser(false);
@@ -108,7 +109,7 @@ export function WalkMap({ routePath }: WalkMapProps) {
       ) : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },

@@ -51,6 +51,19 @@ export function updatePersistedWalkState(
   });
 }
 
+/** 저장된 진행 중 산책이 있으면 갱신하고 갱신된 상태를 돌려준다 (읽기 1번·쓰기 1번) */
+export function updateActiveWalkState(
+  updater: (state: PersistedWalkState) => PersistedWalkState,
+): Promise<PersistedWalkState | null> {
+  return withWalkStateLock(async () => {
+    const state = await loadPersistedWalkState();
+    if (!state?.activeWalk) return null;
+    const next = updater(state);
+    await savePersistedWalkState(next);
+    return next;
+  });
+}
+
 export async function savePersistedWalkState(state: PersistedWalkState): Promise<void> {
   await AsyncStorage.setItem(WALK_SESSION_KEY, JSON.stringify(state));
 }

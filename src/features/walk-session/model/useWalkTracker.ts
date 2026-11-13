@@ -20,7 +20,8 @@ import { startWalkTracking } from '../lib/walkLocationService';
 const SYNC_INTERVAL_MS = 2_000;
 
 export async function getCurrentCoordinates(): Promise<WalkCoord | null> {
-  const { status } = await Location.requestForegroundPermissionsAsync();
+  // 권한 요청은 산책 시작 시 이미 했으므로 여기서는 확인만 한다
+  const { status } = await Location.getForegroundPermissionsAsync();
   if (status !== 'granted') return null;
 
   const position = await Location.getCurrentPositionAsync({
@@ -50,11 +51,13 @@ async function applyWeatherForCoords(
   await updateWalkWeather(walkId, payload).catch(() => {});
 }
 
-async function syncWalkStateFromStorage(): Promise<void> {
+/** 백그라운드 태스크가 저장한 산책 상태를 화면에 반영한다. flush면 남은 좌표도 서버로 보낸다 */
+async function syncWalkStateFromStorage({ flush = false } = {}): Promise<void> {
   const persisted = await loadPersistedWalkState();
   if (!persisted?.activeWalk) return;
   useWalkStore.getState().hydrateFromPersisted(persisted);
-  await flushAllPendingDbLocations();
+  // 좌표를 받을 때마다 백그라운드 태스크가 전송하므로, 주기 동기화에서는 보내지 않는다
+  if (flush) await flushAllPendingDbLocations();
 }
 
 export function useWalkTracker() {
@@ -74,7 +77,7 @@ export function useWalkTracker() {
 
     (async () => {
       setTrackingError(null);
-      await syncWalkStateFromStorage();
+      await syncWalkStateFromStorage({ flush: true });
 
       const granted = await requestWalkLocationPermissions();
       if (!granted || cancelled) {
@@ -105,7 +108,6 @@ export function useWalkTracker() {
           if (coords && !cancelled && !weatherFetchedRef.current) {
             weatherFetchedRef.current = true;
             await applyWeatherForCoords(activeWalk.walkId, coords.latitude, coords.longitude);
-            await syncWalkStateFromStorage();
           }
         } catch {
           weatherFetchedRef.current = false;
@@ -119,7 +121,7 @@ export function useWalkTracker() {
 
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
-        syncWalkStateFromStorage().catch(() => {});
+        syncWalkStateFromStorage({ flush: true }).catch(() => {});
       }
     });
 

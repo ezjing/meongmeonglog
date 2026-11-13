@@ -1,10 +1,10 @@
 import type { LocationObject } from 'expo-location';
 
-import { saveWalkLocation } from '@/entities/walk';
 import {
   loadPersistedWalkState,
+  saveWalkLocations,
+  updateActiveWalkState,
   updatePersistedWalkState,
-  type PendingWalkLocation,
   type WalkCoord,
 } from '@/entities/walk';
 import { haversineDistance } from '@/shared/lib/formatDistance';
@@ -46,31 +46,13 @@ function isAcceptableLocation(
   return delta / elapsedSec <= MAX_SPEED_MPS;
 }
 
-async function flushPendingDbLocations(
-  walkId: string,
-  pendingDbLocations: PendingWalkLocation[],
-): Promise<PendingWalkLocation[]> {
-  for (let i = 0; i < pendingDbLocations.length; i++) {
-    const loc = pendingDbLocations[i];
-    try {
-      await saveWalkLocation(walkId, loc.latitude, loc.longitude, loc.recordedAt);
-    } catch {
-      return pendingDbLocations.slice(i);
-    }
-  }
-  return [];
-}
-
 export async function processWalkLocations(locations: LocationObject[]): Promise<void> {
-  if (locations.length === 0) return;
-
-  const state = await loadPersistedWalkState();
-  if (!state?.activeWalk) return;
-
-  const walkStartedAtMs = new Date(state.activeWalk.startedAt).getTime();
-
-  const updated = await updatePersistedWalkState(state.activeWalk.walkId, (current) => {
-    let { distanceMeter, walkPath, pendingDbLocations } = current;
+  const updated = await updateActiveWalkState((current) => {
+    const walkStartedAtMs = new Date(current.activeWalk.startedAt).getTime();
+    // 배치 안에서는 같은 배열에 push한다 (좌표마다 경로 전체를 복사하지 않도록)
+    const walkPath = [...current.walkPath];
+    const pendingDbLocations = [...current.pendingDbLocations];
+    let { distanceMeter } = current;
     let last: AcceptedPoint | null =
       current.lastLatitude != null && current.lastLongitude != null
         ? {
@@ -86,8 +68,8 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
       const { latitude, longitude } = location.coords;
       const coord: WalkCoord = { latitude, longitude };
 
-      walkPath = [...walkPath, coord];
-      pendingDbLocations = [...pendingDbLocations, { ...coord, recordedAt: location.timestamp }];
+      walkPath.push(coord);
+      pendingDbLocations.push({ ...coord, recordedAt: location.timestamp });
 
       if (last) {
         const delta = haversineDistance(last.latitude, last.longitude, latitude, longitude);
@@ -118,9 +100,7 @@ async function flushPersistedPendingLocations(): Promise<void> {
   if (!snapshot?.activeWalk || snapshot.pendingDbLocations.length === 0) return;
 
   const { walkId } = snapshot.activeWalk;
-  const pending = snapshot.pendingDbLocations;
-  const remaining = await flushPendingDbLocations(walkId, pending);
-  const flushedCount = pending.length - remaining.length;
+  const flushedCount = await saveWalkLocations(walkId, snapshot.pendingDbLocations);
   if (flushedCount === 0) return;
 
   // 전송 중 새로 쌓인 좌표는 유지하고, 전송한 앞부분만 제거

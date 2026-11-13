@@ -12,7 +12,7 @@ export {
   useUploadWalkPhotos,
   useWalk,
 } from './api/useWalkMutations';
-export { fetchWalkPhotos, saveWalkLocation, updateWalkWeather } from './api/walkApi';
+export { fetchWalkPhotos, saveWalkLocations, updateWalkWeather } from './api/walkApi';
 export { fetchCurrentWeather, toWalkWeatherPayload } from './api/weatherApi';
 export { formatWalkWeather } from './lib/weatherCode';
 export type { WalkPhoto, WalkSession } from './model/types';
@@ -20,6 +20,7 @@ export {
   createInitialWalkState,
   loadPersistedWalkState,
   savePersistedWalkState,
+  updateActiveWalkState,
   updatePersistedWalkState,
   withWalkStateLock,
 } from './model/walkSessionStorage';

@@ -86,23 +86,34 @@ export async function cancelWalk(walkId: string): Promise<void> {
   if (error) throw new AppError('walk_cancel_failed', error.message);
 }
 
-export async function saveWalkLocation(
+/** 한 번에 insert하는 좌표 수. 오프라인으로 많이 쌓였을 때 요청 하나가 너무 커지지 않게 나눈다 */
+const LOCATION_INSERT_CHUNK_SIZE = 500;
+
+/**
+ * 좌표를 묶어서 저장한다. 앞에서부터 덩어리 단위로 보내고, 실패하면 그때까지 저장한 개수를 돌려준다.
+ * recordedAt(측정 시각, ms)이 없는 이전 버전 좌표는 전송 시각으로 기록한다.
+ */
+export async function saveWalkLocations(
   walkId: string,
-  latitude: number,
-  longitude: number,
-  /** 측정 시각(ms). 없으면 전송 시각으로 기록 */
-  recordedAt?: number,
-): Promise<void> {
-  if (!isSupabaseConfigured) return;
+  locations: { latitude: number; longitude: number; recordedAt?: number }[],
+): Promise<number> {
+  if (!isSupabaseConfigured) return locations.length;
 
-  const { error } = await supabase.from('walk_locations').insert({
-    walk_id: walkId,
-    latitude,
-    longitude,
-    recorded_at: new Date(recordedAt ?? Date.now()).toISOString(),
-  });
-
-  if (error) throw new AppError('location_save_failed', error.message);
+  let saved = 0;
+  for (let i = 0; i < locations.length; i += LOCATION_INSERT_CHUNK_SIZE) {
+    const chunk = locations.slice(i, i + LOCATION_INSERT_CHUNK_SIZE);
+    const { error } = await supabase.from('walk_locations').insert(
+      chunk.map((loc) => ({
+        walk_id: walkId,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        recorded_at: new Date(loc.recordedAt ?? Date.now()).toISOString(),
+      })),
+    );
+    if (error) break;
+    saved += chunk.length;
+  }
+  return saved;
 }
 
 export async function finishWalk(
