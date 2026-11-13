@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, type ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useDogDisplayName } from '@/entities/dog';
 import {
@@ -36,6 +36,7 @@ import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
 import { Button } from '@/shared/ui/Button';
 import { Chip } from '@/shared/ui/Chip';
 import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';
+import { KeyboardAwareScrollView } from '@/shared/ui/KeyboardAwareScrollView';
 import { LoadingOverlayScreen } from '@/shared/ui/LoadingOverlay';
 import { BottomSheet, useOverlay } from '@/shared/ui/overlay/index';
 
@@ -63,6 +64,7 @@ export function WalkFinishScreen() {
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const isLeavingRef = useRef(false);
+  const scrollRef = useRef<ScrollView>(null);
   const allowLeaveRef = useRef<(() => void) | null>(null);
 
   const handleGoHomeLater = useCallback(async () => {
@@ -218,7 +220,11 @@ export function WalkFinishScreen() {
       title={`${dogName}의 일기를 만들 준비 중이에요`}
       subtitle="산책 기록 저장 · 사진 업로드 중"
     >
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <KeyboardAwareScrollView
+        ref={scrollRef}
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
         <View style={styles.summaryBar}>
           <Chip label={`🚶 ${formatDistance(distanceMeter)}`} selected />
           <Chip
@@ -285,6 +291,8 @@ export function WalkFinishScreen() {
           placeholderTextColor={colors.fgSubtle}
           value={form.memo}
           onChangeText={setMemo}
+          // 키보드가 올라온 뒤 메모칸이 보이도록 아래로 스크롤
+          onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300)}
           multiline
         />
 
@@ -306,7 +314,7 @@ export function WalkFinishScreen() {
             그만두고 홈으로 돌아가기
           </Text>
         </Pressable>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <BottomSheet
         visible={photoSheetVisible}
