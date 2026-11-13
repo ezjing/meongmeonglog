@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AlertDialog } from './AlertDialog';
@@ -18,7 +18,9 @@ const OverlayContext = createContext<OverlayContextValue | null>(null);
 
 export function OverlayProvider({ children }: { children: React.ReactNode }) {
   const [alertState, setAlertState] = useState<AlertState | null>(null);
-  const [toastState, setToastState] = useState<ToastOptions | null>(null);
+  const [toastState, setToastState] = useState<(ToastOptions & { id: number }) | null>(null);
+  // 토스트마다 새 key를 줘서 연달아 띄워도 등장 애니메이션과 타이머가 새로 시작되게 한다
+  const toastIdRef = useRef(0);
 
   const showAlert = useCallback((options: AlertDialogOptions) => {
     return new Promise<boolean>((resolve) => {
@@ -27,7 +29,8 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const showToast = useCallback((options: ToastOptions) => {
-    setToastState(options);
+    toastIdRef.current += 1;
+    setToastState({ ...options, id: toastIdRef.current });
   }, []);
 
   const closeAlert = useCallback((confirmed: boolean) => {
@@ -58,6 +61,7 @@ export function OverlayProvider({ children }: { children: React.ReactNode }) {
       <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
         {toastState ? (
           <ToastView
+            key={toastState.id}
             message={toastState.message}
             variant={toastState.variant}
             duration={toastState.duration}
