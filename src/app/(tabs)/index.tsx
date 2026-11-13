@@ -32,12 +32,7 @@ import {
 import { useDogs } from '@/hooks/useAuthSession';
 import { useDiaryList } from '@/hooks/useDiaries';
 import { useStartWalk } from '@/hooks/useWalkMutations';
-import {
-  getCurrentCoordinates,
-  requestLocationPermission,
-  stopWalkTracking,
-} from '@/hooks/useWalkTracker';
-import { fetchCurrentWeather } from '@/lib/api/weatherApi';
+import { requestLocationPermission, stopWalkTracking } from '@/hooks/useWalkTracker';
 import { formatDate, formatDistance, calculateAge } from '@/lib/utils/formatDistance';
 import { getLocalDateKey } from '@/lib/utils/localDate';
 import { useWalkStore } from '@/stores/walkStore';
@@ -148,23 +143,9 @@ export default function HomeScreen() {
     await stopWalkTracking();
     resetWalk();
 
-    let weather: { weatherCondition: string; weatherTemp: number; weatherIcon: string } | undefined;
+    // 날씨는 산책 화면에서 GPS로 조회해 채운다. 여기서 위치를 기다리면 GPS가 잡히지 않을 때 로딩이 끝나지 않는다
     try {
-      const coords = await getCurrentCoordinates();
-      if (coords) {
-        const current = await fetchCurrentWeather(coords.latitude, coords.longitude);
-        weather = {
-          weatherCondition: current.condition,
-          weatherTemp: current.temp,
-          weatherIcon: current.icon,
-        };
-      }
-    } catch {
-      // 위치·날씨 조회 실패 시 산책 중 GPS로 다시 시도
-    }
-
-    try {
-      const walk = await startWalk.mutateAsync({ dogId, weather });
+      const walk = await startWalk.mutateAsync({ dogId });
       setActiveWalk(walk);
       router.push('/walk/active');
     } catch {
