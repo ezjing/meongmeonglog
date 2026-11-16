@@ -5,23 +5,13 @@ import { useRef } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 
-import { QuoteCard, useDiary } from '@/entities/diary';
+import { useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
-import { WalkPhotoCarousel } from '@/entities/walk';
-import {
-  colors,
-  spacing,
-  radius,
-  fontSize,
-  fontWeight,
-  lineHeight,
-  shadows,
-} from '@/shared/config/theme';
-import { formatDate } from '@/shared/lib/formatDistance';
+import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
 import { useOverlay } from '@/shared/ui/overlay/index';
 
-const PHOTO_HEIGHT = 150;
+import { ShareCardPreview } from './ShareCardPreview';
 
 export function ShareScreen() {
   const { diaryId } = useLocalSearchParams<{ diaryId: string }>();
@@ -64,21 +54,14 @@ export function ShareScreen() {
       <Text style={styles.title}>공유 카드 미리보기</Text>
 
       <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
-        <View style={styles.card}>
-          <WalkPhotoCarousel photos={photos} width={cardWidth} height={PHOTO_HEIGHT}>
-            <View style={styles.tagWrap}>
-              <Text style={styles.tag}>
-                🐾 {dogName} · {formatDate(diary.createdAt)}
-              </Text>
-            </View>
-          </WalkPhotoCarousel>
-          <View style={styles.cardBody}>
-            <Text style={styles.summary} numberOfLines={3}>
-              {diary.content}
-            </Text>
-            <QuoteCard quote={diary.dailyQuote} />
-          </View>
-        </View>
+        <ShareCardPreview
+          dogName={dogName}
+          createdAt={diary.createdAt}
+          content={diary.content}
+          dailyQuote={diary.dailyQuote}
+          photos={photos}
+          width={cardWidth}
+        />
       </ViewShot>
 
       <Text style={styles.sectionLabel}>공유하기</Text>
@@ -121,35 +104,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.extrabold,
     color: colors.fg,
     marginBottom: spacing.md,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.cardLg,
-    overflow: 'hidden',
-    marginBottom: spacing.md,
-    ...shadows.raised,
-  },
-  tagWrap: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: spacing.ms,
-  },
-  tag: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.scrim,
-    color: colors.fgInverse,
-    fontSize: fontSize.xs,
-    paddingHorizontal: spacing.ms,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
-    overflow: 'hidden',
-  },
-  cardBody: { padding: spacing.ms },
-  summary: {
-    fontSize: fontSize.md,
-    lineHeight: lineHeight.md,
-    color: colors.fg,
-    marginBottom: spacing.sm,
   },
   sectionLabel: {
     fontSize: fontSize.md,

@@ -7,5 +7,7 @@ export { useFinishWalkStore } from './model/finishWalkStore';
 export { useAbandonWalk } from './model/useAbandonWalk';
 export { getWalkElapsedSec } from './model/useElapsedSec';
 export { useWalkPhotos } from './model/useWalkPhotos';
+export { acquireWebWalkWakeLock } from './lib/webWakeLock';
 export { useWalkTracker } from './model/useWalkTracker';
 export { WalkMap } from './ui/WalkMap';
+export { WebWalkRecordingNotice } from './ui/WebWalkRecordingNotice';

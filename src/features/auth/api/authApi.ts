@@ -11,46 +11,85 @@ import { unlinkKakaoAccount } from '../lib/kakaoAuth';
 import { unlinkNaverAccount } from '../lib/naverAuth';
 import type { AuthSession } from '../model/types';
 
-export async function signInWithProvider(
-  provider: AuthProvider,
-  accessToken: string,
-): Promise<AuthSession> {
+async function invokeSocialAuth(provider: AuthProvider, body: Record<string, unknown>) {
   if (!isSupabaseConfigured) {
-    if (DEV_AUTH) {
-      return mockDevSession(provider);
-    }
+    if (DEV_AUTH) return null;
     throw new AppError('supabase_not_configured', 'Supabase 환경 변수를 설정해주세요.');
   }
 
   const { data, error } = await supabase.functions.invoke(
     provider === 'naver' ? 'auth-naver' : 'auth-kakao',
-    { body: { provider, accessToken } },
+    { body: { provider, ...body } },
   );
-
   const responseError = (data as { error?: string } | null)?.error;
   if (error || responseError) {
-    if (DEV_AUTH) {
-      return mockDevSession(provider);
-    }
+    if (DEV_AUTH) return null;
     throw new AppError('auth_failed', responseError ?? error?.message ?? '로그인에 실패했습니다.');
   }
+  return data;
+}
 
-  const session = data as AuthSession & { refreshToken?: string };
-  if (session.accessToken) {
+async function persistSocialSession(
+  provider: AuthProvider,
+  data: (AuthSession & { refreshToken?: string }) | null,
+): Promise<AuthSession> {
+  if (!data) return mockDevSession(provider);
+
+  if (data.accessToken) {
     await supabase.auth.setSession({
-      access_token: session.accessToken,
-      refresh_token: session.refreshToken ?? session.accessToken,
+      access_token: data.accessToken,
+      refresh_token: data.refreshToken ?? data.accessToken,
     });
   }
 
   const authSession = {
-    userId: session.userId,
-    accessToken: session.accessToken,
-    provider: session.provider ?? provider,
+    userId: data.userId,
+    accessToken: data.accessToken,
+    provider: data.provider ?? provider,
   };
-
   await persistAuthSession({ userId: authSession.userId, provider: authSession.provider });
   return authSession;
+}
+
+export async function signInWithProvider(
+  provider: AuthProvider,
+  accessToken: string,
+): Promise<AuthSession> {
+  const data = await invokeSocialAuth(provider, { accessToken });
+  return persistSocialSession(provider, data as AuthSession & { refreshToken?: string });
+}
+
+export async function fetchWebAuthorizeUrl(input: {
+  provider: AuthProvider;
+  redirectUri: string;
+  state: string;
+  forceAccountPicker: boolean;
+}): Promise<string> {
+  const data = await invokeSocialAuth(input.provider, {
+    intent: 'authorize',
+    redirectUri: input.redirectUri,
+    state: input.state,
+    forceAccountPicker: input.forceAccountPicker,
+  });
+  const authorizeUrl = (data as { authorizeUrl?: string } | null)?.authorizeUrl;
+  if (!authorizeUrl) {
+    throw new AppError('auth_failed', '로그인에 실패했습니다.');
+  }
+  return authorizeUrl;
+}
+
+export async function signInWithAuthCode(input: {
+  provider: AuthProvider;
+  code: string;
+  redirectUri: string;
+  state: string;
+}): Promise<AuthSession> {
+  const data = await invokeSocialAuth(input.provider, {
+    code: input.code,
+    redirectUri: input.redirectUri,
+    state: input.state,
+  });
+  return persistSocialSession(input.provider, data as AuthSession & { refreshToken?: string });
 }
 
 async function mockDevSession(provider: AuthProvider): Promise<AuthSession> {

@@ -4,6 +4,7 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 import { serveJson } from './http.ts';
 import { createAdminClient } from './requestUser.ts';
+import type { SocialOAuth } from './socialOAuth.ts';
 
 export type SocialProvider = 'kakao' | 'naver';
 
@@ -156,17 +157,50 @@ const DEV_NICKNAME: Record<SocialProvider, string> = {
   naver: '네이버 사용자',
 };
 
+interface SocialAuthBody {
+  accessToken?: string;
+  code?: string;
+  redirectUri?: string;
+  state?: string;
+  intent?: string;
+  forceAccountPicker?: boolean;
+}
+
 /**
- * 소셜 로그인 함수 공통 처리: 소셜 토큰으로 프로필을 확인해 Supabase 세션을 발급한다.
+ * 소셜 로그인 함수 공통 처리.
+ * 앱은 accessToken을 보내고, 웹은 인가 코드 교환을 요청한다.
  * DEV_AUTH 환경에서는 토큰 확인 없이 개발용 프로필을 쓴다.
  */
 export function serveSocialAuth(
   provider: SocialProvider,
   fetchProfile: (accessToken: string) => Promise<SocialProfile>,
+  oauth: SocialOAuth,
 ) {
   serveJson(async (req) => {
-    const { accessToken } = await req.json();
+    const body = (await req.json()) as SocialAuthBody;
+
+    if (body.intent === 'authorize') {
+      if (!body.redirectUri || !body.state) throw new Error('로그인에 실패했습니다.');
+      return {
+        authorizeUrl: oauth.buildAuthorizeUrl({
+          redirectUri: body.redirectUri,
+          state: body.state,
+          forceAccountPicker: body.forceAccountPicker === true,
+        }),
+      };
+    }
+
     const devAuth = Deno.env.get('DEV_AUTH') === 'true';
+    let accessToken = body.accessToken;
+    if (!accessToken && body.code) {
+      if (!body.redirectUri || !body.state) throw new Error('로그인에 실패했습니다.');
+      accessToken = await oauth.exchangeCode({
+        code: body.code,
+        redirectUri: body.redirectUri,
+        state: body.state,
+      });
+    }
+    if (!devAuth && !accessToken) throw new Error('로그인에 실패했습니다.');
 
     const profile: SocialProfile = devAuth
       ? {
@@ -176,7 +210,7 @@ export function serveSocialAuth(
           nickname: DEV_NICKNAME[provider],
           profileImage: null,
         }
-      : await fetchProfile(accessToken);
+      : await fetchProfile(accessToken!);
 
     return createSocialSession(createAdminClient(), profile);
   });

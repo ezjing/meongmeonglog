@@ -17,6 +17,7 @@ import { DogAvatar, useDogs } from '@/entities/dog';
 import { stopWalkTracking, useStartWalk, useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
+import { acquireWebWalkWakeLock, WebWalkRecordingNotice } from '@/features/walk-session';
 import {
   colors,
   spacing,
@@ -49,7 +50,10 @@ function getTodayWalkStatus(
       title: '산책 진행 중이에요',
       subtitle: '탭하면 이어서 기록할 수 있어요',
       emoji: '🐾',
-      onPress: () => router.push('/walk/active'),
+      onPress: () => {
+        acquireWebWalkWakeLock();
+        router.push('/walk/active');
+      },
     };
   }
 
@@ -92,6 +96,8 @@ export function HomeScreen() {
   // 안드로이드: 홈에서 뒤로가기를 한 번 더 눌러야 종료
   useFocusEffect(
     useCallback(() => {
+      if (Platform.OS !== 'android') return;
+
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
         const now = Date.now();
         if (now - lastBackPressRef.current < EXIT_CONFIRM_WINDOW_MS) return false;
@@ -117,6 +123,7 @@ export function HomeScreen() {
   const handleStartWalk = async () => {
     if (!dog || startingWalkRef.current) return;
 
+    acquireWebWalkWakeLock();
     startingWalkRef.current = true;
     setIsStartingWalk(true);
     try {
@@ -134,7 +141,9 @@ export function HomeScreen() {
         message:
           Platform.OS === 'ios'
             ? '산책 기록을 위해 위치 "항상 허용"이 필요해요. 설정에서 권한을 확인해 주세요.'
-            : '산책 기록을 위해 위치(앱 사용 중)와 알림 권한을 허용해 주세요.',
+            : Platform.OS === 'web'
+              ? '산책 기록을 위해 위치 권한을 허용해 주세요.'
+              : '산책 기록을 위해 위치(앱 사용 중)와 알림 권한을 허용해 주세요.',
         variant: 'warning',
       });
       return;
@@ -194,6 +203,7 @@ export function HomeScreen() {
           <Text style={styles.walkCtaEmoji}>🐾</Text>
           <Text style={styles.walkCtaLabel}>산책 시작</Text>
         </Pressable>
+        <WebWalkRecordingNotice style={styles.walkNotice} />
 
         <Text style={styles.sectionTitle}>최근 일기</Text>
         {recentDiaries.length > 0 ? (
@@ -262,6 +272,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.base,
     marginTop: spacing.xs,
   },
+  walkNotice: { marginTop: -spacing.sm, marginBottom: spacing.md },
   sectionTitle: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,

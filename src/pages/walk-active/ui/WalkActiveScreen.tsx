@@ -5,6 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useWalkStore } from '@/entities/walk';
 import {
   WalkMap,
+  WebWalkRecordingNotice,
   useAbandonWalk,
   useWalkTracker,
   freezeWalkSession,
@@ -117,6 +118,8 @@ export function WalkActiveScreen() {
         </View>
       </View>
 
+      <WebWalkRecordingNotice style={styles.recordingNotice} />
+
       <View style={styles.actions}>
         <Button
           label="산책 취소"
@@ -169,6 +172,7 @@ const styles = StyleSheet.create({
   statItem: { alignItems: 'center' },
   statValue: { fontSize: fontSize.base, fontWeight: fontWeight.bold, color: colors.fg },
   statLabel: { fontSize: fontSize.xs, color: colors.fgMuted },
+  recordingNotice: { marginBottom: spacing.sm, paddingHorizontal: spacing.md },
   actions: {
     flexDirection: 'row',
     gap: spacing.sm,

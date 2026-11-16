@@ -12,6 +12,7 @@ import { subscribeAuthSessionSync, initKakaoSdk, initNaverSdk } from '@/features
 import { queryClient } from '@/shared/api/queryClient';
 import { colors } from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
+import { AddToHomeBanner } from '@/shared/ui/AddToHomeBanner';
 import { OverlayProvider } from '@/shared/ui/overlay/index';
 
 export default function RootLayout() {
@@ -49,6 +50,7 @@ export default function RootLayout() {
                 <Stack.Screen name="share" />
               </Stack.Protected>
             </Stack>
+            <AddToHomeBanner />
           </QueryClientProvider>
         </OverlayProvider>
       </SafeAreaProvider>

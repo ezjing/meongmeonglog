@@ -1,4 +1,5 @@
 import { externalApiSignal } from '../_shared/http.ts';
+import { oauthFor } from '../_shared/socialOAuth.ts';
 import { serveSocialAuth, type SocialProfile } from '../_shared/socialAuth.ts';
 
 /** 카카오디벨로퍼스 멍멍로그 앱 ID — 다른 앱에서 발급된 토큰 차단용 */
@@ -35,4 +36,4 @@ async function fetchKakaoProfile(accessToken: string): Promise<SocialProfile> {
   };
 }
 
-serveSocialAuth('kakao', fetchKakaoProfile);
+serveSocialAuth('kakao', fetchKakaoProfile, oauthFor('kakao'));

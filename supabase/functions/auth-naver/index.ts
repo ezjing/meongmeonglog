@@ -1,4 +1,5 @@
 import { externalApiSignal } from '../_shared/http.ts';
+import { oauthFor } from '../_shared/socialOAuth.ts';
 import { serveSocialAuth, type SocialProfile } from '../_shared/socialAuth.ts';
 
 async function fetchNaverProfile(accessToken: string): Promise<SocialProfile> {
@@ -22,4 +23,4 @@ async function fetchNaverProfile(accessToken: string): Promise<SocialProfile> {
   };
 }
 
-serveSocialAuth('naver', fetchNaverProfile);
+serveSocialAuth('naver', fetchNaverProfile, oauthFor('naver'));

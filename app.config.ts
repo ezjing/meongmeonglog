@@ -19,6 +19,18 @@ const basePlugins = (baseConfig.plugins ?? []).map((plugin) =>
 
 export default (): ExpoConfig => ({
   ...baseConfig,
+  web: {
+    ...baseConfig.web,
+    output: 'single',
+    lang: 'ko',
+    name: '멍멍로그',
+    shortName: '멍멍로그',
+    themeColor: palette.cream200,
+    backgroundColor: palette.cream200,
+    display: 'standalone',
+    barStyle: 'default',
+    startUrl: '/',
+  },
   android: {
     ...baseConfig.android,
     adaptiveIcon: { ...baseConfig.android?.adaptiveIcon, backgroundColor: palette.cream200 },

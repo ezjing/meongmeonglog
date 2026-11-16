@@ -4,6 +4,7 @@ export {
   pauseWalkLocationUpdates,
   stopWalkTracking,
 } from './lib/walkTracking';
+export { bindWebWalkWatch } from './lib/webWalkWatch';
 export {
   useCancelWalk,
   useFinishWalk,

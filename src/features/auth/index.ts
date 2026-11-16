@@ -4,6 +4,7 @@ export { handleSessionLost } from './lib/authSessionSync';
 export { subscribeAuthSessionSync } from './lib/authSessionSync';
 export { loadAuthSession } from './lib/authStorage';
 export { getKakaoAccessToken, initKakaoSdk } from './lib/kakaoAuth';
+export { readWebOAuthCallback, startWebOAuth } from './lib/webOAuth';
 export { getNaverAccessToken, initNaverSdk } from './lib/naverAuth';
 export { useAccountEmail, useAuthSession } from './model/useAuthSession';
 export { KakaoIcon, NaverIcon } from './ui/SocialIcons';

@@ -85,7 +85,9 @@ export function useWalkTracker() {
           setTrackingError(
             Platform.OS === 'android'
               ? '위치·알림 권한을 허용해야 산책을 기록할 수 있어요.'
-              : '위치 "항상 허용" 권한이 필요해요.',
+              : Platform.OS === 'web'
+                ? '위치 권한을 허용해야 산책을 기록할 수 있어요.'
+                : '위치 "항상 허용" 권한이 필요해요.',
           );
         }
         return;

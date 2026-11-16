@@ -3,7 +3,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AuthProvider } from '@/shared/api/database';
 import { useAuthStore } from '@/shared/session/sessionStore';
 
-import { signInWithProvider, signOut, deleteAccount, getCurrentUserEmail } from '../api/authApi';
+import {
+  signInWithProvider,
+  signInWithAuthCode,
+  signOut,
+  deleteAccount,
+  getCurrentUserEmail,
+} from '../api/authApi';
 import { resetClientAuthState } from '../lib/resetClientAuthState';
 
 export function useAuthSession() {
@@ -15,6 +21,14 @@ export function useAuthSession() {
   const loginMutation = useMutation({
     mutationFn: ({ provider, accessToken }: { provider: AuthProvider; accessToken: string }) =>
       signInWithProvider(provider, accessToken),
+    onSuccess: (session) => {
+      queryClient.clear();
+      setSession(session.userId, session.provider);
+    },
+  });
+
+  const loginWithCodeMutation = useMutation({
+    mutationFn: signInWithAuthCode,
     onSuccess: (session) => {
       queryClient.clear();
       setSession(session.userId, session.provider);
@@ -35,9 +49,10 @@ export function useAuthSession() {
     userId,
     provider,
     login: loginMutation.mutateAsync,
+    loginWithCode: loginWithCodeMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
     deleteAccount: deleteAccountMutation.mutateAsync,
-    isLoggingIn: loginMutation.isPending,
+    isLoggingIn: loginMutation.isPending || loginWithCodeMutation.isPending,
     isDeletingAccount: deleteAccountMutation.isPending,
   };
 }

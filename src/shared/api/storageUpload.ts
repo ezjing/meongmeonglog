@@ -1,8 +1,8 @@
-import { File } from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
 import { AppError } from '@/shared/lib/AppError';
 
+import { readStorageImageBytes } from './readStorageImageBytes';
 import { supabase, isSupabaseConfigured } from './supabase';
 
 const MAX_GROQ_IMAGE_EDGE = 2048;
@@ -20,11 +20,6 @@ async function normalizeImageForUpload(
     contentType: 'image/jpeg',
     ext: 'jpg',
   };
-}
-
-async function readImageBytes(uri: string): Promise<ArrayBuffer> {
-  const file = new File(uri);
-  return file.arrayBuffer();
 }
 
 export async function uploadStorageImage(
@@ -47,7 +42,7 @@ export async function uploadStorageImage(
   }
 
   const normalized = await normalizeImageForUpload(uri);
-  const bytes = await readImageBytes(normalized.uri);
+  const bytes = await readStorageImageBytes(normalized.uri);
 
   const { error: uploadError } = await supabase.storage
     .from(bucket)

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import {
   KakaoIcon,
@@ -9,6 +9,7 @@ import {
   useAuthSession,
   getKakaoAccessToken,
   getNaverAccessToken,
+  startWebOAuth,
 } from '@/features/auth';
 import { resolveOnboardingRoute } from '@/features/onboarding';
 import type { AuthProvider } from '@/shared/api/database';
@@ -35,6 +36,7 @@ export function LoginScreen() {
   const { login, isLoggingIn } = useAuthSession();
   const { showToast } = useOverlay();
   const [accountSheetVisible, setAccountSheetVisible] = useState(false);
+  const [isStartingWebLogin, setIsStartingWebLogin] = useState(false);
   const sessionEndedElsewhere = useAuthStore((s) => s.sessionEndedElsewhere);
   const setSessionEndedElsewhere = useAuthStore((s) => s.setSessionEndedElsewhere);
 
@@ -57,6 +59,20 @@ export function LoginScreen() {
 
   const handleProviderLogin = async (provider: AuthProvider, forceAccountPicker = false) => {
     const providerLabel = PROVIDER_LABEL[provider];
+
+    if (Platform.OS === 'web') {
+      setIsStartingWebLogin(true);
+      try {
+        await startWebOAuth(provider, forceAccountPicker);
+      } catch (error) {
+        setIsStartingWebLogin(false);
+        showToast({
+          message: getLoginErrorMessage(error, providerLabel),
+          variant: 'error',
+        });
+      }
+      return;
+    }
 
     try {
       const accessToken =
@@ -89,14 +105,14 @@ export function LoginScreen() {
           variant="kakao"
           icon={<KakaoIcon size={iconSize.lg} />}
           onPress={() => handleProviderLogin('kakao')}
-          disabled={isLoggingIn}
+          disabled={isLoggingIn || isStartingWebLogin}
         />
         <Button
           label="네이버로 시작하기"
           variant="naver"
           icon={<NaverIcon size={iconSize.lg} />}
           onPress={() => handleProviderLogin('naver')}
-          disabled={isLoggingIn}
+          disabled={isLoggingIn || isStartingWebLogin}
         />
       </View>
 
@@ -104,7 +120,7 @@ export function LoginScreen() {
         label="다른 계정으로 로그인"
         variant="text"
         onPress={() => setAccountSheetVisible(true)}
-        disabled={isLoggingIn}
+        disabled={isLoggingIn || isStartingWebLogin}
         hitSlop={hitSlop}
         style={styles.otherAccount}
       />
