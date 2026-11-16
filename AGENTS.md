@@ -4,6 +4,8 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 # 구조 규칙 (Feature-Sliced Design) — 반드시 준수
 
+작업을 시작하기 전에 **[docs/handoff.md](docs/handoff.md)**(현재 진행 상황·결정 사항·다음 작업)를 읽는다. 로컬에 `HANDOFF.local.md`가 있으면 함께 읽는다(공개하면 안 되는 메모, git 제외).
+
 코드를 추가·이동·수정할 때는 **[docs/architecture.md](docs/architecture.md)의 규칙을 따른다.** 핵심 요약:
 
 - 레이어: `app`(Expo Router 라우트) → `pages` → `features` → `entities` → `shared`. 위 레이어만 아래를 import한다.

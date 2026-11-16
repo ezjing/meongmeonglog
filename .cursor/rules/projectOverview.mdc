@@ -1,27 +1,42 @@
 ---
-description: 멍멍로그 프로젝트 개요, 기술 스택, 폴더 구조
+description: 멍멍로그 프로젝트 개요, 작업 원칙, 반드시 읽을 문서
 alwaysApply: true
 ---
 
 # 멍멍로그 프로젝트 개요
 
-- 서비스: 강아지 AI 산책 일기 앱 (React Native Expo 56)
-- 백엔드: Supabase (Auth, PostgreSQL, Storage, Edge Functions)
-- AI: Groq API (Edge Functions에서 호출)
-- Expo 문서: https://docs.expo.dev/versions/v56.0.0/
+- 서비스: 강아지 산책 기록 + AI 산책 일기 앱 (Expo SDK 56, React Native 0.85, expo-router, expo-dev-client)
+- 백엔드: Supabase (Auth, PostgreSQL + RLS, Storage, Edge Functions), AI는 Groq(Edge Function에서 호출)
+- 상태: TanStack Query(서버 데이터) + zustand(로컬 상태)
+- Expo 문서는 반드시 버전 문서를 본다: https://docs.expo.dev/versions/v56.0.0/
 
-## 폴더 구조 (Expo 기본 + 최소 추가)
+## 반드시 따르는 문서 (요약은 아래, 상세는 원문)
 
-- `src/app/` — Expo Router 화면·라우트 (`_layout.tsx`로 네비게이션)
-- `src/components/` — 재사용 UI
-- `src/hooks/` — 커스텀 훅, React Query
-- `src/constants/` — 테마, 옵션
-- `src/lib/` — Supabase client, api, mappers, utils
-- `src/types/` — 공유 TypeScript 타입
-- `src/stores/` — Zustand (산책 세션 등)
-- `supabase/` — migrations, Edge Functions
+1. `AGENTS.md` — 구조·토큰 규칙 요약
+2. `docs/architecture.md` — **FSD 구조 규칙** (lint로 강제됨)
+3. `docs/design-tokens.md` — **디자인 토큰, 버튼 역할, 토스트 종류**
+4. `docs/handoff.md` — **현재 진행 상황, 결정 사항, 다음 작업** (작업 시작 전에 읽기)
+5. `docs/web-plan.md` — 웹(iOS 사용자용 PWA) 지원 계획
+6. `HANDOFF.local.md` — git에 없는 로컬 전용 메모 (공개 저장소에 올리면 안 되는 내용). 파일이 있으면 읽는다
 
-`features/` 레이어 사용 금지.
+## 구조 (FSD)
+
+`src/app`(Expo Router 라우트) → `src/pages` → `src/features` → `src/entities` → `src/shared`
+- 위 레이어만 아래를 import. 같은 레이어의 다른 slice는 import 금지(entities끼리는 `@x`만)
+- 다른 slice는 `index.ts`(이름 명시 re-export)로만, slice 내부는 상대 경로
+- 라우트 파일은 `export { XScreen as default } from '@/pages/x';` 한 줄
+- `npx tsc --noEmit`, `npm run lint`가 통과해야 한다. lint 규칙을 끄거나 예외를 추가해 우회하지 않는다
+
+## 작업 원칙 (사용자 지시 — 반드시 지킨다)
+
+- **화면 설계·계획서와 다르게 구현해야 하는 부분이 있으면, 구현 전에 목록으로 보여주고 승인받는다.**
+  - 예: 컬럼·탭·필드·검색조건 추가/삭제, 응답 항목 제외, 임의의 값(상한선, 기본값, 문구 등) 결정
+  - 승인 없이 판단해서 구현하지 않는다. "사후 보고"로 대신하지 않는다. 승인받은 것만 구현한다
+- 새 화면 문구(토스트·안내·버튼 라벨)는 초안을 제시하고 승인받는다
+- 커밋은 작업 단위로 나누고 메시지는 한국어로 쓴다 (`fix:`, `feat:`, `refactor:`, `perf:`, `docs:`, `chore:`)
+- **push는 사용자가 직접 한다.** 서버 배포(Edge Function, DB 마이그레이션), OTA·스토어 배포, 웹 호스팅 배포는 실행 직전에 확인받는다
+- **공개 저장소다.** 키·토큰·보안 약점 설명은 코드·문서·커밋 메시지에 쓰지 않는다 (`docs/`는 GitHub Pages로 공개됨)
+- 답변·설명은 한국어로 한다
 
 ## import alias
 

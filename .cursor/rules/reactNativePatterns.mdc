@@ -1,28 +1,62 @@
 ---
-description: React Native / Expo 컴포넌트 패턴
-globs: src/**/*.tsx
+description: React Native / Expo 컴포넌트·UI 패턴 (토큰, 버튼, 토스트, 키보드, 플랫폼 분리)
+globs: src/**/*.tsx,src/**/*.ts
 alwaysApply: false
 ---
 
 # React Native 패턴
 
-- 함수형 컴포넌트 + TypeScript strict
-- `StyleSheet.create` co-located, 스타일 값은 `@/constants/theme` 디자인 토큰만 사용 (하드코딩 숫자·hex 금지)
-  - 토큰: `colors` `spacing` `radius` `fontSize` `emojiSize` `iconSize` `fontWeight` `lineHeight` `borderWidth` `opacity` `scale` `shadows` `sizes` `zIndex` `hitSlop`
-  - 색상 원본은 `constants/colors.json` (app.config.ts에서도 읽음). 새 색상은 여기에 추가
-  - 그림자는 `...shadows.card` 처럼 프리셋 spread로 사용
-  - 토큰 스케일에 없는 컴포넌트 고유 크기(아바타 84 등)는 파일 상단 `UPPER_SNAKE` 상수로, 여러 파일이 공유하면 `constants/layout.ts`
-- `app/` 화면: default export (Expo Router). 재사용 UI는 `components/` named export
-- 200줄 초과 시 `components/{domain}/`로 분리
-- `app/`·`components/`에서 Supabase client 직접 import 금지
+## 스타일·디자인 토큰 (상세: `docs/design-tokens.md`)
+
+- 함수형 컴포넌트 + TypeScript strict, `StyleSheet.create` co-located
+- 스타일 값은 `@/shared/config/theme`에서만 가져온다
+  - 색·모서리·그림자·고정 크기: **의미(2단계) 토큰** — `colors.fg`, `colors.surface`, `radius.card`, `shadows.modal`, `sizes.iconButton`
+  - 간격·글자 등 스케일: `spacing` `fontSize` `fontWeight` `lineHeight` `iconSize` `emojiSize` `borderWidth` `opacity` `scale` `zIndex` `hitSlop`
+- **값이 아니라 용도로 고른다**: 카드 배경 `surface`, 주황 면 위 글자 `fgOnPrimary`, 진한 면 위 글자 `fgInverse`
+- 색 값(`#xxxxxx`, `rgba()`)·팔레트(`@/shared/config/tokens/*`) 직접 사용 금지 (lint 에러). 필요한 용도가 없으면 `tokens/semantic.ts`에 토큰 추가 + 문서 갱신
+- 토큰에 없는 컴포넌트 고유 크기는 파일 상단 `UPPER_SNAKE` 상수
+
+## 버튼 — 역할로 고른다 (`@/shared/ui/Button`)
+
+| variant | 역할 |
+|---|---|
+| `primary` | 화면당 1개 주요 행동 |
+| `secondary` | 보조 행동(이전, 수정, 로그아웃 등) |
+| `danger` | 되돌릴 수 없는 행동(반드시 확인 다이얼로그) |
+| `dangerFilled` | 위험 행동 확인 다이얼로그의 확인 버튼 |
+| `text` | 눈에 덜 띄는 이탈·부가 행동 |
+| `kakao` `naver` `instagram` | 외부 서비스 |
+
+- `size="md"`는 다이얼로그용. 처리 중에는 `disabled` 대신 `loading`
+
+## 토스트 (`useOverlay().showToast`)
+
+- `variant` 필수: `success`(초록, 저장·완료) / `warning`(주황, 안내·입력값·권한·준비 중) / `error`(빨강, 요청 실패)
+- 아이콘(✅ ⚠️ ❌)은 자동으로 붙는다. **메시지 문구에 이모지를 넣지 않는다**
+
+## 입력 화면
+
+- 입력칸이 있는 화면은 `@/shared/ui/KeyboardAwareScrollView` + `useScrollToEndOnFocus` (Android edge-to-edge에서 키보드가 화면을 덮음)
+- 확인 다이얼로그: `useOverlay().showAlert({ ..., destructive })`
+
+## 화면·컴포넌트 배치
+
+- 화면은 `pages/<화면>/ui/<이름>Screen.tsx`(named export), 라우트 파일은 re-export만
+- 한 화면 전용 조각은 그 page slice 안, 여러 화면이면 성격에 따라 features/entities/shared
+- 화면·UI 코드에서 `@/shared/api/supabase` 직접 import 금지 (각 slice의 `api` 세그먼트 사용)
+- 리스트 항목 컴포넌트는 `memo`, `renderItem`은 `useCallback`
+
+## 플랫폼 분리 (웹 지원)
+
+- 네이티브 전용 모듈(react-native-maps, expo-task-manager, 카카오·네이버 SDK, view-shot 등)은 같은 세그먼트에 `.web.tsx`/`.web.ts`를 두어 분리. public API(`index.ts`)는 바꾸지 않는다
 
 ```tsx
-// ✅ app/walk/active.tsx
-import { WalkMap } from '@/components/walk/WalkMap';
-import { useWalkTracker } from '@/hooks/useWalkTracker';
+// ✅ src/app/walk/active.tsx
+export { WalkActiveScreen as default } from '@/pages/walk-active';
 
-export default function WalkActiveScreen() {
-  const { elapsedSec, distanceMeter } = useWalkTracker();
-  return <WalkMap distanceMeter={distanceMeter} />;
-}
+// ✅ src/pages/walk-active/ui/WalkActiveScreen.tsx
+import { useWalkStore } from '@/entities/walk';
+import { WalkMap, useWalkTracker } from '@/features/walk-session';
+import { colors, spacing } from '@/shared/config/theme';
+import { Button } from '@/shared/ui/Button';
 ```

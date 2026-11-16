@@ -7,21 +7,27 @@ alwaysApply: true
 
 | 대상 | 규칙 | 예시 |
 |------|------|------|
-| 폴더 | camelCase | `components/walk/` |
+| slice 폴더 (pages/features/entities) | kebab-case, 도메인·사용자 행동 이름 | `walk-session/`, `diary-generate/`, `dog-basic/` |
+| 세그먼트 폴더 | `ui` `model` `api` `lib` `config` | `entities/dog/api/` |
+| 화면 컴포넌트 | `pages/<화면>/ui/<이름>Screen.tsx` | `HomeScreen.tsx` |
+| 라우트 파일 (`src/app`) | Expo Router 경로 그대로, 내용은 re-export 한 줄 | `walk/active.tsx` |
 | 컴포넌트 파일 | PascalCase | `Button.tsx`, `WalkMap.tsx` |
+| 플랫폼별 파일 | `.web.tsx` / `.native.tsx` (같은 세그먼트) | `WalkMap.web.tsx` |
 | 훅 | camelCase, `use` 접두 | `useWalkTracker.ts` |
-| app 라우트 | camelCase | `dogBasic.tsx` |
 | 함수/변수 | camelCase | `startWalk()`, `walkId` |
 | 타입 | PascalCase | `DogProfile`, `WalkSession` |
+| 상수 | UPPER_SNAKE (파일 상단) | `MAX_WALK_PHOTOS`, `DIARY_PAGE_SIZE` |
 | DB 컬럼 | snake_case | `daily_quote` |
 | Edge Function | kebab-case | `diaries-generate/` |
+| 디자인 토큰 | camelCase, 용도 이름 | `colors.fgMuted`, `radius.controlLg` |
 
 ## 함수 패턴
 
-- API: `fetchDiaries`, `createDog`, `finishWalk`
-- Query hook: `useDiary(id)`, `useDiaryList()`
+- API: `fetchDiaryPage`, `createDog`, `finishWalk`, `saveWalkLocations`
+- Query hook: `useDiary(id)`, `useDiaryPages()`, `useRecentDiaries(5)`
 - Mutation hook: `useCreateDog()`, `useGenerateDiary()`
-- Handler: `handleWalkStart()`
-- Boolean: `isWalkActive`, `hasPhotos`, `canGenerateDiary`
+- Query key 객체: `diaryKeys`, `dogKeys`, `guardianKeys`, `walkKeys` (각 entity의 api 세그먼트)
+- Handler: `handleGenerate()`, 흐름 hook: `useConfirmLogout()`, `useAbandonWalk()`
+- Boolean: `isWalkActive`, `hasPhotos`, `canGenerate`
 
-DB row는 `lib/mappers/`에서 camelCase로 변환 후 사용.
+DB row(snake_case)는 각 entity의 `lib/*Mappers.ts`에서 camelCase 도메인 타입으로 변환한다.

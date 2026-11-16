@@ -1,24 +1,43 @@
 ---
-description: Supabase DB, API, Edge Function 패턴
-globs: supabase/**,src/lib/**,src/hooks/**
+description: Supabase 클라이언트·API·Edge Function·마이그레이션 패턴
+globs: supabase/**,src/**/api/**,src/shared/api/**
 alwaysApply: false
 ---
 
 # Supabase 패턴
 
-- 클라이언트: `src/lib/supabase.ts` 단일 인스턴스
-- 테이블 접근: `src/lib/api/{domain}Api.ts`
-- Edge Function: `src/lib/api/edgeFunctions.ts`
-- service role key 클라이언트 사용 금지 (RLS + anon key)
-- snake_case DB → camelCase는 `lib/mappers/`에서 변환
+## 클라이언트 (앱)
+
+- 클라이언트 단일 인스턴스: `src/shared/api/supabase.ts` (anon key + RLS. service role key는 앱에서 절대 사용 금지)
+- 테이블 접근은 각 entity의 `api/` 세그먼트: `entities/{dog|guardian|walk|diary}/api/*Api.ts`
+- snake_case row → camelCase 도메인 타입 변환은 entity의 `lib/*Mappers.ts`
+- Edge Function 호출 에러 메시지: `shared/api/edgeFunctions.ts`의 `getEdgeFunctionErrorMessage`
+- 사진 업로드: `shared/api/storageUpload.ts`의 `uploadStorageImage` (경로는 `${userId}/...`, 기기 세션으로 소유자 확인)
 
 ```typescript
-// lib/api/walkApi.ts
+// entities/walk/api/walkApi.ts
 export async function startWalk(dogId: string): Promise<WalkSession> {
-  const { data, error } = await supabase.from('walks').insert({ dog_id: dogId }).select().single();
+  const { data, error } = await supabase
+    .from('walks')
+    .insert({ dog_id: dogId, started_at: new Date().toISOString() })
+    .select()
+    .single();
   if (error) throw new AppError('walk_start_failed', error.message);
-  return toWalkSession(data);
+  return toWalkSession(data as WalkRow);
 }
 ```
 
-Edge Function 폴더: `supabase/functions/diaries-generate/index.ts`
+## Edge Functions (`supabase/functions`)
+
+- 공통 처리는 `_shared/http.ts`의 `serveJson(handler)`: CORS·JSON 응답·에러(`{ error }`, 400)를 처리. 핸들러는 값을 return, 실패는 throw
+- 외부 API(Groq·카카오·네이버·사진) fetch에는 `signal: externalApiSignal()` (30초 타임아웃)
+- 인증: `_shared/requestUser.ts`의 `createAdminClient()`, `getRequestUserId(req, client)`
+- 소셜 로그인: `_shared/socialAuth.ts`의 `serveSocialAuth(provider, fetchProfile)`
+- 서로 의존하지 않는 DB 조회는 `Promise.all`, select는 필요한 컬럼만
+- 배포는 사용자 확인 후: `supabase functions deploy <name> --project-ref ansjpqdsujostrhukygy`
+- Edge Function은 기본 도메인에서 HTML을 반환할 수 없다 (웹 미리보기 HTML은 웹 호스팅의 API route에서)
+
+## 마이그레이션 (`supabase/migrations`)
+
+- 번호 순서 파일 (`008_...sql`). 적용 전 `supabase db push --linked --dry-run`으로 확인 → 사용자 확인 후 적용
+- 서버 전용 DB 함수는 `security definer` + `set search_path = ''` + anon/authenticated 실행 권한 회수

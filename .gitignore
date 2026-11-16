@@ -49,3 +49,6 @@ example
 
 # JetBrains IDE
 .idea/
+
+# 로컬 전용 메모 (공개 저장소에 올리지 않음)
+*.local.md
