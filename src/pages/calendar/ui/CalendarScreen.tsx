@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryListCard, useCalendar, useDiariesByDate } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
@@ -12,7 +12,8 @@ import { getLocalDateKey } from '@/shared/lib/localDate';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-const CELL_SIZE = (Dimensions.get('window').width - 32) / 7;
+// 한 줄에 7칸. 화면 크기가 바뀌어도(회전, 웹 창 크기) 그리드 폭을 따라간다
+const CELL_WIDTH = `${100 / 7}%` as const;
 
 export function CalendarScreen() {
   const now = new Date();
@@ -151,8 +152,8 @@ const styles = StyleSheet.create({
   weekday: { flex: 1, textAlign: 'center', fontSize: fontSize.xs, color: colors.fgMuted },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
+    width: CELL_WIDTH,
+    aspectRatio: 1,
     padding: spacing.xs,
   },
   cellInner: {
