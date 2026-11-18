@@ -91,10 +91,9 @@ export function LoginScreen() {
       trackEvent(AnalyticsEvents.loginComplete, { provider });
       await navigateAfterLogin(session.userId);
     } catch (error) {
-      showToast({
-        message: getLoginErrorMessage(error, providerLabel),
-        variant: 'error',
-      });
+      const message = getLoginErrorMessage(error, providerLabel);
+      // 직접 취소한 경우는 실패가 아니므로 웹 콜백 화면과 같이 안내(주황)로 보여준다
+      showToast({ message, variant: message === '로그인이 취소되었습니다.' ? 'warning' : 'error' });
     }
   };
 
