@@ -1,8 +1,8 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
-import type { WalkCoord } from '@/entities/walk';
+import { splitWalkPath, type WalkCoord } from '@/entities/walk';
 import { colors, spacing, radius, fontSize, sizes, shadows } from '@/shared/config/theme';
 
 interface WalkMapProps {
@@ -28,6 +28,7 @@ const FOLLOW_DELTA = {
 export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
   const mapRef = useRef<MapView>(null);
   const lastPoint = routePath.at(-1);
+  const segments = useMemo(() => splitWalkPath(routePath), [routePath]);
   const [followUser, setFollowUser] = useState(true);
 
   const lastLatitude = lastPoint?.latitude;
@@ -87,12 +88,15 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
           }
         }}
       >
-        {routePath.length > 1 && (
-          <Polyline
-            coordinates={routePath}
-            strokeColor={colors.primary}
-            strokeWidth={ROUTE_STROKE_WIDTH}
-          />
+        {segments.map((segment, index) =>
+          segment.length > 1 ? (
+            <Polyline
+              key={index}
+              coordinates={segment}
+              strokeColor={colors.primary}
+              strokeWidth={ROUTE_STROKE_WIDTH}
+            />
+          ) : null,
         )}
         {lastPoint && <Marker coordinate={lastPoint} />}
       </MapView>

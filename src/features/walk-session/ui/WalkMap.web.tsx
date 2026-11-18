@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { WalkCoord } from '@/entities/walk';
+import { splitWalkPath, type WalkCoord } from '@/entities/walk';
 import { colors, fontSize, radius, shadows, sizes, spacing } from '@/shared/config/theme';
 
 import { subscribeWebWalkGeolocation } from '../lib/webWalkGeolocation';
@@ -27,6 +27,7 @@ interface GoogleMap {
 
 interface GooglePolyline {
   setPath: (path: LatLng[]) => void;
+  setMap: (map: GoogleMap | null) => void;
 }
 
 interface GoogleMarker {
@@ -71,7 +72,7 @@ function toLatLng(coord: WalkCoord): LatLng {
 export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
   const hostRef = useRef<View>(null);
   const mapRef = useRef<GoogleMap | null>(null);
-  const lineRef = useRef<GooglePolyline | null>(null);
+  const linesRef = useRef<GooglePolyline[]>([]);
   const markerRef = useRef<GoogleMarker | null>(null);
   const mapsRef = useRef<GoogleMaps | null>(null);
   const routeRef = useRef(routePath);
@@ -105,17 +106,23 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
     const maps = mapsRef.current;
     if (!map || !maps) return;
 
-    const path = routeRef.current.map(toLatLng);
-    if (!lineRef.current) {
-      lineRef.current = new maps.Polyline({
-        map,
-        path,
-        strokeColor: colors.primary,
-        strokeWeight: ROUTE_STROKE_WEIGHT,
-      });
-    } else {
-      lineRef.current.setPath(path);
-    }
+    // 끊긴 구간마다 선을 따로 그린다 (기록되지 않은 구간을 직선으로 잇지 않음)
+    const segments = splitWalkPath(routeRef.current);
+    const lines = linesRef.current;
+    segments.forEach((segment, index) => {
+      const path = segment.map(toLatLng);
+      if (lines[index]) {
+        lines[index].setPath(path);
+      } else {
+        lines[index] = new maps.Polyline({
+          map,
+          path,
+          strokeColor: colors.primary,
+          strokeWeight: ROUTE_STROKE_WEIGHT,
+        });
+      }
+    });
+    lines.splice(segments.length).forEach((line) => line.setMap(null));
 
     const point = routeRef.current.at(-1);
     if (!point) return;
@@ -164,7 +171,7 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
       const map = mapRef.current;
       if (map) mapsRef.current?.event.clearInstanceListeners(map);
       mapRef.current = null;
-      lineRef.current = null;
+      linesRef.current = [];
       markerRef.current = null;
     };
   }, [drawRoute, showLivePosition]);

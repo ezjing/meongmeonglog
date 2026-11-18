@@ -7,6 +7,8 @@ const WALK_SESSION_KEY = 'meongmeonglog.activeWalk';
 export interface WalkCoord {
   latitude: number;
   longitude: number;
+  /** 앞 좌표와 잇지 않고 새 구간을 시작한다 (기록이 끊겼던 뒤의 첫 좌표) */
+  segmentStart?: true;
 }
 
 /** DB 전송 대기 좌표. 이전 버전 저장분에는 측정 시각(ms)이 없을 수 있음 */

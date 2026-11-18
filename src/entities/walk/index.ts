@@ -17,6 +17,7 @@ export {
 export { fetchWalkPhotos, saveWalkLocations, updateWalkWeather } from './api/walkApi';
 export { fetchCurrentWeather, toWalkWeatherPayload } from './api/weatherApi';
 export { formatWalkWeather } from './lib/weatherCode';
+export { splitWalkPath } from './lib/walkPathSegments';
 export type { WalkPhoto, WalkSession } from './model/types';
 export {
   createInitialWalkState,

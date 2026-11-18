@@ -66,10 +66,14 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
       if (!isAcceptableLocation(location, walkStartedAtMs, last)) continue;
 
       const { latitude, longitude } = location.coords;
-      const coord: WalkCoord = { latitude, longitude };
+      // 기준점이 없는데 경로가 이미 있으면 기록이 끊겼던 뒤다 → 앞 구간과 잇지 않는다
+      const coord: WalkCoord =
+        last == null && walkPath.length > 0
+          ? { latitude, longitude, segmentStart: true }
+          : { latitude, longitude };
 
       walkPath.push(coord);
-      pendingDbLocations.push({ ...coord, recordedAt: location.timestamp });
+      pendingDbLocations.push({ latitude, longitude, recordedAt: location.timestamp });
 
       if (last) {
         const delta = haversineDistance(last.latitude, last.longitude, latitude, longitude);

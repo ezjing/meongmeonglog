@@ -81,14 +81,14 @@ async function handleLocation(location: LocationObject) {
 
   if (breakPathOnNextPoint) {
     breakPathOnNextPoint = false;
-    // 화면이 꺼진 구간은 직선으로 잇지 않고, 다시 켜진 위치를 새 기준으로 둔다
+    // 화면이 꺼졌던(또는 페이지가 다시 로드된) 구간은 잇지 않는다: 기준점을 비우면
+    // 다음으로 채택된 좌표가 거리 없이 새 구간의 시작이 된다 (정확도 검사는 그대로 거친다)
     await updateActiveWalkState((current) => ({
       ...current,
-      lastLatitude: location.coords.latitude,
-      lastLongitude: location.coords.longitude,
-      lastTimestamp: location.timestamp,
+      lastLatitude: null,
+      lastLongitude: null,
+      lastTimestamp: null,
     }));
-    return;
   }
 
   await processWalkLocations([location]);
