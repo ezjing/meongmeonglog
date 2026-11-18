@@ -6,11 +6,12 @@ import { useSharedDiary } from '@/features/share-link';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { goBackOrHome } from '@/shared/lib/navigation';
+import { Button } from '@/shared/ui/Button';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
 
 export function SharedDiaryScreen() {
   const { token } = useLocalSearchParams<{ token: string }>();
-  const { data: diary, isLoading, isError } = useSharedDiary(token ?? '');
+  const { data: diary, isLoading, isError, refetch, isRefetching } = useSharedDiary(token ?? '');
 
   if (isLoading) {
     return (
@@ -20,7 +21,24 @@ export function SharedDiaryScreen() {
     );
   }
 
-  if (isError || !diary) {
+  if (isError) {
+    return (
+      <View style={styles.screen}>
+        <StackAppBar title="산책 일기" onBackPress={goBackOrHome} />
+        <View style={styles.center}>
+          <Text style={styles.message}>일기를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</Text>
+          <Button
+            label="다시 시도"
+            onPress={() => void refetch()}
+            loading={isRefetching}
+            style={styles.retry}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  if (!diary) {
     return (
       <View style={styles.screen}>
         <StackAppBar title="산책 일기" onBackPress={goBackOrHome} />
@@ -63,4 +81,5 @@ const styles = StyleSheet.create({
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.md },
   message: { color: colors.fgMuted, textAlign: 'center' },
+  retry: { marginTop: spacing.md, alignSelf: 'stretch' },
 });
