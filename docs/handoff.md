@@ -59,7 +59,7 @@
 
 ### 콘솔에 이미 해 둔 것
 - 카카오·네이버 콜백은 미리보기와 정식 주소 둘 다 등록: `https://meongmeonglog--preview.expo.app/callback`, `https://meongmeonglog.expo.app/callback`. 네이버 서비스 URL은 PC 웹에 미리보기, 모바일 웹에 정식 주소
-- 카카오 로그인 Client Secret 활성화는 꺼 둠. 비즈니스 인증 쪽은 그대로 둠. REST API 키는 Supabase secret `KAKAO_REST_API_KEY`
+- 카카오 REST API 키는 Supabase secret `KAKAO_REST_API_KEY`. 그 밖의 로그인 보안 설정은 `HANDOFF.local.md` 참고
 - 구글 지도: 기존 키는 Android 앱 제한 유지. 웹용 키는 웹사이트 제한에 미리보기·정식 주소와 Maps JavaScript API. 미리보기 주소에서 서울 지도 타일이 열리는 것 확인
 
 ### 승인된 웹 문구
