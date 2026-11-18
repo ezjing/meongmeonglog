@@ -1,4 +1,4 @@
-# 작업 인계 (2026-11-16, 웹 W4까지)
+# 작업 인계 (2026-11-18, 웹 W5 배포까지)
 
 다른 도구(Cursor 등)에서 이어서 작업하기 위한 현재 상태 정리. 작업 규칙은 `AGENTS.md`, `docs/architecture.md`, `docs/design-tokens.md`, `.cursor/rules/`를 따른다.
 
@@ -19,14 +19,15 @@
 | 웹 W2 | 카카오·네이버 웹 로그인. 브라우저가 인가 코드를 받고 Edge Function이 토큰으로 교환한 뒤 기존 `createSocialSession` 사용. 콜백 경로 `/callback` |
 | 웹 W3 | Google Maps JS, 화면이 켜진 동안만 위치 기록, 화면이 숨으면 그 구간은 경로에 잇지 않음, 화면 꺼짐 방지(Wake Lock). iPhone에서 지도가 현재 위치로 이동하는 것까지 확인 |
 | 웹 W4 | Safari용 사진 선택(`pickImage.web.ts`). 탭 안에서 바로 앨범·카메라를 연다. 리사이즈·업로드는 기존 `manipulateAsync`와 `readStorageImageBytes.web.ts`. 웹에는 자르기 화면이 없다. 미리보기·정식 주소에 배포됨. 아이폰에서 앨범·카메라·업로드는 아직 확인 전 |
+| 날씨·웹 위치 | 날씨 기본 서버가 응답하지 않으면 다른 Open-Meteo 주소로 조회. 홈 화면 앱은 산책 시작 탭에서 대략적인 위치와 정밀 위치를 함께 요청. 웹에는 배포됨. 네이티브 앱 업데이트는 아직 없음 |
 
 ## 2. 배포 상태
 
 | 대상 | 상태 |
 |---|---|
 | Edge Functions 6개 | 배포 완료 (auth-kakao, auth-naver, diaries-generate, welcome-greeting, share-card, delete-account). 웹 로그인 반영본 포함 |
-| DB 마이그레이션 | 001~007 원격 적용 |
-| 웹 미리보기 | `https://meongmeonglog--preview.expo.app` (alias `preview`). W4 사진 선택 포함 |
+| DB 마이그레이션 | 001~008 원격 적용. 008은 일기 공유 링크 |
+| 웹 미리보기 | `https://meongmeonglog--preview.expo.app` (alias `preview`). W5 공유 링크와 5장 초과 안내 포함 |
 | 웹 정식 주소 | `https://meongmeonglog.expo.app` 배포됨. 카카오·네이버 콜백에 이 주소가 등록된 상태 |
 | 앱 OTA | 2026-11-13 production 채널, runtime 1.1.0, Android — Update group `49908538-ff2b-495f-857e-5653ff969e20` |
 | 스토어 빌드 | production 1.1.0 (version code 6). preview 프로필 빌드는 없음 |
@@ -35,7 +36,13 @@
 **사용자 확인 대기**: OTA 적용 후 실기기에서 로그인, 실제 걸으며 산책 기록, 종료(메모 키보드)·일기 생성, 리스트 스크롤, 강아지 정보 수정.
 문제 시 롤백: `npx eas-cli update:rollback` → **Embedded Update** 선택.
 
-## 3. 다음 작업: W5 공유 링크
+## 3. 다음 작업: W5 실기기 확인
+
+공유 링크와 5장 초과 안내는 미리보기·정식 웹 주소에 배포됐다. 앱 업데이트는 아직 없다.
+- 일기마다 토큰 하나. 다시 공유하면 같은 주소를 다시 켠다. 토큰은 서버가 만든다
+- 받는 사람 페이지 `/s/{token}`은 로그인 없이 연다. 본문·한마디·사진·이름·날짜·거리·시간만 보여 준다
+- 앱은 이미지 공유를 유지하고 "링크 공유"와 "공유 중지"를 추가했다. 웹은 링크 공유만. 앱에서 쓰려면 OTA가 필요하다
+- 카카오 미리보기를 위해 `web.output`을 `server`로 바꿨다
 
 계획 전체: `docs/web-plan.md`. 결정 사항은 그대로다.
 - 지도: Google Maps JS. 안드로이드 키와 웹 키는 분리한다. 웹 키 환경 변수는 `EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY`
@@ -44,7 +51,7 @@
 - 공유 링크(W5): 본문·한마디·사진·강아지 이름·날짜·거리·시간만 공개, 경로·보호자 정보 숨김, 만료 없음 + "공유 중지". 앱은 이미지 공유 유지 + 링크 공유 추가
 
 ### 다른 컴퓨터에서 시작하기 전에
-- 웹 W1–W4 코드는 이 커밋에 들어 있다. 다른 컴퓨터에서 받으려면 push가 필요하다. push는 사용자가 한다
+- 날씨 대체 주소·홈 화면 앱 위치·5장 안내·W5 공유 링크는 이 커밋들에 들어 있다. push는 사용자가 한다
 - `.env`는 git에 없다. 지금 컴퓨터를 그대로 복사해야 한다. 변수 이름만 적으면 Supabase URL·anon key, 카카오 네이티브 앱 키, 네이버 클라이언트 ID·시크릿, 구글 지도 안드로이드 키·웹 키, `EXPO_PUBLIC_DEV_AUTH`, `ANDROID_SDK_PATH`, `GROQ_API_KEY`
 - `.env.example`에는 실제 값이 들어 있다. 커밋하지 않는다. `supabase/.temp/cli-latest`도 커밋하지 않는다
 - `eas` / `expo export` 전에 `set -a && . ./.env && set +a`. EAS는 `.env`를 읽지 않아 카카오 플러그인이 실패한다
@@ -62,7 +69,7 @@
 ### W4에서 남은 확인
 - iPhone Safari에서 앨범 선택, 카메라 촬영, 미리보기, 업로드. 확인할 주소는 `https://meongmeonglog.expo.app`
 - 웹은 사진을 사각형으로 자르지 않는다. 프로필은 원 안에 꽉 차게 보인다
-- 그 다음은 W5 공유 링크. DB 마이그레이션과 배포는 실행 전에 확인
+- W5는 웹에 배포됐다. 앱의 링크 공유는 OTA 전이라 아직 설치본에 없다
 
 ### 아직 열린 확인
 - iPhone에서 화면을 끄거나 다른 앱으로 나갔을 때 그 구간이 경로에서 빠지는지, 실외에서 실선이 이어지는지
@@ -70,7 +77,7 @@
 
 ## 4. 백로그
 
-- W5 공유 링크(마이그레이션·공개 조회 함수·공개 페이지·카톡 미리보기) → W6 QA
+- W5 웹 배포됨. 남은 것은 실기기에서 링크 공유·받는 페이지·카톡 미리보기 확인, 앱 OTA는 별도 → W6 QA
 - 썸네일 원본 크기(46px에 원본 사용) — Supabase Pro 요금제 이미지 변환 시 처리 (보류)
 - 캘린더 칸 크기가 화면 크기 변경을 반영하지 않음 (`Dimensions` → `useWindowDimensions`, 사소)
 - 이용약관 초안 법률 검토 (사용자)

@@ -7,8 +7,9 @@ import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
 
 import { ShareCardPreview } from './ShareCardPreview';
+import { ShareLinkActions } from './ShareLinkActions';
 
-/** 웹에서는 카드 캡처 공유를 보여주지 않는다. 링크 공유는 이후 단계에서 넣는다. */
+/** 웹에서는 카드 캡처 공유를 보여주지 않는다. */
 export function ShareScreen() {
   const { diaryId } = useLocalSearchParams<{ diaryId: string }>();
   const { data: diary } = useDiary(diaryId ?? '');
@@ -36,6 +37,8 @@ export function ShareScreen() {
         photos={photos}
         width={cardWidth}
       />
+      <Text style={styles.sectionLabel}>공유하기</Text>
+      <ShareLinkActions diaryId={diary.diaryId} />
       <Button
         label="완료"
         variant="secondary"
@@ -56,6 +59,12 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.extrabold,
     color: colors.fg,
     marginBottom: spacing.md,
+  },
+  sectionLabel: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
+    color: colors.fgMuted,
+    marginBottom: spacing.sm,
   },
   done: { marginTop: spacing.sm },
 });

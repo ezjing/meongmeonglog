@@ -12,6 +12,7 @@ import { Button } from '@/shared/ui/Button';
 import { useOverlay } from '@/shared/ui/overlay/index';
 
 import { ShareCardPreview } from './ShareCardPreview';
+import { ShareLinkActions } from './ShareLinkActions';
 
 export function ShareScreen() {
   const { diaryId } = useLocalSearchParams<{ diaryId: string }>();
@@ -65,6 +66,7 @@ export function ShareScreen() {
       </ViewShot>
 
       <Text style={styles.sectionLabel}>공유하기</Text>
+      <ShareLinkActions diaryId={diary.diaryId} />
       <Button
         label="💬  카카오톡 공유"
         variant="kakao"

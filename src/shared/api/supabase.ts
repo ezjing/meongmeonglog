@@ -32,10 +32,12 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: authStorage,
-    autoRefreshToken: true,
-    persistSession: true,
+    autoRefreshToken: !isServer,
+    persistSession: !isServer,
     detectSessionInUrl: false,
   },
+  // 서버에서 페이지를 그릴 때는 실시간 연결을 만들지 않는다
+  ...(isServer ? { realtime: { transport: class {} as unknown as typeof WebSocket } } : {}),
 });
 
 // React Native는 브라우저처럼 자동 토큰 갱신이 돌지 않아 앱이 포그라운드일 때만 직접 켠다 (Supabase RN 가이드)

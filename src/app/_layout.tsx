@@ -38,6 +38,8 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="index" />
+              {/* 공유 링크는 로그인 없이 연다 */}
+              <Stack.Screen name="s/[token]" />
               {/* 로그인 상태가 바뀌면 반대쪽 화면들이 스택에서 제거되어 뒤로가기로 돌아갈 수 없다 */}
               <Stack.Protected guard={!isLoggedIn}>
                 <Stack.Screen name="(auth)" />
