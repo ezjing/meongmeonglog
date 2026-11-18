@@ -180,6 +180,7 @@ export function serveSocialAuth(
   provider: SocialProvider,
   fetchProfile: (accessToken: string) => Promise<SocialProfile>,
   oauth: SocialOAuth,
+  options: { acceptAppAccessToken: boolean } = { acceptAppAccessToken: true },
 ) {
   serveJson(async (req) => {
     const body = (await req.json()) as SocialAuthBody;
@@ -206,6 +207,10 @@ export function serveSocialAuth(
     }
 
     const devAuth = Deno.env.get('DEV_AUTH') === 'true';
+    // 앱 SDK가 받은 토큰을 직접 받을지 (발급 앱을 서버에서 확인할 수 있는 제공자만 허용)
+    if (body.accessToken && !options.acceptAppAccessToken && !devAuth) {
+      throw new Error('로그인에 실패했습니다.');
+    }
     let accessToken = body.accessToken;
     if (!accessToken && body.sealed) {
       if (!body.redirectUri || !isAppLoginState(body.state)) {

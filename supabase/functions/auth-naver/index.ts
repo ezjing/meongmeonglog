@@ -23,4 +23,5 @@ async function fetchNaverProfile(accessToken: string): Promise<SocialProfile> {
   };
 }
 
-serveSocialAuth('naver', fetchNaverProfile, oauthFor('naver'));
+// 네이버는 앱도 브라우저 로그인(서버 코드 교환)만 쓴다
+serveSocialAuth('naver', fetchNaverProfile, oauthFor('naver'), { acceptAppAccessToken: false });
