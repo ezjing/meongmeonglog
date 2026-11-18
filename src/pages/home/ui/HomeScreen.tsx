@@ -22,7 +22,6 @@ import {
   primeWebWalkGeolocation,
   releaseWebWalkGeolocation,
   releaseWebWalkWakeLock,
-  WebWalkRecordingNotice,
 } from '@/features/walk-session';
 import {
   colors,
@@ -219,7 +218,6 @@ export function HomeScreen() {
           <Text style={styles.walkCtaEmoji}>🐾</Text>
           <Text style={styles.walkCtaLabel}>산책 시작</Text>
         </Pressable>
-        <WebWalkRecordingNotice style={styles.walkNotice} />
 
         <Text style={styles.sectionTitle}>최근 일기</Text>
         {recentDiaries.length > 0 ? (
@@ -288,7 +286,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.base,
     marginTop: spacing.xs,
   },
-  walkNotice: { marginTop: -spacing.sm, marginBottom: spacing.md },
   sectionTitle: {
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
