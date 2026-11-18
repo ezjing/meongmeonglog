@@ -24,7 +24,9 @@ async function invokeSocialAuth(provider: AuthProvider, body: Record<string, unk
   const responseError = (data as { error?: string } | null)?.error;
   if (error || responseError) {
     if (DEV_AUTH) return null;
-    throw new AppError('auth_failed', responseError ?? error?.message ?? '로그인에 실패했습니다.');
+    // 서버·SDK 오류 문구(영어, 내부 정보)는 사용자에게 보여주지 않는다
+    if (__DEV__) console.warn('[auth] social auth failed', responseError ?? error);
+    throw new AppError('auth_failed', '로그인에 실패했습니다.');
   }
   return data;
 }
