@@ -25,7 +25,7 @@
 
 | 대상 | 상태 |
 |---|---|
-| Edge Functions 6개 | 배포 완료 (auth-kakao, auth-naver, diaries-generate, welcome-greeting, share-card, delete-account). 웹 로그인 반영본 포함 |
+| Edge Functions 5개 | 배포 완료 (auth-kakao, auth-naver, diaries-generate, welcome-greeting, delete-account). 웹 로그인 반영본 포함. 쓰지 않던 share-card는 2026-11-18 삭제 |
 | DB 마이그레이션 | 001~008 원격 적용. 008은 일기 공유 링크 |
 | 웹 미리보기 | `https://meongmeonglog--preview.expo.app` (alias `preview`). W5 공유 링크와 5장 초과 안내 포함 |
 | 웹 정식 주소 | `https://meongmeonglog.expo.app` 배포됨. 카카오·네이버 콜백에 이 주소가 등록된 상태 |
