@@ -16,8 +16,10 @@ import { requestWalkLocationPermissions } from '@/shared/lib/locationPermission'
 import { useElapsedSec } from './useElapsedSec';
 import { flushAllPendingDbLocations } from '../lib/walkLocationProcessor';
 import { startWalkTracking } from '../lib/walkLocationService';
+import { subscribeWebWalkGeolocation } from '../lib/webWalkGeolocation';
 
 const SYNC_INTERVAL_MS = 2_000;
+const MAX_WEATHER_ATTEMPTS = 3;
 
 export async function getCurrentCoordinates(): Promise<WalkCoord | null> {
   // 권한 요청은 산책 시작 시 이미 했으므로 여기서는 확인만 한다
@@ -73,7 +75,23 @@ export function useWalkTracker() {
     if (!activeWalk || frozenElapsedSec != null) return;
 
     let cancelled = false;
+    let weatherAttempts = 0;
     weatherFetchedRef.current = false;
+
+    const loadWeather = async (latitude: number, longitude: number) => {
+      if (cancelled || weatherFetchedRef.current || weatherAttempts >= MAX_WEATHER_ATTEMPTS) return;
+      weatherAttempts += 1;
+      weatherFetchedRef.current = true;
+      try {
+        await applyWeatherForCoords(activeWalk.walkId, latitude, longitude);
+      } catch {
+        weatherFetchedRef.current = false;
+      }
+    };
+
+    const unsubscribeWeather = subscribeWebWalkGeolocation((fix) => {
+      void loadWeather(fix.latitude, fix.longitude);
+    });
 
     (async () => {
       setTrackingError(null);
@@ -104,12 +122,12 @@ export function useWalkTracker() {
         return;
       }
 
-      if (activeWalk.weatherTemp == null) {
+      if (activeWalk.weatherTemp == null && Platform.OS !== 'web') {
         try {
           const coords = await getCurrentCoordinates();
-          if (coords && !cancelled && !weatherFetchedRef.current) {
-            weatherFetchedRef.current = true;
-            await applyWeatherForCoords(activeWalk.walkId, coords.latitude, coords.longitude);
+          while (coords && !cancelled && weatherAttempts < MAX_WEATHER_ATTEMPTS) {
+            if (weatherFetchedRef.current) break;
+            await loadWeather(coords.latitude, coords.longitude);
           }
         } catch {
           weatherFetchedRef.current = false;
@@ -129,6 +147,7 @@ export function useWalkTracker() {
 
     return () => {
       cancelled = true;
+      unsubscribeWeather();
       clearInterval(syncInterval);
       subscription.remove();
     };

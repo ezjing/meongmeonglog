@@ -17,7 +17,11 @@ import { DogAvatar, useDogs } from '@/entities/dog';
 import { stopWalkTracking, useStartWalk, useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
-import { acquireWebWalkWakeLock, WebWalkRecordingNotice } from '@/features/walk-session';
+import {
+  acquireWebWalkWakeLock,
+  primeWebWalkGeolocation,
+  WebWalkRecordingNotice,
+} from '@/features/walk-session';
 import {
   colors,
   spacing,
@@ -51,6 +55,7 @@ function getTodayWalkStatus(
       subtitle: '탭하면 이어서 기록할 수 있어요',
       emoji: '🐾',
       onPress: () => {
+        primeWebWalkGeolocation();
         acquireWebWalkWakeLock();
         router.push('/walk/active');
       },
@@ -123,6 +128,7 @@ export function HomeScreen() {
   const handleStartWalk = async () => {
     if (!dog || startingWalkRef.current) return;
 
+    primeWebWalkGeolocation();
     acquireWebWalkWakeLock();
     startingWalkRef.current = true;
     setIsStartingWalk(true);

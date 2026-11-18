@@ -4,6 +4,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { WalkCoord } from '@/entities/walk';
 import { colors, fontSize, radius, shadows, sizes, spacing } from '@/shared/config/theme';
 
+import { subscribeWebWalkGeolocation } from '../lib/webWalkGeolocation';
+
 interface WalkMapProps {
   routePath: WalkCoord[];
 }
@@ -172,20 +174,9 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
   }, [drawRoute, routePath, followUser]);
 
   useEffect(() => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        showLivePosition({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      },
-      () => {},
-      { enableHighAccuracy: true, maximumAge: 5_000, timeout: 15_000 },
-    );
-
-    return () => navigator.geolocation.clearWatch(watchId);
+    return subscribeWebWalkGeolocation((fix) => {
+      showLivePosition({ lat: fix.latitude, lng: fix.longitude });
+    });
   }, [showLivePosition]);
 
   const handleRecenter = () => {

@@ -1,4 +1,4 @@
-import * as Location from 'expo-location';
+import type { LocationObject } from 'expo-location';
 
 import {
   bindWebWalkWatch,
@@ -13,13 +13,14 @@ import { haversineDistance } from '@/shared/lib/formatDistance';
 
 import { processWalkLocations } from './walkLocationProcessor';
 import { acquireWebWalkWakeLock, releaseWebWalkWakeLock } from './webWakeLock';
+import { subscribeWebWalkGeolocation, type WebGeoFix } from './webWalkGeolocation';
 
 /** 네이티브 위치 간격과 같다 */
 const LOCATION_INTERVAL_MS = 5_000;
 const LOCATION_DISTANCE_INTERVAL_M = 5;
 
 let wantsTracking = false;
-let subscription: Location.LocationSubscription | null = null;
+let unsubscribe: (() => void) | null = null;
 let breakPathOnNextPoint = false;
 let lastEmittedAt = 0;
 let lastEmittedLatitude: number | null = null;
@@ -36,7 +37,22 @@ function isPageHidden() {
   return typeof document !== 'undefined' && document.visibilityState === 'hidden';
 }
 
-function shouldEmit(location: Location.LocationObject) {
+function toLocation(fix: WebGeoFix): LocationObject {
+  return {
+    coords: {
+      latitude: fix.latitude,
+      longitude: fix.longitude,
+      altitude: null,
+      accuracy: fix.accuracy,
+      altitudeAccuracy: null,
+      heading: null,
+      speed: null,
+    },
+    timestamp: fix.timestamp,
+  };
+}
+
+function shouldEmit(location: LocationObject) {
   if (lastEmittedAt === 0 || lastEmittedLatitude == null || lastEmittedLongitude == null) return true;
 
   const elapsed = location.timestamp - lastEmittedAt;
@@ -51,13 +67,13 @@ function shouldEmit(location: Location.LocationObject) {
   return moved >= LOCATION_DISTANCE_INTERVAL_M;
 }
 
-function rememberEmitted(location: Location.LocationObject) {
+function rememberEmitted(location: LocationObject) {
   lastEmittedAt = location.timestamp;
   lastEmittedLatitude = location.coords.latitude;
   lastEmittedLongitude = location.coords.longitude;
 }
 
-async function handleLocation(location: Location.LocationObject) {
+async function handleLocation(location: LocationObject) {
   if (!wantsTracking || isPageHidden()) return;
   if (!shouldEmit(location)) return;
   rememberEmitted(location);
@@ -77,27 +93,20 @@ async function handleLocation(location: Location.LocationObject) {
   await processWalkLocations([location]);
 }
 
-async function stopWatch() {
-  subscription?.remove();
-  subscription = null;
+function stopWatch() {
+  unsubscribe?.();
+  unsubscribe = null;
 }
 
-async function startWatch() {
-  if (subscription || isPageHidden()) return;
+function startWatch() {
+  if (unsubscribe || isPageHidden()) return;
   if (typeof navigator !== 'undefined' && !('geolocation' in navigator)) {
     throw new Error('위치 추적을 시작하지 못했어요.');
   }
 
-  subscription = await Location.watchPositionAsync(
-    {
-      accuracy: Location.Accuracy.Highest,
-      timeInterval: LOCATION_INTERVAL_MS,
-      distanceInterval: LOCATION_DISTANCE_INTERVAL_M,
-    },
-    (location) => {
-      void enqueue(() => handleLocation(location));
-    },
-  );
+  unsubscribe = subscribeWebWalkGeolocation((fix) => {
+    void enqueue(() => handleLocation(toLocation(fix)));
+  });
 }
 
 function onVisibilityChange() {
@@ -105,11 +114,11 @@ function onVisibilityChange() {
     if (!wantsTracking) return;
     if (isPageHidden()) {
       breakPathOnNextPoint = true;
-      await stopWatch();
+      stopWatch();
       return;
     }
     acquireWebWalkWakeLock();
-    await startWatch();
+    startWatch();
   });
 }
 
@@ -123,13 +132,13 @@ async function pauseWebWalk() {
     if (typeof document !== 'undefined') {
       document.removeEventListener('visibilitychange', onVisibilityChange);
     }
-    await stopWatch();
+    stopWatch();
     releaseWebWalkWakeLock();
   });
 }
 
 bindWebWalkWatch({
-  isRunning: () => wantsTracking && subscription != null,
+  isRunning: () => wantsTracking && unsubscribe != null,
   pause: pauseWebWalk,
 });
 
@@ -156,6 +165,6 @@ export async function startWalkTracking(activeWalk: WalkSession): Promise<void> 
       document.addEventListener('visibilitychange', onVisibilityChange);
     }
     acquireWebWalkWakeLock();
-    await startWatch();
+    startWatch();
   });
 }
