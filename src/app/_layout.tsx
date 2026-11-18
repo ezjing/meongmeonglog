@@ -8,7 +8,7 @@ import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { subscribeAuthSessionSync, initKakaoSdk, initNaverSdk } from '@/features/auth';
+import { subscribeAuthSessionSync, initKakaoSdk } from '@/features/auth';
 import { queryClient } from '@/shared/api/queryClient';
 import { colors } from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
@@ -20,7 +20,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     initKakaoSdk();
-    initNaverSdk();
   }, []);
 
   useEffect(() => subscribeAuthSessionSync(), []);

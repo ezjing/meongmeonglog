@@ -8,7 +8,6 @@ import { AppError } from '@/shared/lib/AppError';
 import { DEV_AUTH } from '../config/devAuth';
 import { persistAuthSession, clearAuthSession, loadAuthSession } from '../lib/authStorage';
 import { unlinkKakaoAccount } from '../lib/kakaoAuth';
-import { unlinkNaverAccount } from '../lib/naverAuth';
 import type { AuthSession } from '../model/types';
 
 async function invokeSocialAuth(provider: AuthProvider, body: Record<string, unknown>) {
@@ -94,6 +93,41 @@ export async function signInWithAuthCode(input: {
   return persistSocialSession(input.provider, data as AuthSession & { refreshToken?: string });
 }
 
+/** 앱에서 브라우저 로그인을 시작할 때: 로그인 주소와 서버가 만든 state·appProof */
+export async function fetchAppAuthorize(input: {
+  provider: AuthProvider;
+  redirectUri: string;
+  forceAccountPicker: boolean;
+}): Promise<{ authorizeUrl: string; state: string; appProof: string }> {
+  const data = (await invokeSocialAuth(input.provider, {
+    intent: 'authorize',
+    appLogin: true,
+    redirectUri: input.redirectUri,
+    forceAccountPicker: input.forceAccountPicker,
+  })) as { authorizeUrl?: string; state?: string; appProof?: string } | null;
+  if (!data?.authorizeUrl || !data.state || !data.appProof) {
+    throw new AppError('auth_failed', '로그인에 실패했습니다.');
+  }
+  return { authorizeUrl: data.authorizeUrl, state: data.state, appProof: data.appProof };
+}
+
+/** 앱 브라우저 로그인 결과(암호화된 코드)로 로그인 */
+export async function signInWithAppCode(input: {
+  provider: AuthProvider;
+  sealed: string;
+  state: string;
+  appProof: string;
+  redirectUri: string;
+}): Promise<AuthSession> {
+  const data = await invokeSocialAuth(input.provider, {
+    sealed: input.sealed,
+    state: input.state,
+    appProof: input.appProof,
+    redirectUri: input.redirectUri,
+  });
+  return persistSocialSession(input.provider, data as AuthSession & { refreshToken?: string });
+}
+
 async function mockDevSession(provider: AuthProvider): Promise<AuthSession> {
   const userId = `dev-${provider}-user`;
   const authSession = { userId, accessToken: `dev-token-${provider}`, provider };
@@ -156,9 +190,8 @@ export async function deleteAccount(): Promise<void> {
     }
   }
 
-  if (storedAuth?.provider === 'naver') {
-    await unlinkNaverAccount();
-  } else if (storedAuth?.provider === 'kakao') {
+  // 네이버는 앱에 토큰을 두지 않아 연동 해제를 하지 않는다 (사용자가 네이버 설정에서 해제)
+  if (storedAuth?.provider === 'kakao') {
     await unlinkKakaoAccount();
   }
 

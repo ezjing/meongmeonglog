@@ -6,6 +6,7 @@ import { useAuthStore } from '@/shared/session/sessionStore';
 import {
   signInWithProvider,
   signInWithAuthCode,
+  signInWithAppCode,
   signOut,
   deleteAccount,
   getCurrentUserEmail,
@@ -35,6 +36,14 @@ export function useAuthSession() {
     },
   });
 
+  const loginWithAppCodeMutation = useMutation({
+    mutationFn: signInWithAppCode,
+    onSuccess: (session) => {
+      queryClient.clear();
+      setSession(session.userId, session.provider);
+    },
+  });
+
   const logoutMutation = useMutation({
     mutationFn: signOut,
     onSuccess: resetClientAuthState,
@@ -50,9 +59,13 @@ export function useAuthSession() {
     provider,
     login: loginMutation.mutateAsync,
     loginWithCode: loginWithCodeMutation.mutateAsync,
+    loginWithAppCode: loginWithAppCodeMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
     deleteAccount: deleteAccountMutation.mutateAsync,
-    isLoggingIn: loginMutation.isPending || loginWithCodeMutation.isPending,
+    isLoggingIn:
+      loginMutation.isPending ||
+      loginWithCodeMutation.isPending ||
+      loginWithAppCodeMutation.isPending,
     isDeletingAccount: deleteAccountMutation.isPending,
   };
 }

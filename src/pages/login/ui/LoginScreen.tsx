@@ -8,7 +8,7 @@ import {
   PROVIDER_LABEL,
   useAuthSession,
   getKakaoAccessToken,
-  getNaverAccessToken,
+  startAppOAuth,
   startWebOAuth,
 } from '@/features/auth';
 import { resolveOnboardingRoute } from '@/features/onboarding';
@@ -33,7 +33,7 @@ import { BottomSheet, useOverlay } from '@/shared/ui/overlay/index';
 const LOGO_SIZE = 74;
 
 export function LoginScreen() {
-  const { login, isLoggingIn } = useAuthSession();
+  const { login, loginWithAppCode, isLoggingIn } = useAuthSession();
   const { showToast } = useOverlay();
   const [accountSheetVisible, setAccountSheetVisible] = useState(false);
   const [isStartingWebLogin, setIsStartingWebLogin] = useState(false);
@@ -75,12 +75,19 @@ export function LoginScreen() {
     }
 
     try {
-      const accessToken =
-        provider === 'kakao'
-          ? await getKakaoAccessToken({ forceAccountPicker })
-          : await getNaverAccessToken({ forceAccountPicker });
-
-      const session = await login({ provider, accessToken });
+      let session;
+      if (provider === 'kakao') {
+        const accessToken = await getKakaoAccessToken({ forceAccountPicker });
+        session = await login({ provider, accessToken });
+      } else {
+        // 네이버는 브라우저로 로그인하고 서버가 인가 코드를 교환한다 (앱에 secret을 두지 않음)
+        setIsStartingWebLogin(true);
+        try {
+          session = await loginWithAppCode(await startAppOAuth(provider, forceAccountPicker));
+        } finally {
+          setIsStartingWebLogin(false);
+        }
+      }
       trackEvent(AnalyticsEvents.loginComplete, { provider });
       await navigateAfterLogin(session.userId);
     } catch (error) {

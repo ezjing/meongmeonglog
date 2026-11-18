@@ -2,6 +2,7 @@
 
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+import { createAppLoginState, isAppLoginState, openAppLoginCode, sealAppLoginCode } from './appLogin.ts';
 import { serveJson } from './http.ts';
 import { createAdminClient } from './requestUser.ts';
 import type { SocialOAuth } from './socialOAuth.ts';
@@ -164,11 +165,15 @@ interface SocialAuthBody {
   state?: string;
   intent?: string;
   forceAccountPicker?: boolean;
+  /** 앱이 브라우저로 로그인을 시작할 때 true (appLogin.ts) */
+  appLogin?: boolean;
+  sealed?: string;
+  appProof?: string;
 }
 
 /**
  * 소셜 로그인 함수 공통 처리.
- * 앱은 accessToken을 보내고, 웹은 인가 코드 교환을 요청한다.
+ * 웹은 인가 코드 교환, 앱은 브라우저 로그인(sealed 코드) 또는 SDK accessToken(구버전 앱)을 보낸다.
  * DEV_AUTH 환경에서는 토큰 확인 없이 개발용 프로필을 쓴다.
  */
 export function serveSocialAuth(
@@ -180,20 +185,47 @@ export function serveSocialAuth(
     const body = (await req.json()) as SocialAuthBody;
 
     if (body.intent === 'authorize') {
-      if (!body.redirectUri || !body.state) throw new Error('로그인에 실패했습니다.');
+      if (!body.redirectUri) throw new Error('로그인에 실패했습니다.');
+      const appLogin = body.appLogin === true ? await createAppLoginState(provider) : null;
+      const state = appLogin?.state ?? body.state;
+      if (!state) throw new Error('로그인에 실패했습니다.');
       return {
         authorizeUrl: oauth.buildAuthorizeUrl({
           redirectUri: body.redirectUri,
-          state: body.state,
+          state,
           forceAccountPicker: body.forceAccountPicker === true,
         }),
+        ...(appLogin ?? {}),
       };
+    }
+
+    // 웹 /callback이 앱 로그인의 인가 코드를 암호화해 앱으로 넘긴다
+    if (body.intent === 'seal') {
+      if (!body.code || !isAppLoginState(body.state)) throw new Error('로그인에 실패했습니다.');
+      return sealAppLoginCode(provider, body.state, body.code);
     }
 
     const devAuth = Deno.env.get('DEV_AUTH') === 'true';
     let accessToken = body.accessToken;
-    if (!accessToken && body.code) {
-      if (!body.redirectUri || !body.state) throw new Error('로그인에 실패했습니다.');
+    if (!accessToken && body.sealed) {
+      if (!body.redirectUri || !isAppLoginState(body.state)) {
+        throw new Error('로그인에 실패했습니다.');
+      }
+      const code = await openAppLoginCode(provider, {
+        state: body.state,
+        sealed: body.sealed,
+        appProof: body.appProof,
+      });
+      accessToken = await oauth.exchangeCode({
+        code,
+        redirectUri: body.redirectUri,
+        state: body.state,
+      });
+    } else if (!accessToken && body.code) {
+      // 앱 로그인의 코드는 반드시 sealed로만 받는다
+      if (!body.redirectUri || !body.state || isAppLoginState(body.state)) {
+        throw new Error('로그인에 실패했습니다.');
+      }
       accessToken = await oauth.exchangeCode({
         code: body.code,
         redirectUri: body.redirectUri,
