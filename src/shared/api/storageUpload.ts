@@ -23,7 +23,7 @@ async function normalizeImageForUpload(
 }
 
 export async function uploadStorageImage(
-  bucket: 'dog-profiles' | 'walk-photos' | 'share-cards',
+  bucket: 'dog-profiles' | 'walk-photos',
   path: string,
   uri: string,
 ): Promise<string> {

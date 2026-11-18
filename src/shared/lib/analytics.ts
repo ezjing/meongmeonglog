@@ -10,5 +10,4 @@ export const AnalyticsEvents = {
   walkStarted: 'walk_started',
   walkFinished: 'walk_finished',
   diaryGenerated: 'diary_generated',
-  shareCardCreated: 'share_card_created',
 } as const;

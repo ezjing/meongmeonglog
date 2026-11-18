@@ -68,7 +68,6 @@ supabase functions deploy auth-kakao
 supabase functions deploy auth-naver
 supabase functions deploy diaries-generate
 supabase functions deploy welcome-greeting
-supabase functions deploy share-card
 supabase functions deploy delete-account
 ```
 
