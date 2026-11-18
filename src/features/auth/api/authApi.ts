@@ -150,10 +150,9 @@ export async function deleteAccount(): Promise<void> {
     const { data, error } = await supabase.functions.invoke('delete-account');
     const responseError = (data as { error?: string } | null)?.error;
     if (error || responseError) {
-      throw new AppError(
-        'delete_account_failed',
-        responseError ?? error?.message ?? '계정 삭제에 실패했습니다.',
-      );
+      // 서버·SDK 오류 문구(영어, 내부 정보)는 사용자에게 보여주지 않는다
+      if (__DEV__) console.warn('[auth] delete account failed', responseError ?? error);
+      throw new AppError('delete_account_failed', '계정 삭제에 실패했습니다.');
     }
   }
 
