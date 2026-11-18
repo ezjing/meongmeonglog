@@ -31,6 +31,8 @@ export async function fetchDiaryShareStatus(diaryId: string): Promise<DiaryShare
     .from('share_cards')
     .select('token, revoked_at')
     .eq('diary_id', diaryId)
+    // 예전 공유 카드 기능이 남긴 토큰 없는 행은 건너뛴다 (ensure_diary_share_link와 같은 기준)
+    .not('token', 'is', null)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
