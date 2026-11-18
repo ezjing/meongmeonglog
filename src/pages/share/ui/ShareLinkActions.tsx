@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { presentDiaryShare, shareDiaryUrl, useDiaryShareLink } from '@/features/share-link';
+import { useDiaryShareLink } from '@/features/share-link';
 import { spacing } from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
 import { useOverlay } from '@/shared/ui/overlay/index';
@@ -11,12 +11,11 @@ interface ShareLinkActionsProps {
 
 export function ShareLinkActions({ diaryId }: ShareLinkActionsProps) {
   const { showToast } = useOverlay();
-  const { isActive, share, stop } = useDiaryShareLink(diaryId);
+  const { isActive, share, stop, shareNow } = useDiaryShareLink(diaryId);
 
   const handleShare = async () => {
     try {
-      const token = await share.mutateAsync();
-      const result = await presentDiaryShare(shareDiaryUrl(token));
+      const result = await shareNow();
       if (result === 'copied') {
         showToast({ message: '링크를 복사했어요', variant: 'success' });
       }
