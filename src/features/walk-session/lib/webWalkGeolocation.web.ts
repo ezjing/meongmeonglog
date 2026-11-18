@@ -18,6 +18,7 @@ const FINE_OPTIONS: PositionOptions = {
 };
 
 let started = false;
+let watchIds: number[] = [];
 let latest: WebGeoFix | null = null;
 const listeners = new Set<(fix: WebGeoFix) => void>();
 
@@ -42,9 +43,30 @@ export function primeWebWalkGeolocation(): void {
   started = true;
 
   const geo = navigator.geolocation;
-  geo.getCurrentPosition(publish, () => {}, COARSE_OPTIONS);
-  geo.watchPosition(publish, () => {}, FINE_OPTIONS);
-  geo.watchPosition(publish, () => {}, COARSE_OPTIONS);
+  geo.getCurrentPosition(publish, handleError, COARSE_OPTIONS);
+  watchIds = [
+    geo.watchPosition(publish, handleError, FINE_OPTIONS),
+    geo.watchPosition(publish, handleError, COARSE_OPTIONS),
+  ];
+}
+
+/** 위치 감시를 끈다. 다음 prime/subscribe 때 다시 켠다 (GPS·위치 사용 표시가 남지 않도록) */
+function stopGeolocation() {
+  if (typeof navigator !== 'undefined' && navigator.geolocation) {
+    watchIds.forEach((id) => navigator.geolocation.clearWatch(id));
+  }
+  watchIds = [];
+  started = false;
+}
+
+function handleError(error: GeolocationPositionError) {
+  // 권한을 거부했다가 설정에서 허용한 뒤 다시 시도할 수 있게 한다
+  if (error.code === error.PERMISSION_DENIED) stopGeolocation();
+}
+
+/** 받는 곳(산책 기록·지도·날씨)이 없으면 위치 감시를 끈다. 산책 시작이 중간에 실패했을 때도 호출한다 */
+export function releaseWebWalkGeolocation(): void {
+  if (listeners.size === 0) stopGeolocation();
 }
 
 export function subscribeWebWalkGeolocation(listener: (fix: WebGeoFix) => void): () => void {
@@ -53,5 +75,6 @@ export function subscribeWebWalkGeolocation(listener: (fix: WebGeoFix) => void):
   if (latest) listener(latest);
   return () => {
     listeners.delete(listener);
+    releaseWebWalkGeolocation();
   };
 }

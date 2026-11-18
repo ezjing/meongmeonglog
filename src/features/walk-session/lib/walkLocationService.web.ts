@@ -53,7 +53,8 @@ function toLocation(fix: WebGeoFix): LocationObject {
 }
 
 function shouldEmit(location: LocationObject) {
-  if (lastEmittedAt === 0 || lastEmittedLatitude == null || lastEmittedLongitude == null) return true;
+  if (lastEmittedAt === 0 || lastEmittedLatitude == null || lastEmittedLongitude == null)
+    return true;
 
   const elapsed = location.timestamp - lastEmittedAt;
   if (elapsed >= LOCATION_INTERVAL_MS) return true;
@@ -143,9 +144,12 @@ bindWebWalkWatch({
 });
 
 export async function startWalkTracking(activeWalk: WalkSession): Promise<void> {
+  // 새로고침·탭 재로드로 이 모듈이 처음부터 다시 실행됐는데 저장된 산책이 이어지는 경우
+  let resumedAfterReload = false;
   await withWalkStateLock(async () => {
     const existing = await loadPersistedWalkState();
     if (existing?.activeWalk.walkId === activeWalk.walkId) {
+      resumedAfterReload = existing.lastTimestamp != null;
       await savePersistedWalkState({ ...existing, activeWalk });
     } else {
       await savePersistedWalkState(createInitialWalkState(activeWalk));
@@ -156,7 +160,8 @@ export async function startWalkTracking(activeWalk: WalkSession): Promise<void> 
     const sameSession = wantsTracking;
     wantsTracking = true;
     if (!sameSession) {
-      breakPathOnNextPoint = false;
+      // 페이지가 다시 로드된 동안은 기록되지 않았으므로, 화면이 꺼졌던 경우와 같이 다음 위치를 새 기준으로 둔다
+      breakPathOnNextPoint = resumedAfterReload;
       lastEmittedAt = 0;
       lastEmittedLatitude = null;
       lastEmittedLongitude = null;

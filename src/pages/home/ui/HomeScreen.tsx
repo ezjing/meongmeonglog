@@ -20,6 +20,8 @@ import { SettingsDrawer } from '@/features/settings';
 import {
   acquireWebWalkWakeLock,
   primeWebWalkGeolocation,
+  releaseWebWalkGeolocation,
+  releaseWebWalkWakeLock,
   WebWalkRecordingNotice,
 } from '@/features/walk-session';
 import {
@@ -78,6 +80,12 @@ function getTodayWalkStatus(
   const subtitle = totalDistance > 0 ? `총 ${formatDistance(totalDistance)} 걸었어요` : null;
 
   return { title, subtitle, emoji: '✨', onPress: undefined };
+}
+
+/** 웹: 산책 시작 탭에서 미리 켠 위치 감시·화면 꺼짐 방지를 시작이 실패하면 되돌린다 (네이티브는 아무 일도 하지 않음) */
+function releaseWebWalkSession() {
+  releaseWebWalkGeolocation();
+  releaseWebWalkWakeLock();
 }
 
 export function HomeScreen() {
@@ -152,6 +160,7 @@ export function HomeScreen() {
               : '산책 기록을 위해 위치(앱 사용 중)와 알림 권한을 허용해 주세요.',
         variant: 'warning',
       });
+      releaseWebWalkSession();
       return;
     }
 
@@ -164,6 +173,7 @@ export function HomeScreen() {
       setActiveWalk(walk);
       router.push('/walk/active');
     } catch {
+      releaseWebWalkSession();
       showToast({ message: '산책을 시작하지 못했어요. 다시 시도해주세요.', variant: 'error' });
     }
   };
