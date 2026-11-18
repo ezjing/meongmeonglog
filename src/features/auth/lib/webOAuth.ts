@@ -17,8 +17,12 @@ interface WebOAuthCallback {
   state: string;
 }
 
+/**
+ * 홈 화면 앱(standalone)에서는 로그인 페이지가 Safari로 열렸다가 돌아오면서 sessionStorage가 달라질 수 있어
+ * localStorage에 둔다. 콜백에서 읽자마자 지우므로 한 번만 쓰인다.
+ */
 function browserStorage(): Storage {
-  const storage = (globalThis as { sessionStorage?: Storage }).sessionStorage;
+  const storage = (globalThis as { localStorage?: Storage }).localStorage;
   if (!storage) throw new AppError('auth_failed', '로그인에 실패했습니다.');
   return storage;
 }
