@@ -17,6 +17,7 @@
 | 문서 | 이용약관 초안(`docs/terms-of-service.md`, 법률 검토 전), README 정책 페이지 URL, 웹 지원 계획서 |
 | 웹 W1 | `web.output: "server"`(루트 HTML `src/app/+html.tsx`에 PWA 설정), 네이티브 전용 모듈 `.web` 분리, PWA manifest·아이콘, iPhone Safari 홈 화면 추가 배너 |
 | 웹 W2 | 카카오·네이버 웹 로그인. 브라우저가 인가 코드를 받고 Edge Function이 토큰으로 교환한 뒤 기존 `createSocialSession` 사용. 콜백 경로 `/callback` |
+| 앱 네이버 로그인 | SDK 대신 브라우저 로그인(Custom Tab). 웹 `/callback`(+middleware)이 앱에서 시작한 로그인을 `meongmeonglog://oauth-callback`으로 돌려보내고, 서버가 코드를 교환. Supabase secret `OAUTH_STATE_SECRET` 필요. 탈퇴 시 네이버 연동 해제는 하지 않음(계정 삭제 안내 페이지에 해제 방법 안내) |
 | 웹 W3 | Google Maps JS, 화면이 켜진 동안만 위치 기록, 화면이 숨으면 그 구간은 경로에 잇지 않음, 화면 꺼짐 방지(Wake Lock). iPhone에서 지도가 현재 위치로 이동하는 것까지 확인 |
 | 웹 W4 | Safari용 사진 선택(`pickImage.web.ts`). 탭 안에서 바로 앨범·카메라를 연다. 리사이즈·업로드는 기존 `manipulateAsync`와 `readStorageImageBytes.web.ts`. 웹에는 자르기 화면이 없다. 미리보기·정식 주소에 배포됨. 아이폰에서 앨범·카메라·업로드는 아직 확인 전 |
 | 날씨·웹 위치 | 날씨 기본 서버가 응답하지 않으면 다른 Open-Meteo 주소로 조회. 홈 화면 앱은 산책 시작 탭에서 대략적인 위치와 정밀 위치를 함께 요청. 웹에는 배포됨. 네이티브 앱 업데이트는 아직 없음 |
@@ -29,7 +30,7 @@
 | DB 마이그레이션 | 001~008 원격 적용. 008은 일기 공유 링크 |
 | 웹 미리보기 | `https://meongmeonglog--preview.expo.app` (alias `preview`). W5 공유 링크와 5장 초과 안내 포함 |
 | 웹 정식 주소 | `https://meongmeonglog.expo.app` 배포됨. 카카오·네이버 콜백에 이 주소가 등록된 상태 |
-| 앱 OTA | 2026-11-18 production 채널, runtime 1.1.0, Android — Update group `6ceb201c-40b4-4afe-a486-b385c3e03b4c` (링크 공유, 끊긴 경로 분리, 오류 문구). 이전: `49908538-ff2b-495f-857e-5653ff969e20` |
+| 앱 OTA | 2026-11-18 production 채널, runtime 1.1.0, Android — Update group `b55d06dc-0363-4399-82f7-fbddfdddbf0e` (네이버 로그인을 브라우저 로그인으로). 이전: `6ceb201c-40b4-4afe-a486-b385c3e03b4c`, `49908538-ff2b-495f-857e-5653ff969e20` |
 | 스토어 빌드 | production 1.1.0 (version code 6). preview 프로필 빌드는 없음 |
 | 정책 페이지 | GitHub Pages: `/meongmeonglog/terms-of-service`, `/privacy-policy`, `/account-deletion` |
 
@@ -52,7 +53,7 @@
 
 ### 다른 컴퓨터에서 시작하기 전에
 - 날씨 대체 주소·홈 화면 앱 위치·5장 안내·W5 공유 링크는 이 커밋들에 들어 있다. push는 사용자가 한다
-- `.env`는 git에 없다. 지금 컴퓨터를 그대로 복사해야 한다. 변수 이름만 적으면 Supabase URL·anon key, 카카오 네이티브 앱 키, 네이버 클라이언트 ID·시크릿, 구글 지도 안드로이드 키·웹 키, `EXPO_PUBLIC_DEV_AUTH`, `ANDROID_SDK_PATH`, `GROQ_API_KEY`
+- `.env`는 git에 없다. 지금 컴퓨터를 그대로 복사해야 한다. 변수 이름만 적으면 Supabase URL·anon key, 카카오 네이티브 앱 키, 네이버 클라이언트 ID, 구글 지도 안드로이드 키·웹 키, `EXPO_PUBLIC_DEV_AUTH`, `ANDROID_SDK_PATH`, `GROQ_API_KEY`
 - `.env.example`에는 실제 값이 들어 있다. 커밋하지 않는다. `supabase/.temp/cli-latest`도 커밋하지 않는다
 - `eas` / `expo export` 전에 `set -a && . ./.env && set +a`. EAS는 `.env`를 읽지 않아 카카오 플러그인이 실패한다
 - 웹 배포: `npx expo export --platform web` 후 미리보기는 `npx eas-cli deploy --non-interactive --alias preview --export-dir dist`, 정식 주소는 `npx eas-cli deploy --non-interactive --prod --export-dir dist`. 실행 전 사용자 확인
@@ -79,7 +80,6 @@
 
 ### 아직 열린 확인
 - iPhone에서 화면을 끄거나 다른 앱으로 나갔을 때 그 구간이 경로에서 빠지는지, 실외에서 실선이 이어지는지
-- `HANDOFF.local.md`의 인증 보안 항목은 아직 그대로다
 
 ## 4. 백로그
 
