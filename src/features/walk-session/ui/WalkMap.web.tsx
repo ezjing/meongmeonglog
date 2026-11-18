@@ -6,6 +6,8 @@ import { colors, fontSize, radius, shadows, sizes, spacing } from '@/shared/conf
 
 import { subscribeWebWalkGeolocation } from '../lib/webWalkGeolocation';
 
+const GOOGLE_MAPS_WEB_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY;
+
 interface WalkMapProps {
   routePath: WalkCoord[];
 }
@@ -78,6 +80,8 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
   const routeRef = useRef(routePath);
   const followRef = useRef(true);
   const liveRef = useRef<LatLng | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const mapUnavailable = !GOOGLE_MAPS_WEB_API_KEY || loadFailed;
   const [followUser, setFollowUser] = useState(true);
   const [hasLiveFix, setHasLiveFix] = useState(false);
   const lastPoint = routePath.at(-1);
@@ -136,7 +140,7 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
   }, []);
 
   useEffect(() => {
-    const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY;
+    const apiKey = GOOGLE_MAPS_WEB_API_KEY;
     const host = hostRef.current as unknown as HTMLElement | null;
     if (!apiKey || !host) return;
 
@@ -163,6 +167,7 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
       })
       .catch(() => {
         mapsPromise = null;
+        if (!cancelled) setLoadFailed(true);
       });
 
     return () => {
@@ -196,6 +201,11 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
   return (
     <View style={styles.wrap}>
       <View ref={hostRef} style={styles.map} />
+      {mapUnavailable ? (
+        <View style={styles.fallback} pointerEvents="none">
+          <Text style={styles.fallbackText}>지도를 불러오지 못했어요</Text>
+        </View>
+      ) : null}
       {!followUser && (lastPoint || hasLiveFix) ? (
         <Pressable
           style={styles.recenterBtn}
@@ -213,6 +223,13 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   map: { flex: 1, backgroundColor: colors.bg },
+  fallback: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.md,
+  },
+  fallbackText: { color: colors.fgMuted, textAlign: 'center' },
   recenterBtn: {
     position: 'absolute',
     right: spacing.ms,
