@@ -80,6 +80,8 @@ export function useWalkTracker() {
 
     const loadWeather = async (latitude: number, longitude: number) => {
       if (cancelled || weatherFetchedRef.current || weatherAttempts >= MAX_WEATHER_ATTEMPTS) return;
+      // 이미 받은 날씨가 있으면(새로고침·화면 재진입) 다시 조회하지 않는다
+      if (useWalkStore.getState().activeWalk?.weatherTemp != null) return;
       weatherAttempts += 1;
       weatherFetchedRef.current = true;
       try {
