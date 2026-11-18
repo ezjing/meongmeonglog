@@ -5,17 +5,16 @@ interface PickImageOptions {
   selectionLimit?: number;
 }
 
-const CANCEL_GRACE_MS = 500;
-
 /**
  * Safari는 사용자 탭이 끝난 뒤(await 이후)에는 파일 창을 열지 않는다.
  * 권한 요청 없이, 탭 처리 안에서 input.click()을 바로 호출한다.
+ * 창이 뜨는 동안 페이지 포커스가 왔다 갔다 하므로, 포커스로 취소를 판단하지 않는다.
+ * 파일 창은 장수 제한을 받지 않는다. 고른 사진을 모두 돌려주고, 상한은 호출하는 화면이 자른다.
  * 자르기(allowsEditing)는 웹 파일 창에 없어서 원본을 그대로 받는다.
  */
 function openImageInput(options: {
   capture: boolean;
   allowsMultipleSelection: boolean;
-  selectionLimit?: number;
 }): Promise<string[] | null> {
   if (typeof document === 'undefined') return Promise.resolve(null);
 
@@ -35,33 +34,18 @@ function openImageInput(options: {
     const finish = (uris: string[] | null) => {
       if (settled) return;
       settled = true;
-      window.removeEventListener('blur', onBlur);
-      window.removeEventListener('focus', onFocus);
       input.remove();
       resolve(uris);
     };
 
-    const onFocus = () => {
-      window.setTimeout(() => {
-        if (!input.files?.length) finish(null);
-      }, CANCEL_GRACE_MS);
-    };
-
-    const onBlur = () => {
-      window.addEventListener('focus', onFocus);
-    };
-
     input.addEventListener('change', () => {
       const files = input.files ? Array.from(input.files) : [];
-      const limited =
-        options.selectionLimit != null ? files.slice(0, options.selectionLimit) : files;
-      const uris = limited
+      const uris = files
         .filter((file) => file.type === '' || file.type.startsWith('image/'))
         .map((file) => URL.createObjectURL(file));
       finish(uris.length > 0 ? uris : null);
     });
     input.addEventListener('cancel', () => finish(null));
-    window.addEventListener('blur', onBlur);
     input.click();
   });
 }
@@ -70,7 +54,6 @@ export function pickImageFromLibrary(options: PickImageOptions = {}): Promise<st
   return openImageInput({
     capture: false,
     allowsMultipleSelection: options.allowsMultipleSelection ?? false,
-    selectionLimit: options.selectionLimit,
   });
 }
 
@@ -78,6 +61,5 @@ export function pickImageFromCamera(_options: PickImageOptions = {}): Promise<st
   return openImageInput({
     capture: true,
     allowsMultipleSelection: false,
-    selectionLimit: 1,
   });
 }

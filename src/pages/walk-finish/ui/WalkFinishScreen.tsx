@@ -136,11 +136,22 @@ export function WalkFinishScreen() {
   };
 
   const handlePickFromLibrary = async () => {
+    if (remainingSlots <= 0) return;
     const uris = await pickImageFromLibrary({
       allowsMultipleSelection: true,
       selectionLimit: remainingSlots,
     });
-    if (uris) appendPhotos(uris);
+    if (!uris) return;
+    if (uris.length > remainingSlots) {
+      showToast({
+        message:
+          form.photoUris.length === 0
+            ? `최대 ${MAX_WALK_PHOTOS}장까지 첨부할 수 있어요. 그중 ${MAX_WALK_PHOTOS}장만 넣었어요.`
+            : `최대 ${MAX_WALK_PHOTOS}장까지 첨부할 수 있어요. 남은 ${remainingSlots}장만 넣었어요.`,
+        variant: 'warning',
+      });
+    }
+    appendPhotos(uris);
   };
 
   const handlePickFromCamera = async () => {
