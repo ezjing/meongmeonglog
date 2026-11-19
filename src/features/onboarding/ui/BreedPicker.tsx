@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput } from 'react-native';
 
 import { dogBreedOptions, filterDogBreeds, type DogBreedOption } from '@/entities/dog';
 import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/shared/config/theme';
-import { BottomSheet } from '@/shared/ui/overlay/index';
+import { BottomSheet } from '@/shared/ui/overlay';
 
 const LIST_MAX_HEIGHT = 280;
 

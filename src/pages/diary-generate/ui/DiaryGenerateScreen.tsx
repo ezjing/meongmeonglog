@@ -13,7 +13,7 @@ import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
 import { Button } from '@/shared/ui/Button';
 import { LoadingOverlayScreen } from '@/shared/ui/LoadingOverlay';
-import { useOverlay } from '@/shared/ui/overlay/index';
+import { useOverlay } from '@/shared/ui/overlay';
 
 export function DiaryGenerateScreen() {
   const { walkId } = useLocalSearchParams<{ walkId: string }>();

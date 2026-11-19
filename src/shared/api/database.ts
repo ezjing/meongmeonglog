@@ -46,23 +46,6 @@ export interface WalkRow {
   created_at: string;
 }
 
-export interface WalkLocationRow {
-  id: string;
-  walk_id: string;
-  latitude: number;
-  longitude: number;
-  recorded_at: string;
-}
-
-export interface WalkEventRow {
-  id: string;
-  walk_id: string;
-  pee_count: number;
-  poop_count: number;
-  dog_meeting_level: DogMeetingLevel;
-  memo: string | null;
-}
-
 export interface WalkPhotoRow {
   id: string;
   walk_id: string;
@@ -79,12 +62,5 @@ export interface DiaryRow {
   daily_quote: string;
   ai_model: string | null;
   generated_at: string;
-  created_at: string;
-}
-
-export interface ShareCardRow {
-  id: string;
-  diary_id: string;
-  image_url: string;
   created_at: string;
 }

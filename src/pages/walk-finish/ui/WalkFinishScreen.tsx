@@ -33,7 +33,7 @@ import {
   useScrollToEndOnFocus,
 } from '@/shared/ui/KeyboardAwareScrollView';
 import { LoadingOverlayScreen } from '@/shared/ui/LoadingOverlay';
-import { BottomSheet, useOverlay } from '@/shared/ui/overlay/index';
+import { BottomSheet, useOverlay } from '@/shared/ui/overlay';
 
 const PHOTO_SIZE = 56;
 const PHOTO_REMOVE_SIZE = 18;

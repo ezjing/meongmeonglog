@@ -29,7 +29,7 @@ import { AnalyticsEvents, trackEvent } from '@/shared/lib/analytics';
 import { AppError } from '@/shared/lib/AppError';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
-import { BottomSheet, useOverlay } from '@/shared/ui/overlay/index';
+import { BottomSheet, useOverlay } from '@/shared/ui/overlay';
 
 const LOGO_SIZE = 74;
 

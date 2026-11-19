@@ -13,7 +13,7 @@ import {
 } from './walkApi';
 import type { WalkEvent } from '../model/types';
 
-export const walkKeys = {
+const walkKeys = {
   all: ['walks'] as const,
   detail: (walkId: string) => [...walkKeys.all, walkId] as const,
   photos: (walkId: string) => [...walkKeys.all, walkId, 'photos'] as const,

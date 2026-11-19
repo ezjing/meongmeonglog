@@ -1,12 +1,12 @@
 import { supabase } from '@/shared/api/supabase';
 import { AppError } from '@/shared/lib/AppError';
 
-export interface SharedDiaryPhoto {
+interface SharedDiaryPhoto {
   imageUrl: string;
   sortOrder: number;
 }
 
-export interface SharedDiary {
+interface SharedDiary {
   dogName: string;
   content: string;
   dailyQuote: string;
@@ -16,7 +16,7 @@ export interface SharedDiary {
   photos: SharedDiaryPhoto[];
 }
 
-export interface DiaryShareStatus {
+interface DiaryShareStatus {
   token: string | null;
   revokedAt: string | null;
 }

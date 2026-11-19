@@ -13,7 +13,7 @@ import { queryClient } from '@/shared/api/queryClient';
 import { colors } from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { AddToHomeBanner } from '@/shared/ui/AddToHomeBanner';
-import { OverlayProvider } from '@/shared/ui/overlay/index';
+import { OverlayProvider } from '@/shared/ui/overlay';
 
 export default function RootLayout() {
   const isLoggedIn = useAuthStore((s) => s.userId != null);

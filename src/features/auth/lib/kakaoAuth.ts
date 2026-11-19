@@ -23,7 +23,7 @@ function assertKakaoAppKey() {
 }
 
 export function initKakaoSdk() {
-  if (sdkInitialized || Platform.OS === 'web') return;
+  if (sdkInitialized) return;
   if (!isKakaoConfigured) return;
 
   initializeKakaoSDK(KAKAO_APP_KEY);
@@ -32,7 +32,7 @@ export function initKakaoSdk() {
 
 /** 회원 탈퇴 시 카카오 연결 끊기 (실패해도 탈퇴 흐름은 계속 진행) */
 export async function unlinkKakaoAccount(): Promise<void> {
-  if (DEV_AUTH || Platform.OS === 'web') return;
+  if (DEV_AUTH) return;
   if (!isKakaoConfigured) return;
 
   initKakaoSdk();
@@ -54,10 +54,6 @@ function isKakaoLoginCancelled(error: unknown) {
 
 export async function getKakaoAccessToken(options: KakaoAccessTokenOptions = {}): Promise<string> {
   if (DEV_AUTH) return 'dev';
-
-  if (Platform.OS === 'web') {
-    throw new Error('카카오 로그인은 모바일 앱에서만 지원됩니다.');
-  }
 
   assertKakaoAppKey();
   initKakaoSdk();

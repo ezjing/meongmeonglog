@@ -53,8 +53,8 @@ export async function startWalkTracking(activeWalk: WalkSession): Promise<void> 
       activityType: Location.LocationActivityType.Fitness,
       showsBackgroundLocationIndicator: true,
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '위치 추적을 시작하지 못했어요';
-    throw new Error(message);
+  } catch {
+    // 위치 모듈의 오류 원문(영어)은 보여주지 않는다
+    throw new Error('위치 추적을 시작하지 못했어요.');
   }
 }

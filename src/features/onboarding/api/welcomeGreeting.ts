@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 
 import { isSupabaseConfigured, supabase } from '@/shared/api/supabase';
 
-export async function fetchWelcomeGreeting(
+async function fetchWelcomeGreeting(
   dogName: string,
   personality: string[],
   speechStyle: string | null,

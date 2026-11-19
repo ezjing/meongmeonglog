@@ -1,7 +1,7 @@
 import type { WalkWeatherPayload } from './walkApi';
 import { weatherCodeToDisplay } from '../lib/weatherCode';
 
-export interface WeatherInfo {
+interface WeatherInfo {
   condition: string;
   temp: number;
   icon: string;

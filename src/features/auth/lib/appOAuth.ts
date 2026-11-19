@@ -4,6 +4,7 @@ import * as WebBrowser from 'expo-web-browser';
 import type { AuthProvider } from '@/shared/api/database';
 import { WEB_ORIGIN } from '@/shared/config/links';
 import { AppError } from '@/shared/lib/AppError';
+import { firstParam } from '@/shared/lib/firstParam';
 
 import { loginCancelledError } from './loginCancelled';
 import { fetchAppAuthorize } from '../api/authApi';
@@ -13,16 +14,12 @@ const APP_LOGIN_REDIRECT_URI = `${WEB_ORIGIN}/callback`;
 // src/app/+middleware.ts의 APP_CALLBACK_URL과 같아야 한다
 const APP_RETURN_URL = 'meongmeonglog://oauth-callback';
 
-export interface AppOAuthResult {
+interface AppOAuthResult {
   provider: AuthProvider;
   sealed: string;
   state: string;
   appProof: string;
   redirectUri: string;
-}
-
-function firstParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }
 
 /**

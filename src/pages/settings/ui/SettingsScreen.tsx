@@ -11,7 +11,7 @@ import { openDogEdit, openGuardianEdit } from '@/shared/lib/navigation';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
-import { useOverlay } from '@/shared/ui/overlay/index';
+import { useOverlay } from '@/shared/ui/overlay';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
 
 export function SettingsScreen() {

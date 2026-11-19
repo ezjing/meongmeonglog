@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { useDiaryShareLink } from '@/features/share-link';
 import { spacing } from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
-import { useOverlay } from '@/shared/ui/overlay/index';
+import { useOverlay } from '@/shared/ui/overlay';
 
 interface ShareLinkActionsProps {
   diaryId: string;

@@ -33,7 +33,7 @@ import { getLocalDateKey } from '@/shared/lib/localDate';
 import { Card } from '@/shared/ui/Card';
 import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';
 import { LoadingOverlay } from '@/shared/ui/LoadingOverlay';
-import { useOverlay } from '@/shared/ui/overlay/index';
+import { useOverlay } from '@/shared/ui/overlay';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
 
 const WALK_CTA_SIZE = 118;

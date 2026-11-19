@@ -6,11 +6,8 @@ import { isLoginCancelled, readWebOAuthCallback, useAuthSession } from '@/featur
 import { resolveOnboardingRoute } from '@/features/onboarding';
 import { colors, fontSize } from '@/shared/config/theme';
 import { AppError } from '@/shared/lib/AppError';
-import { useOverlay } from '@/shared/ui/overlay/index';
-
-function firstParam(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
+import { firstParam } from '@/shared/lib/firstParam';
+import { useOverlay } from '@/shared/ui/overlay';
 
 export function AuthCallbackScreen() {
   const params = useLocalSearchParams<{ code?: string; state?: string; error?: string }>();

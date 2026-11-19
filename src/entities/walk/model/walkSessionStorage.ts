@@ -12,7 +12,7 @@ export interface WalkCoord {
 }
 
 /** DB 전송 대기 좌표. 이전 버전 저장분에는 측정 시각(ms)이 없을 수 있음 */
-export interface PendingWalkLocation extends WalkCoord {
+interface PendingWalkLocation extends WalkCoord {
   recordedAt?: number;
 }
 

@@ -14,7 +14,7 @@ import { colors, spacing, radius, fontSize, fontWeight } from '@/shared/config/t
 import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
 import { Button } from '@/shared/ui/Button';
-import { useOverlay } from '@/shared/ui/overlay/index';
+import { useOverlay } from '@/shared/ui/overlay';
 
 export function WalkActiveScreen() {
   const { activeWalk, elapsedSec, distanceMeter, trackingError } = useWalkTracker();

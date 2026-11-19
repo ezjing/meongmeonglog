@@ -5,7 +5,7 @@ type DogBreedDefinition = {
 };
 
 /** docs/dogbreed.json 기반 품종 목록 */
-export const dogBreeds: DogBreedDefinition[] = [
+const dogBreeds: DogBreedDefinition[] = [
   { key: 'golden-retriever', label: '골든 리트리버', englishName: 'Golden Retriever' },
   { key: 'goldendoodle', label: '골든두들', englishName: 'Goldendoodle' },
   { key: 'greyhound', label: '그레이하운드', englishName: 'Greyhound' },

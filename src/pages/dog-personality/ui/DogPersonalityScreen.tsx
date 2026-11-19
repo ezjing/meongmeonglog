@@ -20,7 +20,7 @@ import {
   KeyboardAwareScrollView,
   useScrollToEndOnFocus,
 } from '@/shared/ui/KeyboardAwareScrollView';
-import { useOverlay } from '@/shared/ui/overlay/index';
+import { useOverlay } from '@/shared/ui/overlay';
 import { PawProgress } from '@/shared/ui/PawProgress';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
 

@@ -21,7 +21,7 @@ import { subscribeWebWalkGeolocation } from '../lib/webWalkGeolocation';
 const SYNC_INTERVAL_MS = 2_000;
 const MAX_WEATHER_ATTEMPTS = 3;
 
-export async function getCurrentCoordinates(): Promise<WalkCoord | null> {
+async function getCurrentCoordinates(): Promise<WalkCoord | null> {
   // 권한 요청은 산책 시작 시 이미 했으므로 여기서는 확인만 한다
   const { status } = await Location.getForegroundPermissionsAsync();
   if (status !== 'granted') return null;

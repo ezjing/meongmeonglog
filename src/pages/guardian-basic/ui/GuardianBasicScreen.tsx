@@ -18,7 +18,7 @@ import {
   useScrollToEndOnFocus,
 } from '@/shared/ui/KeyboardAwareScrollView';
 import { LoadingPaws } from '@/shared/ui/LoadingPaws';
-import { useOverlay } from '@/shared/ui/overlay/index';
+import { useOverlay } from '@/shared/ui/overlay';
 import { PawProgress } from '@/shared/ui/PawProgress';
 import { ProfilePhotoPicker } from '@/shared/ui/ProfilePhotoPicker';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
