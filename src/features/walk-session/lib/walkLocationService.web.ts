@@ -11,7 +11,7 @@ import {
 } from '@/entities/walk';
 import { haversineDistance } from '@/shared/lib/formatDistance';
 
-import { processWalkLocations } from './walkLocationProcessor';
+import { MAX_ACCURACY_M, processWalkLocations } from './walkLocationProcessor';
 import { acquireWebWalkWakeLock, releaseWebWalkWakeLock } from './webWakeLock';
 import { subscribeWebWalkGeolocation, type WebGeoFix } from './webWalkGeolocation';
 
@@ -74,8 +74,15 @@ function rememberEmitted(location: LocationObject) {
   lastEmittedLongitude = location.coords.longitude;
 }
 
+/** 처리기가 버릴 좌표를 간격 기록에 남기면, 바로 뒤의 정밀 좌표가 걸러진다 */
+function isAccurateEnough(location: LocationObject) {
+  const accuracy = location.coords.accuracy;
+  return accuracy != null && accuracy <= MAX_ACCURACY_M;
+}
+
 async function handleLocation(location: LocationObject) {
   if (!wantsTracking || isPageHidden()) return;
+  if (!isAccurateEnough(location)) return;
   if (!shouldEmit(location)) return;
   rememberEmitted(location);
 

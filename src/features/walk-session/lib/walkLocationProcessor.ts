@@ -10,7 +10,7 @@ import {
 import { haversineDistance } from '@/shared/lib/formatDistance';
 
 /** 오차 반경이 이보다 크면 Wi-Fi·기지국 추정 위치로 보고 버린다 */
-const MAX_ACCURACY_M = 30;
+export const MAX_ACCURACY_M = 30;
 /** 직전 좌표 대비 이보다 빠르면 튄 좌표로 보고 버린다 (25km/h) */
 const MAX_SPEED_MPS = 25_000 / 3600;
 /** 이보다 작은 이동은 제자리 흔들림으로 보고 거리에 더하지 않는다 */
