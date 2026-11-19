@@ -5,8 +5,8 @@ import type { AuthProvider } from '@/shared/api/database';
 import { WEB_ORIGIN } from '@/shared/config/links';
 import { AppError } from '@/shared/lib/AppError';
 
-import { fetchAppAuthorize } from '../api/authApi';
 import { loginCancelledError } from './loginCancelled';
+import { fetchAppAuthorize } from '../api/authApi';
 
 /** 네이버·카카오 콘솔에 등록된 웹 콜백. 서버(+middleware)가 앱 주소로 다시 보낸다 */
 const APP_LOGIN_REDIRECT_URI = `${WEB_ORIGIN}/callback`;

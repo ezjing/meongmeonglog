@@ -1,8 +1,8 @@
 import type { AuthProvider } from '@/shared/api/database';
 import { AppError } from '@/shared/lib/AppError';
 
-import { fetchWebAuthorizeUrl } from '../api/authApi';
 import { loginCancelledError } from './loginCancelled';
+import { fetchWebAuthorizeUrl } from '../api/authApi';
 
 const PENDING_KEY = 'web-oauth-pending';
 
