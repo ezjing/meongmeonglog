@@ -14,15 +14,10 @@ import {
 import { DiaryListCard, useDiariesByDate, useRecentDiaries } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { DogAvatar, useDogs } from '@/entities/dog';
-import { stopWalkTracking, useStartWalk, useWalkStore } from '@/entities/walk';
+import { useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
-import {
-  acquireWebWalkWakeLock,
-  primeWebWalkGeolocation,
-  releaseWebWalkGeolocation,
-  releaseWebWalkWakeLock,
-} from '@/features/walk-session';
+import { resumeWalkSession, useStartWalkSession } from '@/features/walk-session';
 import {
   colors,
   spacing,
@@ -35,7 +30,6 @@ import {
 } from '@/shared/config/theme';
 import { formatDistance, calculateAge } from '@/shared/lib/formatDistance';
 import { getLocalDateKey } from '@/shared/lib/localDate';
-import { requestWalkLocationPermissions } from '@/shared/lib/locationPermission';
 import { Card } from '@/shared/ui/Card';
 import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';
 import { LoadingOverlay } from '@/shared/ui/LoadingOverlay';
@@ -56,8 +50,7 @@ function getTodayWalkStatus(
       subtitle: '탭하면 이어서 기록할 수 있어요',
       emoji: '🐾',
       onPress: () => {
-        primeWebWalkGeolocation();
-        acquireWebWalkWakeLock();
+        resumeWalkSession();
         router.push('/walk/active');
       },
     };
@@ -81,27 +74,17 @@ function getTodayWalkStatus(
   return { title, subtitle, emoji: '✨', onPress: undefined };
 }
 
-/** 웹: 산책 시작 탭에서 미리 켠 위치 감시·화면 꺼짐 방지를 시작이 실패하면 되돌린다 (네이티브는 아무 일도 하지 않음) */
-function releaseWebWalkSession() {
-  releaseWebWalkGeolocation();
-  releaseWebWalkWakeLock();
-}
-
 export function HomeScreen() {
   const { data: dogs } = useDogs();
   const todayKey = getLocalDateKey();
   const { data: todayDiaries = [] } = useDiariesByDate(todayKey);
   const { data: recentDiaries = [] } = useRecentDiaries(RECENT_DIARY_COUNT);
-  const startWalk = useStartWalk();
-  const setActiveWalk = useWalkStore((s) => s.setActiveWalk);
-  const resetWalk = useWalkStore((s) => s.reset);
+  const { start: startWalkSession, isStarting: isStartingWalk } = useStartWalkSession();
   const activeWalk = useWalkStore((s) => s.activeWalk);
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const confirmLogout = useConfirmLogout();
   const [profilePreviewVisible, setProfilePreviewVisible] = useState(false);
-  const [isStartingWalk, setIsStartingWalk] = useState(false);
-  const startingWalkRef = useRef(false);
   const { showToast } = useOverlay();
   const lastBackPressRef = useRef(0);
 
@@ -133,23 +116,12 @@ export function HomeScreen() {
   const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries);
 
   const handleStartWalk = async () => {
-    if (!dog || startingWalkRef.current) return;
+    if (!dog) return;
 
-    primeWebWalkGeolocation();
-    acquireWebWalkWakeLock();
-    startingWalkRef.current = true;
-    setIsStartingWalk(true);
-    try {
-      await runStartWalk(dog.dogId);
-    } finally {
-      startingWalkRef.current = false;
-      setIsStartingWalk(false);
-    }
-  };
-
-  const runStartWalk = async (dogId: string) => {
-    const granted = await requestWalkLocationPermissions();
-    if (!granted) {
+    const result = await startWalkSession(dog.dogId);
+    if (result === 'started') {
+      router.push('/walk/active');
+    } else if (result === 'permission_denied') {
       showToast({
         message:
           Platform.OS === 'ios'
@@ -159,20 +131,7 @@ export function HomeScreen() {
               : '산책 기록을 위해 위치(앱 사용 중)와 알림 권한을 허용해 주세요.',
         variant: 'warning',
       });
-      releaseWebWalkSession();
-      return;
-    }
-
-    await stopWalkTracking();
-    resetWalk();
-
-    // 날씨는 산책 화면에서 GPS로 조회해 채운다. 여기서 위치를 기다리면 GPS가 잡히지 않을 때 로딩이 끝나지 않는다
-    try {
-      const walk = await startWalk.mutateAsync({ dogId });
-      setActiveWalk(walk);
-      router.push('/walk/active');
-    } catch {
-      releaseWebWalkSession();
+    } else if (result === 'failed') {
       showToast({ message: '산책을 시작하지 못했어요. 다시 시도해주세요.', variant: 'error' });
     }
   };

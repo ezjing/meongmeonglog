@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import type { DogMeetingLevel } from '@/shared/api/database';
 
-interface FinishWalkForm {
+export interface FinishWalkForm {
   photoUris: string[];
   peeSelected: boolean;
   poopSelected: boolean;

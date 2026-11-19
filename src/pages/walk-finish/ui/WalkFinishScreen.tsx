@@ -4,18 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useDogDisplayName } from '@/entities/dog';
-import {
-  formatWalkWeather,
-  stopWalkTracking,
-  useFinishWalk,
-  useSaveWalkEvent,
-  useUploadWalkPhotos,
-  loadPersistedWalkState,
-  useWalkStore,
-} from '@/entities/walk';
+import { formatWalkWeather, loadPersistedWalkState, useWalkStore } from '@/entities/walk';
 import {
   getWalkElapsedSec,
   useAbandonWalk,
+  useCompleteWalk,
   flushAllPendingDbLocations,
   useFinishWalkStore,
 } from '@/features/walk-session';
@@ -56,9 +49,7 @@ export function WalkFinishScreen() {
   const { form, setPhotoUris, togglePee, togglePoop, setDogMeetingLevel, setMemo } =
     useFinishWalkStore();
 
-  const finishWalk = useFinishWalk();
-  const saveEvent = useSaveWalkEvent();
-  const uploadPhotos = useUploadWalkPhotos();
+  const { complete } = useCompleteWalk();
   const { abandonWalk, isAbandoning } = useAbandonWalk();
   const { showAlert, showToast } = useOverlay();
   const dogName = useDogDisplayName();
@@ -172,42 +163,7 @@ export function WalkFinishScreen() {
 
     setIsSaving(true);
     try {
-      await flushAllPendingDbLocations();
-      const persisted = await loadPersistedWalkState();
-      const finalDistance = persisted?.distanceMeter ?? distanceMeter;
-      const finalDuration = getWalkElapsedSec(frozenElapsedSec, activeWalk.startedAt);
-
-      // 산책 종료·이벤트·사진은 서로 독립이라 동시에 저장한다 (다시 시도해도 같은 결과)
-      const [, , uploaded] = await Promise.all([
-        finishWalk.mutateAsync({
-          walkId: activeWalk.walkId,
-          payload: {
-            endedAt: new Date().toISOString(),
-            distanceMeter: Math.round(finalDistance),
-            durationSec: finalDuration,
-            weatherCondition: activeWalk.weatherCondition ?? undefined,
-            weatherTemp: activeWalk.weatherTemp ?? undefined,
-            weatherIcon: activeWalk.weatherIcon ?? undefined,
-          },
-        }),
-        saveEvent.mutateAsync({
-          walkId: activeWalk.walkId,
-          event: {
-            peeCount: form.peeSelected ? 1 : 0,
-            poopCount: form.poopSelected ? 1 : 0,
-            dogMeetingLevel: form.dogMeetingLevel,
-            memo: form.memo || null,
-          },
-        }),
-        uploadPhotos.mutateAsync({
-          walkId: activeWalk.walkId,
-          uris: form.photoUris,
-        }),
-      ]);
-
-      useWalkStore.getState().setPendingWalkPhotos(activeWalk.walkId, uploaded);
-      await stopWalkTracking();
-      useWalkStore.getState().reset();
+      await complete(activeWalk, form);
       allowLeave();
       router.push({
         pathname: '/diary/generate',
