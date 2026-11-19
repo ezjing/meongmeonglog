@@ -1,16 +1,45 @@
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+import { Image } from 'react-native';
 
 import { AppError } from '@/shared/lib/AppError';
 
 import { readStorageImageBytes } from './readStorageImageBytes';
 import { supabase, isSupabaseConfigured } from './supabase';
 
-const MAX_GROQ_IMAGE_EDGE = 2048;
+type StorageBucket = 'dog-profiles' | 'walk-photos';
+
+/** 긴 변 최대 길이. 산책 사진은 일기 생성(이미지 분석)과 크게 보기에 충분한 크기, 프로필은 작은 원형 표시용 */
+const MAX_IMAGE_EDGE: Record<StorageBucket, number> = {
+  'walk-photos': 1600,
+  'dog-profiles': 512,
+};
+
+function getImageSize(uri: string): Promise<{ width: number; height: number } | null> {
+  return new Promise((resolve) => {
+    Image.getSize(
+      uri,
+      (width, height) => resolve({ width, height }),
+      () => resolve(null),
+    );
+  });
+}
 
 async function normalizeImageForUpload(
   uri: string,
+  maxEdge: number,
 ): Promise<{ uri: string; contentType: string; ext: string }> {
-  const result = await manipulateAsync(uri, [{ resize: { width: MAX_GROQ_IMAGE_EDGE } }], {
+  // 긴 변 기준으로 큰 사진만 줄인다 (작은 사진을 키우지 않음). 크기를 모르면 가로 기준으로 줄인다
+  const size = await getImageSize(uri);
+  const actions =
+    size == null
+      ? [{ resize: { width: maxEdge } }]
+      : Math.max(size.width, size.height) <= maxEdge
+        ? []
+        : size.width >= size.height
+          ? [{ resize: { width: maxEdge } }]
+          : [{ resize: { height: maxEdge } }];
+
+  const result = await manipulateAsync(uri, actions, {
     compress: 0.8,
     format: SaveFormat.JPEG,
   });
@@ -23,7 +52,7 @@ async function normalizeImageForUpload(
 }
 
 export async function uploadStorageImage(
-  bucket: 'dog-profiles' | 'walk-photos',
+  bucket: StorageBucket,
   path: string,
   uri: string,
 ): Promise<string> {
@@ -41,7 +70,7 @@ export async function uploadStorageImage(
     throw new AppError('storage_user_mismatch', '로그인 사용자와 업로드 경로가 일치하지 않습니다.');
   }
 
-  const normalized = await normalizeImageForUpload(uri);
+  const normalized = await normalizeImageForUpload(uri, MAX_IMAGE_EDGE[bucket]);
   const bytes = await readStorageImageBytes(normalized.uri);
 
   const { error: uploadError } = await supabase.storage
