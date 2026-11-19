@@ -50,3 +50,11 @@
 - 지시서와 달라진 점: 없음
 - 웹 JS 크기 (변경 전 → 후): 2873.4KB / gzip 699.7KB → 2770.1KB / gzip 661.6KB. 웹 export에 `expo-symbols` 문자열과 Material Symbols 폰트(956KB) 없음. Android export에는 그 폰트 파일이 남아 있음
 - 확인하지 못한 것: 로그인된 일기 상세에서 아이콘이 어떻게 보이는지는 브라우저로 확인하지 못함
+
+## 검토 (Claude, 2026-11-19)
+
+결과: **통과.** 수정 지시 없음. 지시서와 다른 점 없음.
+
+- 코드가 지시서와 같다: 네이티브 `ShareIcon.tsx`는 기존 `SymbolView` 그대로, 웹 `ShareIcon.web.tsx`는 지정한 path로 SVG, `StackAppBar`는 크기(`iconSize.sm`)·색(`colors.fg`)·라벨 그대로
+- 직접 확인: `tsc`·`lint` 통과, 웹 export에 `expo-symbols`·`SymbolView` 문자열과 심볼 폰트 없음
+- 남은 확인 (배포 후): 웹 일기 상세 화면에서 공유 아이콘 모양
