@@ -31,10 +31,10 @@
 
 ## 완료 조건
 
-- [ ] `delete-account`가 카카오 계정이면 연결 끊기를 시도하고, 실패해도 탈퇴가 끝난다
-- [ ] 네이버 계정은 아무 호출도 하지 않는다
-- [ ] `npx tsc --noEmit`, `npm run lint` 통과 (Edge Function은 Deno라 tsc 대상이 아님 → 문법 오류가 없게 주의, 가능하면 `deno check`)
-- [ ] 커밋 메시지에 키 값이나 보안 설명을 쓰지 않는다
+- [x] `delete-account`가 카카오 계정이면 연결 끊기를 시도하고, 실패해도 탈퇴가 끝난다
+- [x] 네이버 계정은 아무 호출도 하지 않는다
+- [x] `npx tsc --noEmit`, `npm run lint` 통과 (Edge Function은 Deno라 tsc 대상이 아님 → 문법 오류가 없게 주의, 가능하면 `deno check`)
+- [x] 커밋 메시지에 키 값이나 보안 설명을 쓰지 않는다
 
 ## 하지 말 것
 
@@ -50,6 +50,6 @@
 
 ## 구현 결과 (Cursor가 작성)
 
-- 커밋:
-- 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
-- 확인하지 못한 것:
+- 커밋: `a9049f4` fix: 탈퇴할 때 서버에서 카카오 연결을 끊는다
+- 지시서와 달라진 점: 없음. 연결 끊기 `Content-Type`은 공식 문서의 `application/x-www-form-urlencoded;charset=utf-8`을 사용
+- 확인하지 못한 것: 이 환경에 Deno가 없어 `deno check`는 실행하지 못함. 배포와 테스트 계정 탈퇴 확인은 하지 않음
