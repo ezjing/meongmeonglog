@@ -29,10 +29,10 @@
 
 ## 완료 조건
 
-- [ ] `npx tsc --noEmit`, `npm run lint` 통과
-- [ ] `npx expo export --platform web` 결과에 `expo-symbols`·Material Symbols 폰트가 없다 (예: `grep -r "expo-symbols" dist/` 결과 없음, 폰트 파일 없음). 변경 전후 웹 JS 크기를 "구현 결과"에 적는다
-- [ ] `npx expo export --platform android` 통과 (앱은 `expo-symbols` 그대로)
-- [ ] 아이콘 크기·색·버튼 위치·라벨 변경 없음
+- [x] `npx tsc --noEmit`, `npm run lint` 통과
+- [x] `npx expo export --platform web` 결과에 `expo-symbols`·Material Symbols 폰트가 없다 (예: `grep -r "expo-symbols" dist/` 결과 없음, 폰트 파일 없음). 변경 전후 웹 JS 크기를 "구현 결과"에 적는다
+- [x] `npx expo export --platform android` 통과 (앱은 `expo-symbols` 그대로)
+- [x] 아이콘 크기·색·버튼 위치·라벨 변경 없음
 
 ## 하지 말 것
 
@@ -46,7 +46,7 @@
 
 ## 구현 결과 (Cursor가 작성)
 
-- 커밋:
-- 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
-- 웹 JS 크기 (변경 전 → 후):
-- 확인하지 못한 것:
+- 커밋: `940c689` perf: 웹 공유 아이콘을 SVG로 바꿔 심볼 폰트를 뺀다
+- 지시서와 달라진 점: 없음
+- 웹 JS 크기 (변경 전 → 후): 2873.4KB / gzip 699.7KB → 2770.1KB / gzip 661.6KB. 웹 export에 `expo-symbols` 문자열과 Material Symbols 폰트(956KB) 없음. Android export에는 그 폰트 파일이 남아 있음
+- 확인하지 못한 것: 로그인된 일기 상세에서 아이콘이 어떻게 보이는지는 브라우저로 확인하지 못함
