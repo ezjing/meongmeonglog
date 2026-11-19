@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { diaryKeys, generateDiary } from '@/entities/diary';
 import { AnalyticsEvents, trackEvent } from '@/shared/lib/analytics';
 import { getLocalDateKey } from '@/shared/lib/localDate';
 import { useAuthStore } from '@/shared/session/sessionStore';
+
+import { diaryKeys, generateDiary } from './diaryApi';
 
 export function useGenerateDiary() {
   const queryClient = useQueryClient();

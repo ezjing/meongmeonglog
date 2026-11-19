@@ -11,7 +11,7 @@
 src/
 ├─ app/        Expo Router 라우트 (FSD의 app 레이어 역할: 레이아웃·프로바이더·라우팅)
 ├─ pages/      화면 단위 slice
-├─ features/   여러 화면에서 재사용하는 사용자 행동 (로그인, 산책 기록, 일기 생성 …)
+├─ features/   여러 화면에서 재사용하는 사용자 행동 (로그인, 산책 기록, 링크 공유 …)
 ├─ entities/   도메인 데이터 (dog, guardian, walk, diary): API·타입·조회 hook·표시용 UI
 └─ shared/     도메인을 모르는 공용 코드 (ui, api, lib, config, session)
 ```

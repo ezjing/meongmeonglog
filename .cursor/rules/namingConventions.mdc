@@ -7,7 +7,7 @@ alwaysApply: true
 
 | 대상 | 규칙 | 예시 |
 |------|------|------|
-| slice 폴더 (pages/features/entities) | kebab-case, 도메인·사용자 행동 이름 | `walk-session/`, `diary-generate/`, `dog-basic/` |
+| slice 폴더 (pages/features/entities) | kebab-case, 도메인·사용자 행동 이름 | `walk-session/`, `diary-list/`, `dog-basic/` |
 | 세그먼트 폴더 | `ui` `model` `api` `lib` `config` | `entities/dog/api/` |
 | 화면 컴포넌트 | `pages/<화면>/ui/<이름>Screen.tsx` | `HomeScreen.tsx` |
 | 라우트 파일 (`src/app`) | Expo Router 경로 그대로, 내용은 re-export 한 줄 | `walk/active.tsx` |

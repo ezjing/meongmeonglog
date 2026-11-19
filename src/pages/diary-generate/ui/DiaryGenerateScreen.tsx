@@ -2,11 +2,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { DiaryContentView } from '@/entities/diary';
+import { DiaryContentView, useGenerateDiary } from '@/entities/diary';
 import type { Diary } from '@/entities/diary';
 import { useDogDisplayName } from '@/entities/dog';
 import { formatWalkWeather, useWalk, useWalkStore } from '@/entities/walk';
-import { useGenerateDiary } from '@/features/diary-generate';
 import { useWalkPhotos, useFinishWalkStore } from '@/features/walk-session';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';

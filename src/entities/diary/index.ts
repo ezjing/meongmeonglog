@@ -6,6 +6,7 @@ export {
   useDiaryPages,
   useRecentDiaries,
 } from './api/diaryQueries';
+export { useGenerateDiary } from './api/useDiaryMutations';
 export type { Diary, DiaryListItem } from './model/types';
 export { DiaryContentView } from './ui/DiaryContentView';
 export { DiaryListCard } from './ui/DiaryListCard';
