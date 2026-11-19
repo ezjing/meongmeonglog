@@ -30,7 +30,7 @@
 | DB 마이그레이션 | 001~008 원격 적용. 008은 일기 공유 링크 |
 | 웹 미리보기 | `https://meongmeonglog--preview.expo.app` (alias `preview`). W5 공유 링크와 5장 초과 안내 포함 |
 | 웹 정식 주소 | `https://meongmeonglog.expo.app` 배포됨. 카카오·네이버 콜백에 이 주소가 등록된 상태 |
-| 앱 OTA | 2026-11-18 production 채널, runtime 1.1.0, Android — Update group `b55d06dc-0363-4399-82f7-fbddfdddbf0e` (네이버 로그인을 브라우저 로그인으로). 이전: `6ceb201c-40b4-4afe-a486-b385c3e03b4c`, `49908538-ff2b-495f-857e-5653ff969e20` |
+| 앱 OTA | 2026-11-19 production 채널, runtime 1.1.0, Android — Update group `022e79be-3fa9-40ad-84ef-7d20cb279568` (좌표 묶음 전송, 사진 리사이즈, 시작·저장 속도, 구조 정리). 이전: `b55d06dc-…`(네이버 브라우저 로그인), `6ceb201c-…`, `49908538-…` |
 | 스토어 빌드 | production 1.1.0 (version code 6). preview 프로필 빌드는 없음 |
 | 정책 페이지 | GitHub Pages: `/meongmeonglog/terms-of-service`, `/privacy-policy`, `/account-deletion` |
 
