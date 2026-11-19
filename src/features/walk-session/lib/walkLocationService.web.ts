@@ -13,11 +13,12 @@ import { haversineDistance } from '@/shared/lib/formatDistance';
 
 import { MAX_ACCURACY_M, processWalkLocations } from './walkLocationProcessor';
 import { acquireWebWalkWakeLock, releaseWebWalkWakeLock } from './webWakeLock';
-import { subscribeWebWalkGeolocation, type WebGeoFix } from './webWalkGeolocation';
-
-/** 네이티브 위치 간격과 같다 */
-const LOCATION_INTERVAL_MS = 5_000;
-const LOCATION_DISTANCE_INTERVAL_M = 5;
+import { subscribeWebWalkGeolocation } from './webWalkGeolocation';
+import {
+  LOCATION_DISTANCE_INTERVAL_M,
+  LOCATION_INTERVAL_MS,
+  type WebGeoFix,
+} from '../config/walkTracking';
 
 let wantsTracking = false;
 let unsubscribe: (() => void) | null = null;

@@ -1,9 +1,4 @@
-export interface WebGeoFix {
-  latitude: number;
-  longitude: number;
-  accuracy: number | null;
-  timestamp: number;
-}
+import type { WebGeoFix } from '../config/walkTracking';
 
 /** 네이티브 위치는 expo-location이 받는다. */
 export function primeWebWalkGeolocation(): void {}

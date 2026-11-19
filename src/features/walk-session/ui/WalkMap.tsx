@@ -5,16 +5,20 @@ import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { splitWalkPath, type WalkCoord } from '@/entities/walk';
 import { colors, spacing, radius, fontSize, sizes, shadows } from '@/shared/config/theme';
 
+import {
+  DEFAULT_MAP_LATITUDE,
+  DEFAULT_MAP_LONGITUDE,
+  ROUTE_STROKE_WIDTH,
+} from '../config/walkTracking';
+
 interface WalkMapProps {
   routePath: WalkCoord[];
 }
 
-const ROUTE_STROKE_WIDTH = 3;
-
 /** 서울시청 기준 */
 const DEFAULT_REGION = {
-  latitude: 37.566535,
-  longitude: 126.977969,
+  latitude: DEFAULT_MAP_LATITUDE,
+  longitude: DEFAULT_MAP_LONGITUDE,
   latitudeDelta: 0.01,
   longitudeDelta: 0.01,
 };

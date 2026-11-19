@@ -1,9 +1,4 @@
-export interface WebGeoFix {
-  latitude: number;
-  longitude: number;
-  accuracy: number | null;
-  timestamp: number;
-}
+import type { WebGeoFix } from '../config/walkTracking';
 
 const COARSE_OPTIONS: PositionOptions = {
   enableHighAccuracy: false,

@@ -4,6 +4,11 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { splitWalkPath, type WalkCoord } from '@/entities/walk';
 import { colors, fontSize, radius, shadows, sizes, spacing } from '@/shared/config/theme';
 
+import {
+  DEFAULT_MAP_LATITUDE,
+  DEFAULT_MAP_LONGITUDE,
+  ROUTE_STROKE_WIDTH,
+} from '../config/walkTracking';
 import { subscribeWebWalkGeolocation } from '../lib/webWalkGeolocation';
 
 const GOOGLE_MAPS_WEB_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY;
@@ -13,9 +18,8 @@ interface WalkMapProps {
 }
 
 /** 서울시청 기준. 네이티브 지도의 기본 위치와 같다. */
-const DEFAULT_CENTER = { lat: 37.566535, lng: 126.977969 };
+const DEFAULT_CENTER = { lat: DEFAULT_MAP_LATITUDE, lng: DEFAULT_MAP_LONGITUDE };
 const FOLLOW_ZOOM = 16;
-const ROUTE_STROKE_WEIGHT = 3;
 
 interface LatLng {
   lat: number;
@@ -122,7 +126,7 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
           map,
           path,
           strokeColor: colors.primary,
-          strokeWeight: ROUTE_STROKE_WEIGHT,
+          strokeWeight: ROUTE_STROKE_WIDTH,
         });
       }
     });

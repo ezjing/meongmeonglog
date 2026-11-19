@@ -12,8 +12,7 @@ import {
 import type { WalkSession } from '@/entities/walk';
 import { colors } from '@/shared/config/theme';
 
-const LOCATION_INTERVAL_MS = 5_000;
-const LOCATION_DISTANCE_INTERVAL_M = 5;
+import { LOCATION_DISTANCE_INTERVAL_M, LOCATION_INTERVAL_MS } from '../config/walkTracking';
 
 export async function startWalkTracking(activeWalk: WalkSession): Promise<void> {
   await withWalkStateLock(async () => {
