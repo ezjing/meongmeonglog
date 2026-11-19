@@ -8,6 +8,7 @@ import {
   PROVIDER_LABEL,
   useAuthSession,
   getKakaoAccessToken,
+  isLoginCancelled,
   startAppOAuth,
   startWebOAuth,
 } from '@/features/auth';
@@ -52,8 +53,8 @@ export function LoginScreen() {
   };
 
   const getLoginErrorMessage = (error: unknown, providerLabel: string) => {
+    // SDK·브라우저 오류 문구(영어)는 보여주지 않고 앱이 만든 안내만 보여준다
     if (error instanceof AppError) return error.message;
-    if (error instanceof Error) return error.message;
     return `${providerLabel} 로그인에 실패했습니다.`;
   };
 
@@ -93,7 +94,7 @@ export function LoginScreen() {
     } catch (error) {
       const message = getLoginErrorMessage(error, providerLabel);
       // 직접 취소한 경우는 실패가 아니므로 웹 콜백 화면과 같이 안내(주황)로 보여준다
-      showToast({ message, variant: message === '로그인이 취소되었습니다.' ? 'warning' : 'error' });
+      showToast({ message, variant: isLoginCancelled(error) ? 'warning' : 'error' });
     }
   };
 

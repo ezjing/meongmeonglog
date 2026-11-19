@@ -2,6 +2,7 @@
 
 import { externalApiSignal } from './http.ts';
 
+// 클라이언트의 WEB_ORIGIN(src/shared/config/links.ts)과 카카오·네이버 콘솔 콜백과 맞춘다
 const ALLOWED_REDIRECT_URIS = new Set([
   'https://meongmeonglog--preview.expo.app/callback',
   'https://meongmeonglog.expo.app/callback',

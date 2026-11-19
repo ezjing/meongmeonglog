@@ -1,12 +1,10 @@
 import { Platform, Share } from 'react-native';
 
-const PRODUCTION_WEB_ORIGIN = 'https://meongmeonglog.expo.app';
+import { WEB_ORIGIN } from '@/shared/config/links';
 
 export function shareDiaryUrl(token: string): string {
   const origin =
-    Platform.OS === 'web' && typeof window !== 'undefined'
-      ? window.location.origin
-      : PRODUCTION_WEB_ORIGIN;
+    Platform.OS === 'web' && typeof window !== 'undefined' ? window.location.origin : WEB_ORIGIN;
   return `${origin}/s/${token}`;
 }
 

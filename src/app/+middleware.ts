@@ -16,6 +16,7 @@ function escapeHtml(value: string): string {
     .replaceAll('"', '&quot;');
 }
 
+// features/auth/lib/appOAuth.ts의 APP_RETURN_URL과 같아야 한다
 const APP_CALLBACK_URL = 'meongmeonglog://oauth-callback';
 const APP_STATE_PATTERN = /^app\.(kakao|naver)\.[0-9a-f]{32}$/;
 

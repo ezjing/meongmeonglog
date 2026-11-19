@@ -4,3 +4,9 @@ export const EXTERNAL_LINKS = {
   privacyPolicy: 'https://ezjing.github.io/meongmeonglog/privacy-policy',
   accountDeletion: 'https://ezjing.github.io/meongmeonglog/account-deletion',
 } as const;
+
+/**
+ * 웹 정식 주소. 앱의 공유 링크와 로그인 복귀 주소가 이 주소를 쓴다.
+ * 바꾸면 카카오·네이버 콘솔의 콜백과 supabase/functions/_shared/socialOAuth.ts 허용 목록도 함께 바꾼다.
+ */
+export const WEB_ORIGIN = 'https://meongmeonglog.expo.app';

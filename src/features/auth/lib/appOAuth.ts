@@ -2,12 +2,15 @@ import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
 import type { AuthProvider } from '@/shared/api/database';
+import { WEB_ORIGIN } from '@/shared/config/links';
 import { AppError } from '@/shared/lib/AppError';
 
 import { fetchAppAuthorize } from '../api/authApi';
+import { loginCancelledError } from './loginCancelled';
 
 /** 네이버·카카오 콘솔에 등록된 웹 콜백. 서버(+middleware)가 앱 주소로 다시 보낸다 */
-const APP_LOGIN_REDIRECT_URI = 'https://meongmeonglog.expo.app/callback';
+const APP_LOGIN_REDIRECT_URI = `${WEB_ORIGIN}/callback`;
+// src/app/+middleware.ts의 APP_CALLBACK_URL과 같아야 한다
 const APP_RETURN_URL = 'meongmeonglog://oauth-callback';
 
 export interface AppOAuthResult {
@@ -37,7 +40,7 @@ export async function startAppOAuth(
   });
 
   const result = await WebBrowser.openAuthSessionAsync(authorizeUrl, APP_RETURN_URL);
-  if (result.type !== 'success') throw new Error('로그인이 취소되었습니다.');
+  if (result.type !== 'success') throw loginCancelledError();
 
   const { queryParams } = Linking.parse(result.url);
   const returnedState = firstParam(queryParams?.state as string | string[] | undefined);
@@ -46,7 +49,7 @@ export async function startAppOAuth(
 
   if (returnedState !== state) throw new AppError('auth_failed', '로그인에 실패했습니다.');
   if (error === 'cancelled' || error === 'access_denied') {
-    throw new Error('로그인이 취소되었습니다.');
+    throw loginCancelledError();
   }
   if (error || !sealed) throw new AppError('auth_failed', '로그인에 실패했습니다.');
 

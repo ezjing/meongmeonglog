@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { readWebOAuthCallback, useAuthSession } from '@/features/auth';
+import { isLoginCancelled, readWebOAuthCallback, useAuthSession } from '@/features/auth';
 import { resolveOnboardingRoute } from '@/features/onboarding';
 import { colors, fontSize } from '@/shared/config/theme';
 import { AppError } from '@/shared/lib/AppError';
@@ -39,7 +39,7 @@ export function AuthCallbackScreen() {
             : '로그인에 실패했습니다.';
         showToast({
           message,
-          variant: message === '로그인이 취소되었습니다.' ? 'warning' : 'error',
+          variant: isLoginCancelled(error) ? 'warning' : 'error',
         });
         router.replace('/login');
       }

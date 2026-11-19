@@ -7,6 +7,7 @@ import {
 } from '@react-native-kakao/user';
 import { Platform } from 'react-native';
 
+import { loginCancelledError } from './loginCancelled';
 import { toSdkNotLinkedError } from './sdkError';
 import { DEV_AUTH } from '../config/devAuth';
 
@@ -91,7 +92,7 @@ export async function getKakaoAccessToken(options: KakaoAccessTokenOptions = {})
     const sdkError = toSdkNotLinkedError(error);
     if (sdkError) throw sdkError;
     if (isKakaoLoginCancelled(error)) {
-      throw new Error('로그인이 취소되었습니다.');
+      throw loginCancelledError();
     }
     throw error;
   }

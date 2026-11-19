@@ -2,6 +2,7 @@ import type { AuthProvider } from '@/shared/api/database';
 import { AppError } from '@/shared/lib/AppError';
 
 import { fetchWebAuthorizeUrl } from '../api/authApi';
+import { loginCancelledError } from './loginCancelled';
 
 const PENDING_KEY = 'web-oauth-pending';
 
@@ -56,7 +57,9 @@ export function readWebOAuthCallback(params: {
   const raw = storage.getItem(PENDING_KEY);
   storage.removeItem(PENDING_KEY);
 
-  if (params.error) throw new Error('로그인이 취소되었습니다.');
+  // 동의 거절·창 닫기는 취소, 그 밖의 제공자 오류는 실패로 보여준다
+  if (params.error === 'access_denied') throw loginCancelledError();
+  if (params.error) throw new AppError('auth_failed', '로그인에 실패했습니다.');
 
   let pending: PendingOAuth | null = null;
   try {
