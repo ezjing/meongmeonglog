@@ -177,32 +177,33 @@ export function WalkFinishScreen() {
       const finalDistance = persisted?.distanceMeter ?? distanceMeter;
       const finalDuration = getWalkElapsedSec(frozenElapsedSec, activeWalk.startedAt);
 
-      await finishWalk.mutateAsync({
-        walkId: activeWalk.walkId,
-        payload: {
-          endedAt: new Date().toISOString(),
-          distanceMeter: Math.round(finalDistance),
-          durationSec: finalDuration,
-          weatherCondition: activeWalk.weatherCondition ?? undefined,
-          weatherTemp: activeWalk.weatherTemp ?? undefined,
-          weatherIcon: activeWalk.weatherIcon ?? undefined,
-        },
-      });
-
-      await saveEvent.mutateAsync({
-        walkId: activeWalk.walkId,
-        event: {
-          peeCount: form.peeSelected ? 1 : 0,
-          poopCount: form.poopSelected ? 1 : 0,
-          dogMeetingLevel: form.dogMeetingLevel,
-          memo: form.memo || null,
-        },
-      });
-
-      const uploaded = await uploadPhotos.mutateAsync({
-        walkId: activeWalk.walkId,
-        uris: form.photoUris,
-      });
+      // 산책 종료·이벤트·사진은 서로 독립이라 동시에 저장한다 (다시 시도해도 같은 결과)
+      const [, , uploaded] = await Promise.all([
+        finishWalk.mutateAsync({
+          walkId: activeWalk.walkId,
+          payload: {
+            endedAt: new Date().toISOString(),
+            distanceMeter: Math.round(finalDistance),
+            durationSec: finalDuration,
+            weatherCondition: activeWalk.weatherCondition ?? undefined,
+            weatherTemp: activeWalk.weatherTemp ?? undefined,
+            weatherIcon: activeWalk.weatherIcon ?? undefined,
+          },
+        }),
+        saveEvent.mutateAsync({
+          walkId: activeWalk.walkId,
+          event: {
+            peeCount: form.peeSelected ? 1 : 0,
+            poopCount: form.poopSelected ? 1 : 0,
+            dogMeetingLevel: form.dogMeetingLevel,
+            memo: form.memo || null,
+          },
+        }),
+        uploadPhotos.mutateAsync({
+          walkId: activeWalk.walkId,
+          uris: form.photoUris,
+        }),
+      ]);
 
       useWalkStore.getState().setPendingWalkPhotos(activeWalk.walkId, uploaded);
       await stopWalkTracking();

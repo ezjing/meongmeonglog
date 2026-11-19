@@ -187,7 +187,6 @@ export async function uploadWalkPhotos(walkId: string, uris: string[]): Promise<
     return photos;
   }
 
-  const uploaded: WalkPhoto[] = [];
   const { data: sessionData } = await supabase.auth.getSession();
   const ownerId = sessionData.session?.user.id;
   if (!ownerId) {
@@ -198,25 +197,20 @@ export async function uploadWalkPhotos(walkId: string, uris: string[]): Promise<
   const { error: clearError } = await supabase.from('walk_photos').delete().eq('walk_id', walkId);
   if (clearError) throw new AppError('photo_save_failed', clearError.message);
 
-  for (let i = 0; i < uris.length; i++) {
-    const uri = uris[i];
-    const path = `${ownerId}/${walkId}/${i}.jpg`;
-    const publicUrl = await uploadStorageImage('walk-photos', path, uri);
+  // 파일은 동시에 올리고(최대 5장), 사진 행은 한 번에 저장한다
+  const publicUrls = await Promise.all(
+    uris.map((uri, i) => uploadStorageImage('walk-photos', `${ownerId}/${walkId}/${i}.jpg`, uri)),
+  );
 
-    const { data, error } = await supabase
-      .from('walk_photos')
-      .insert({
-        walk_id: walkId,
-        image_url: publicUrl,
-        sort_order: i,
-      })
-      .select()
-      .single();
+  const { data, error } = await supabase
+    .from('walk_photos')
+    .insert(
+      publicUrls.map((imageUrl, i) => ({ walk_id: walkId, image_url: imageUrl, sort_order: i })),
+    )
+    .select();
 
-    if (error) throw new AppError('photo_save_failed', error.message);
-    uploaded.push(toWalkPhoto(data));
-  }
-  return uploaded;
+  if (error) throw new AppError('photo_save_failed', error.message);
+  return (data ?? []).map(toWalkPhoto).sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 export async function fetchWalkPhotos(walkId: string): Promise<WalkPhoto[]> {
