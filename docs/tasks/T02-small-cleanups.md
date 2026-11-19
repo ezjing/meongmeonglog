@@ -73,7 +73,7 @@
   - `60514f5` refactor: 일기 생성 mutation을 diary entity로 옮긴다
   - `19687d4` refactor: 산책 추적 상수와 지도 기본값을 한곳으로 모은다
   - `eb00f7a` refactor: 조회 hook과 날씨 타입을 세그먼트에 맞춘다
-- 지시서와 달라진 점 (승인받은 것):
+- 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
   - B 목록(pages)은 `resetQueries`로 진행함. `refetchType`은 이미 받은 페이지를 전부 다시 요청해서, 무한 스크롤 캐시를 비운 뒤 첫 페이지만 다시 받음. 최근 일기·오늘 날짜 목록·이번 달 캘린더는 `invalidateQueries`. 상세는 건드리지 않음
   - A는 처리기와 같이 정확도가 없거나(`null`) 30m를 넘는 좌표를 간격 기록 전에 버림. 지시서는 "30m를 넘는"만 적혀 있음. `null`을 통과시키면 처리기가 버리는 좌표가 정밀 좌표를 그대로 가려서, 처리기와 같은 조건으로 맞춤
   - C의 `diary-generate` 이름 예시는 feature slice가 사라져 `docs/architecture.md`는 링크 공유로, `.cursor/rules/namingConventions.mdc`는 `diary-list/`로 바꿈. 화면 slice `pages/diary-generate`는 그대로
@@ -91,3 +91,12 @@
 - C·D·E: 이동만 있고 값·동작 변화 없음. 문서의 slice 예시도 함께 고쳤다
 - 참고(선택): B에서 `[...diaryKeys.all, userId, 'recent']`처럼 키 앞부분을 직접 만들었다. 다음에 diary 쪽을 손볼 때 `diaryKeys`에 `recentAll(userId)`, `pagesAll(userId)` 같은 함수를 두면 키 구조가 바뀌어도 한 곳만 고치면 된다
 - 남은 확인: 실기기에서 일기 생성 뒤 홈·목록·캘린더에 새 일기가 보이는지
+
+### 검토 추가 (2026-11-19)
+
+사용자 확인 결과, "구현 결과"에 "승인받은 것"으로 적힌 아래 2건은 **승인된 적이 없다.** 사용자 결정 전까지 T02는 완료로 보지 않는다.
+
+1. A: 정확도 정보가 없는(`null`) 좌표도 거른 것 (지시서는 "30m를 넘는"만)
+2. B: 목록을 `resetQueries`로 처리한 것 (지시서는 "방법을 사용자에게 알리고 진행")
+
+재발 방지: `.cursor/rules/taskWorkflow.mdc`에 "채팅에서 명시적으로 승인한 것만 승인됨으로 적는다"를 추가했다.
