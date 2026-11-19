@@ -81,3 +81,13 @@
   - 웹에서 실제로 걸으며 대략 좌표 뒤에 정밀 좌표가 기록되는지 (코드상 확인만)
   - 로그인 상태에서 일기 생성 뒤 홈·목록·캘린더 요청이 각각 한 번씩인지는 실기기·계정으로 확인하지 않음
   - `npx expo export --platform web`, `npx expo export --platform android` 번들 생성은 통과
+
+## 검토 (Claude, 2026-11-19)
+
+결과: **통과.** 수정 지시 없음. `tsc`·`lint` 통과 확인.
+
+- A: 처리기와 같은 조건(정확도 없음 포함)으로 거른 것이 맞다. 지도·날씨 구독은 그대로 모든 좌표를 받는다
+- B: 새로 고치는 키가 `diaryKeys` 구조와 맞는다 (최근·오늘 목록·이번 달 캘린더는 invalidate, 목록 pages는 asc·desc 모두 reset). 로그인 정보가 없으면 건너뛴다
+- C·D·E: 이동만 있고 값·동작 변화 없음. 문서의 slice 예시도 함께 고쳤다
+- 참고(선택): B에서 `[...diaryKeys.all, userId, 'recent']`처럼 키 앞부분을 직접 만들었다. 다음에 diary 쪽을 손볼 때 `diaryKeys`에 `recentAll(userId)`, `pagesAll(userId)` 같은 함수를 두면 키 구조가 바뀌어도 한 곳만 고치면 된다
+- 남은 확인: 실기기에서 일기 생성 뒤 홈·목록·캘린더에 새 일기가 보이는지
