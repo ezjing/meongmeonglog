@@ -61,7 +61,8 @@ export function updateActiveWalkState(
     const state = await loadPersistedWalkState();
     if (!state?.activeWalk) return null;
     const next = updater(state);
-    await savePersistedWalkState(next);
+    // 바뀐 것이 없으면(같은 객체) 쓰지 않는다
+    if (next !== state) await savePersistedWalkState(next);
     return next;
   });
 }

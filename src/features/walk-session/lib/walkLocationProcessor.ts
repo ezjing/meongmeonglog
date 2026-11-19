@@ -15,6 +15,13 @@ const MAX_ACCURACY_M = 30;
 const MAX_SPEED_MPS = 25_000 / 3600;
 /** 이보다 작은 이동은 제자리 흔들림으로 보고 거리에 더하지 않는다 */
 const MIN_DISTANCE_DELTA_M = 2;
+/**
+ * 좌표를 받을 때마다 보내면 통신 모듈이 쉬지 못해 배터리를 많이 쓴다.
+ * 이만큼 모이거나 가장 오래된 좌표가 이 시간을 넘으면 한 번에 보낸다.
+ * (앱으로 돌아올 때·산책 종료 때는 따로 바로 보낸다. 대기 좌표는 기기에 저장돼 있어 잃지 않는다)
+ */
+const FLUSH_BATCH_SIZE = 12;
+const FLUSH_MAX_AGE_MS = 60_000;
 
 interface AcceptedPoint {
   latitude: number;
@@ -62,8 +69,10 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
           }
         : null;
 
+    let accepted = 0;
     for (const location of locations) {
       if (!isAcceptableLocation(location, walkStartedAtMs, last)) continue;
+      accepted += 1;
 
       const { latitude, longitude } = location.coords;
       // 기준점이 없는데 경로가 이미 있으면 기록이 끊겼던 뒤다 → 앞 구간과 잇지 않는다
@@ -83,6 +92,9 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
       last = { latitude, longitude, timestamp: location.timestamp };
     }
 
+    // 채택한 좌표가 없으면 저장하지 않는다
+    if (accepted === 0) return current;
+
     return {
       ...current,
       distanceMeter,
@@ -94,7 +106,12 @@ export async function processWalkLocations(locations: LocationObject[]): Promise
     };
   });
 
-  if (updated) await flushAllPendingDbLocations();
+  if (!updated) return;
+  const pending = updated.pendingDbLocations;
+  if (pending.length === 0) return;
+  const oldest = pending[0].recordedAt;
+  const isOld = oldest == null || Date.now() - oldest >= FLUSH_MAX_AGE_MS;
+  if (pending.length >= FLUSH_BATCH_SIZE || isOld) await flushAllPendingDbLocations();
 }
 
 let flushChain: Promise<unknown> = Promise.resolve();
