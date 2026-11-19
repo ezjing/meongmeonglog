@@ -9,9 +9,9 @@ interface WalkMapProps {
   routePath: WalkCoord[];
 }
 
-/** 서울시청 기준 */
 const ROUTE_STROKE_WIDTH = 3;
 
+/** 서울시청 기준 */
 const DEFAULT_REGION = {
   latitude: 37.566535,
   longitude: 126.977969,

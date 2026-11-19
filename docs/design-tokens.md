@@ -9,7 +9,7 @@
   ↓
 2단계 의미 (Semantic)      용도에 따른 이름. 화면은 여기만 사용  예) primary, fgMuted, border
   ↓
-3단계 컴포넌트 (Component)  특정 컴포넌트 전용 이름 — 현재 없음   예) buttonPrimaryBg
+3단계 컴포넌트 (Component)  특정 컴포넌트 전용 이름            예) buttonTokens (버튼 variant별 색)
 ```
 
 | 파일 | 내용 |
@@ -17,7 +17,7 @@
 | `tokens/palette.json` | 1단계 색 원본 (app.config.ts에서도 읽어서 JSON) |
 | `tokens/primitive.ts` | 1단계: 브랜드 선택 블록(`brand`, `neutral`), 모서리 단계(`radiusScale`) |
 | `tokens/semantic.ts` | 2단계: 색(Light/Dark), 모서리, 그림자, 고정 크기 |
-| `tokens/component.ts` | 3단계: 현재 비어 있음. 추가 규칙은 파일 주석 참고 |
+| `tokens/component.ts` | 3단계: 버튼 토큰(`buttonTokens`). 추가 규칙은 파일 주석 참고 |
 | `theme.ts` | 화면 코드 입구. 2단계 토큰 + 간격·글자 크기 등 기본 스케일 |
 
 ## 사용 규칙

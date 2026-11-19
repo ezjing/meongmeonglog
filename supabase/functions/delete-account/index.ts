@@ -3,6 +3,7 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { serveJson } from '../_shared/http.ts';
 import { createAdminClient, getRequestUserId } from '../_shared/requestUser.ts';
 
+// share-cards: 예전 공유 카드 기능이 남긴 파일 정리용 (기능은 삭제됨)
 const STORAGE_BUCKETS = ['dog-profiles', 'walk-photos', 'share-cards'] as const;
 
 const LIST_PAGE_SIZE = 1000;

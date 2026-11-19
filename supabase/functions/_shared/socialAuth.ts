@@ -173,7 +173,8 @@ interface SocialAuthBody {
 
 /**
  * 소셜 로그인 함수 공통 처리.
- * 웹은 인가 코드 교환, 앱은 브라우저 로그인(sealed 코드) 또는 SDK accessToken(구버전 앱)을 보낸다.
+ * 웹은 인가 코드 교환, 앱은 카카오 SDK accessToken 또는 네이버 브라우저 로그인(sealed 코드)을 보낸다.
+ * 네이버는 SDK accessToken을 받지 않는다(auth-naver의 acceptAppAccessToken: false).
  * DEV_AUTH 환경에서는 토큰 확인 없이 개발용 프로필을 쓴다.
  */
 export function serveSocialAuth(
