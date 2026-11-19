@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchSharedDiary, shareLinkKeys } from '../api/shareLinkApi';
+import { fetchSharedDiary, shareLinkKeys } from './shareLinkApi';
 
 export function useSharedDiary(token: string) {
   return useQuery({

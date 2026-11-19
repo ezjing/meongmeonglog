@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 
-import type { WalkPhoto, WalkSession } from './types';
+import type { WalkPhoto, WalkSession, WalkWeatherPayload } from './types';
 import type { PersistedWalkState, WalkCoord } from './walkSessionStorage';
-import type { WalkWeatherPayload } from '../api/walkApi';
 
 interface WalkStore {
   activeWalk: WalkSession | null;

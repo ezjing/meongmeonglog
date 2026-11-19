@@ -1,5 +1,5 @@
-import type { WalkWeatherPayload } from './walkApi';
 import { weatherCodeToDisplay } from '../lib/weatherCode';
+import type { WalkWeatherPayload } from '../model/types';
 
 interface WeatherInfo {
   condition: string;

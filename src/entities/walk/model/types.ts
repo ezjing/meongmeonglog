@@ -25,3 +25,9 @@ export interface WalkPhoto {
   imageUrl: string;
   sortOrder: number;
 }
+
+export interface WalkWeatherPayload {
+  weatherCondition: string;
+  weatherTemp: number;
+  weatherIcon: string;
+}

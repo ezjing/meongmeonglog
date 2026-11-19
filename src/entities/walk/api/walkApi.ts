@@ -4,16 +4,10 @@ import { supabase, isSupabaseConfigured } from '@/shared/api/supabase';
 import { AppError } from '@/shared/lib/AppError';
 
 import { toWalkPhoto, toWalkSession } from '../lib/walkMappers';
-import type { WalkEvent, WalkPhoto, WalkSession } from '../model/types';
+import type { WalkEvent, WalkPhoto, WalkSession, WalkWeatherPayload } from '../model/types';
 
 const mockWalks = new Map<string, WalkSession>();
 const mockPhotos = new Map<string, WalkPhoto[]>();
-
-export interface WalkWeatherPayload {
-  weatherCondition: string;
-  weatherTemp: number;
-  weatherIcon: string;
-}
 
 export async function startWalk(dogId: string): Promise<WalkSession> {
   if (!isSupabaseConfigured) {

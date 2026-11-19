@@ -1,2 +1,2 @@
-export { useDiaryShareLink } from './model/useDiaryShareLink';
-export { useSharedDiary } from './model/useSharedDiary';
+export { useDiaryShareLink } from './api/useDiaryShareLink';
+export { useSharedDiary } from './api/useSharedDiary';

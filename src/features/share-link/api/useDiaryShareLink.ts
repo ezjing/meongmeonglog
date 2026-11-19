@@ -6,7 +6,7 @@ import {
   fetchDiaryShareStatus,
   shareLinkKeys,
   stopDiaryShareLink,
-} from '../api/shareLinkApi';
+} from './shareLinkApi';
 import { copyDiaryUrlWhenReady, presentDiaryShare, shareDiaryUrl } from '../lib/shareDiaryUrl';
 
 export function useDiaryShareLink(diaryId: string) {
