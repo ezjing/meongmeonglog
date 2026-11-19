@@ -1,4 +1,3 @@
-import { SymbolView } from 'expo-symbols';
 import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 import {
@@ -13,6 +12,7 @@ import {
 } from '@/shared/config/theme';
 
 import { IconButton } from './IconButton';
+import { ShareIcon } from './ShareIcon';
 
 interface StackAppBarProps {
   title: string;
@@ -41,11 +41,7 @@ export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAp
           onPress={onSharePress}
           accessibilityLabel="공유"
         >
-          <SymbolView
-            name={{ ios: 'square.and.arrow.up', android: 'share', web: 'share' }}
-            size={iconSize.sm}
-            tintColor={colors.fg}
-          />
+          <ShareIcon size={iconSize.sm} color={colors.fg} />
         </IconButton>
       ) : (
         <View style={[styles.sidePlaceholder, styles.rightAction]} />
