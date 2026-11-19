@@ -1,16 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import * as Sharing from 'expo-sharing';
-import type { ComponentRef } from 'react';
-import { useRef } from 'react';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import ViewShot from 'react-native-view-shot';
 
 import { useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
 import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
-import { useOverlay } from '@/shared/ui/overlay/index';
 
+import { CardCapture, ImageShareButtons, useImageShare } from './ImageShare';
 import { ShareCardPreview } from './ShareCardPreview';
 import { ShareLinkActions } from './ShareLinkActions';
 
@@ -18,29 +14,10 @@ export function ShareScreen() {
   const { diaryId } = useLocalSearchParams<{ diaryId: string }>();
   const { data: diary } = useDiary(diaryId ?? '');
   const dogName = useDiaryDogName(diary?.dogName);
-  const { showToast } = useOverlay();
-  const viewShotRef = useRef<ComponentRef<typeof ViewShot>>(null);
+  const { captureRef, shareImage } = useImageShare();
   const photos = diary?.photos ?? [];
   const { width } = useWindowDimensions();
   const cardWidth = width - spacing.md * 2;
-
-  const handleSaveAndShare = async () => {
-    try {
-      if (viewShotRef.current?.capture) {
-        const uri = await viewShotRef.current.capture();
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(uri);
-        } else {
-          showToast({
-            message: '이 기기에서는 공유 기능을 사용할 수 없어요',
-            variant: 'warning',
-          });
-        }
-      }
-    } catch {
-      showToast({ message: '이미지 저장에 실패했어요', variant: 'error' });
-    }
-  };
 
   if (!diary) {
     return (
@@ -54,7 +31,7 @@ export function ShareScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>공유 카드 미리보기</Text>
 
-      <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
+      <CardCapture captureRef={captureRef}>
         <ShareCardPreview
           dogName={dogName}
           createdAt={diary.createdAt}
@@ -63,28 +40,11 @@ export function ShareScreen() {
           photos={photos}
           width={cardWidth}
         />
-      </ViewShot>
+      </CardCapture>
 
       <Text style={styles.sectionLabel}>공유하기</Text>
       <ShareLinkActions diaryId={diary.diaryId} />
-      <Button
-        label="💬  카카오톡 공유"
-        variant="kakao"
-        onPress={handleSaveAndShare}
-        style={styles.shareBtn}
-      />
-      <Button
-        label="📷  인스타그램 공유"
-        variant="instagram"
-        onPress={handleSaveAndShare}
-        style={styles.instaBtn}
-      />
-      <Button
-        label="⬇️  이미지 저장 후 공유"
-        variant="secondary"
-        onPress={handleSaveAndShare}
-        style={styles.shareBtn}
-      />
+      <ImageShareButtons onShare={shareImage} />
 
       <Button
         label="완료"
@@ -113,7 +73,5 @@ const styles = StyleSheet.create({
     color: colors.fgMuted,
     marginBottom: spacing.sm,
   },
-  shareBtn: { marginBottom: spacing.sm },
-  instaBtn: { marginBottom: spacing.sm },
   done: { marginTop: spacing.sm },
 });
