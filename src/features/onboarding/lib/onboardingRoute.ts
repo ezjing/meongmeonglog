@@ -16,12 +16,16 @@ export async function resolveDogOnboardingRoute(userId: string): Promise<Href> {
 }
 
 export async function resolveOnboardingRoute(userId: string): Promise<Href> {
-  const profile = await queryClient.fetchQuery({
-    queryKey: guardianKeys.profile(userId),
-    queryFn: () => fetchGuardianProfile(userId),
-  });
+  // 대부분은 온보딩을 마친 사용자라 강아지 조회를 함께 시작한다 (순서대로 기다리지 않음)
+  const [profile, dogRoute] = await Promise.all([
+    queryClient.fetchQuery({
+      queryKey: guardianKeys.profile(userId),
+      queryFn: () => fetchGuardianProfile(userId),
+    }),
+    resolveDogOnboardingRoute(userId),
+  ]);
   if (!isGuardianProfileComplete(profile)) {
     return '/(onboarding)/guardianBasic';
   }
-  return resolveDogOnboardingRoute(userId);
+  return dogRoute;
 }
