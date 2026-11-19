@@ -68,5 +68,16 @@
 ## 구현 결과 (Cursor가 작성)
 
 - 커밋:
+  - `3ed21f4` fix: 웹 산책에서 부정확한 좌표가 정밀 좌표를 가리지 않게
+  - `57c56a2` perf: 일기 생성 후 영향 있는 조회만 다시 받는다
+  - `60514f5` refactor: 일기 생성 mutation을 diary entity로 옮긴다
+  - `19687d4` refactor: 산책 추적 상수와 지도 기본값을 한곳으로 모은다
+  - `eb00f7a` refactor: 조회 hook과 날씨 타입을 세그먼트에 맞춘다
 - 지시서와 달라진 점 (승인받은 것):
+  - B 목록(pages)은 `resetQueries`로 진행함. `refetchType`은 이미 받은 페이지를 전부 다시 요청해서, 무한 스크롤 캐시를 비운 뒤 첫 페이지만 다시 받음. 최근 일기·오늘 날짜 목록·이번 달 캘린더는 `invalidateQueries`. 상세는 건드리지 않음
+  - A는 처리기와 같이 정확도가 없거나(`null`) 30m를 넘는 좌표를 간격 기록 전에 버림. 지시서는 "30m를 넘는"만 적혀 있음. `null`을 통과시키면 처리기가 버리는 좌표가 정밀 좌표를 그대로 가려서, 처리기와 같은 조건으로 맞춤
+  - C의 `diary-generate` 이름 예시는 feature slice가 사라져 `docs/architecture.md`는 링크 공유로, `.cursor/rules/namingConventions.mdc`는 `diary-list/`로 바꿈. 화면 slice `pages/diary-generate`는 그대로
 - 확인하지 못한 것:
+  - 웹에서 실제로 걸으며 대략 좌표 뒤에 정밀 좌표가 기록되는지 (코드상 확인만)
+  - 로그인 상태에서 일기 생성 뒤 홈·목록·캘린더 요청이 각각 한 번씩인지는 실기기·계정으로 확인하지 않음
+  - `npx expo export --platform web`, `npx expo export --platform android` 번들 생성은 통과
