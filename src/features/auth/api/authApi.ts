@@ -190,6 +190,7 @@ export async function deleteAccount(): Promise<void> {
     }
   }
 
+  // 서버도 카카오 연결을 끊는다. 앱 SDK 호출은 배포 전 서버를 대비해 그대로 둔다.
   // 네이버는 앱에 토큰을 두지 않아 연동 해제를 하지 않는다 (사용자가 네이버 설정에서 해제)
   if (storedAuth?.provider === 'kakao') {
     await unlinkKakaoAccount();

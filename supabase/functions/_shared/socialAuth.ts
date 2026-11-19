@@ -19,9 +19,22 @@ export interface SocialProfile {
   profileImage: string | null;
 }
 
+const AUTH_EMAIL_DOMAIN = 'meongmeonglog.dev';
+
 /** 소셜 고유 ID 기반 Supabase Auth 이메일 (provider 간 계정이 합쳐지지 않도록) */
 function toAuthEmail(provider: SocialProvider, providerUserId: string) {
-  return `${provider}-${providerUserId}@meongmeonglog.dev`.toLowerCase();
+  return `${provider}-${providerUserId}@${AUTH_EMAIL_DOMAIN}`.toLowerCase();
+}
+
+/** 카카오 로그인 Auth 이메일이면 회원번호. 네이버 등 다른 형식이면 null */
+export function kakaoUserIdFromAuthEmail(email: string | null | undefined): string | null {
+  if (!email) return null;
+  const normalized = email.toLowerCase();
+  const prefix = 'kakao-';
+  const suffix = `@${AUTH_EMAIL_DOMAIN}`;
+  if (!normalized.startsWith(prefix) || !normalized.endsWith(suffix)) return null;
+  const userId = normalized.slice(prefix.length, normalized.length - suffix.length);
+  return /^\d+$/.test(userId) ? userId : null;
 }
 
 async function findAuthUserIdByEmail(supabaseAdmin: SupabaseClient, email: string) {
