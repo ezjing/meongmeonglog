@@ -17,7 +17,8 @@ alwaysApply: true
 3. `docs/design-tokens.md` — **디자인 토큰, 버튼 역할, 토스트 종류**
 4. `docs/handoff.md` — **현재 진행 상황, 결정 사항, 다음 작업** (작업 시작 전에 읽기)
 5. `docs/web-plan.md` — 웹(iOS 사용자용 PWA) 지원 계획
-6. `HANDOFF.local.md` — git에 없는 로컬 전용 메모 (공개 저장소에 올리면 안 되는 내용). 파일이 있으면 읽는다
+6. `docs/tasks/` — **작업 지시서** (Claude가 계획, Cursor가 구현). 진행 방식은 `docs/tasks/README.md`, `taskWorkflow.mdc`
+7. `HANDOFF.local.md` — git에 없는 로컬 전용 메모 (공개 저장소에 올리면 안 되는 내용). 파일이 있으면 읽는다
 
 ## 구조 (FSD)
 

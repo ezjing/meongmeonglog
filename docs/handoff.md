@@ -2,6 +2,8 @@
 
 다른 도구(Cursor 등)에서 이어서 작업하기 위한 현재 상태 정리. 작업 규칙은 `AGENTS.md`, `docs/architecture.md`, `docs/design-tokens.md`, `.cursor/rules/`를 따른다.
 
+> **작업 방식:** Claude가 계획·검토하고 Cursor가 구현한다. 할 일은 `docs/tasks/`의 작업 지시서로 주고받는다 (`docs/tasks/README.md`).
+
 > 이 폴더는 GitHub Pages로 공개된다. 민감한 내용(키, 보안 약점)은 저장소 밖의 `HANDOFF.local.md`(gitignore)에 있다.
 
 ## 1. 지금까지 끝난 것
@@ -84,7 +86,8 @@
 ## 4. 백로그
 
 - W5 웹 배포됨. 남은 것은 실기기에서 링크 공유·받는 페이지·카톡 미리보기 확인, 앱 OTA는 별도 → W6 QA
-- 썸네일 원본 크기(46px에 원본 사용) — Supabase Pro 요금제 이미지 변환 시 처리 (보류)
+- 다음 작업과 결정 대기 항목은 `docs/tasks/README.md`에 정리돼 있다
+- 썸네일 원본 크기(46px에 원본 사용) — 방식 결정 대기 (`docs/tasks/README.md`)
 - 이용약관 초안 법률 검토 (사용자)
 - 1.0.0 사용자는 OTA를 못 받음 → 스토어에서 1.1.0 업데이트 필요
 
