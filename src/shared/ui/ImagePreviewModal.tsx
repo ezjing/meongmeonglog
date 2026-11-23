@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -25,6 +25,8 @@ import { ZoomableImage } from './ZoomableImage';
 
 const NAV_BUTTON_WIDTH = 40;
 const NAV_BUTTON_HEIGHT = 48;
+/** 화살표로 넘긴 뒤 그 장에 도착하지 않으면 목표 번호를 지운다 */
+const ARROW_NAV_TIMEOUT_MS = 600;
 
 interface ImagePreviewModalProps {
   visible: boolean;
@@ -51,14 +53,33 @@ export function ImagePreviewModal({
   const [currentIndex, setCurrentIndex] = useState(resolvedIndex);
   const [prevVisible, setPrevVisible] = useState(visible);
   const [zoomed, setZoomed] = useState(false);
+  const [arrowTarget, setArrowTarget] = useState<number | null>(null);
+  const arrowTargetRef = useRef<number | null>(null);
+  const arrowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+  const shownIndex = arrowTarget ?? currentIndex;
 
   // 열릴 때마다 누른 사진부터, 원래 크기로 보여준다
   if (visible !== prevVisible) {
     setPrevVisible(visible);
     setZoomed(false);
+    setArrowTarget(null);
     if (visible) setCurrentIndex(resolvedIndex);
   }
+
+  useLayoutEffect(() => {
+    arrowTargetRef.current = null;
+    if (arrowTimerRef.current) {
+      clearTimeout(arrowTimerRef.current);
+      arrowTimerRef.current = null;
+    }
+    return () => {
+      if (arrowTimerRef.current) {
+        clearTimeout(arrowTimerRef.current);
+        arrowTimerRef.current = null;
+      }
+    };
+  }, [visible]);
 
   useEffect(() => {
     if (!visible || !hasMultiple) return;
@@ -70,13 +91,31 @@ export function ImagePreviewModal({
 
   const goToIndex = (index: number) => {
     const nextIndex = Math.min(Math.max(index, 0), uris.length - 1);
+    arrowTargetRef.current = nextIndex;
+    setArrowTarget(nextIndex);
     setCurrentIndex(nextIndex);
     setZoomed(false);
     scrollRef.current?.scrollTo({ x: nextIndex * width, animated: true });
+    if (arrowTimerRef.current) clearTimeout(arrowTimerRef.current);
+    arrowTimerRef.current = setTimeout(() => {
+      arrowTimerRef.current = null;
+      if (arrowTargetRef.current !== nextIndex) return;
+      arrowTargetRef.current = null;
+      setArrowTarget(null);
+    }, ARROW_NAV_TIMEOUT_MS);
   };
 
   const handleScroll = (offsetX: number) => {
     const nextIndex = pageIndexFromOffset(offsetX, width, uris.length);
+    if (arrowTargetRef.current !== null) {
+      if (nextIndex !== arrowTargetRef.current) return;
+      if (arrowTimerRef.current) {
+        clearTimeout(arrowTimerRef.current);
+        arrowTimerRef.current = null;
+      }
+      arrowTargetRef.current = null;
+      setArrowTarget(null);
+    }
     setCurrentIndex((current) => (current === nextIndex ? current : nextIndex));
   };
 
@@ -117,25 +156,25 @@ export function ImagePreviewModal({
 
                 <Pressable
                   style={[styles.navBtn, styles.navPrev]}
-                  onPress={() => goToIndex(currentIndex - 1)}
-                  disabled={currentIndex === 0}
+                  onPress={() => goToIndex((arrowTargetRef.current ?? currentIndex) - 1)}
+                  disabled={shownIndex === 0}
                   accessibilityLabel="이전 사진"
                 >
-                  <Text style={[styles.navText, currentIndex === 0 && styles.navTextDisabled]}>
+                  <Text style={[styles.navText, shownIndex === 0 && styles.navTextDisabled]}>
                     ‹
                   </Text>
                 </Pressable>
 
                 <Pressable
                   style={[styles.navBtn, styles.navNext]}
-                  onPress={() => goToIndex(currentIndex + 1)}
-                  disabled={currentIndex === uris.length - 1}
+                  onPress={() => goToIndex((arrowTargetRef.current ?? currentIndex) + 1)}
+                  disabled={shownIndex === uris.length - 1}
                   accessibilityLabel="다음 사진"
                 >
                   <Text
                     style={[
                       styles.navText,
-                      currentIndex === uris.length - 1 && styles.navTextDisabled,
+                      shownIndex === uris.length - 1 && styles.navTextDisabled,
                     ]}
                   >
                     ›
@@ -160,7 +199,7 @@ export function ImagePreviewModal({
 
         {hasMultiple ? (
           <Text style={styles.counter}>
-            {currentIndex + 1} / {uris.length}
+            {shownIndex + 1} / {uris.length}
           </Text>
         ) : null}
       </GestureHandlerRootView>
