@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { colors, spacing, radius, zIndex } from '@/shared/config/theme';
+import { pageIndexFromOffset } from '@/shared/lib/pageIndexFromOffset';
 
 import type { WalkPhoto } from '../model/types';
 
@@ -33,9 +34,15 @@ export function WalkPhotoCarousel({
           pagingEnabled
           nestedScrollEnabled
           showsHorizontalScrollIndicator={false}
+          scrollEventThrottle={16}
           style={{ width, height }}
-          onMomentumScrollEnd={(e) => {
-            setPhotoIndex(Math.round(e.nativeEvent.contentOffset.x / width));
+          onScroll={(event) => {
+            const nextIndex = pageIndexFromOffset(
+              event.nativeEvent.contentOffset.x,
+              width,
+              photos.length,
+            );
+            setPhotoIndex((current) => (current === nextIndex ? current : nextIndex));
           }}
         >
           {photos.map((photo, index) => (

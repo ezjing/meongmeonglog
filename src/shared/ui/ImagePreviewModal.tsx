@@ -19,6 +19,7 @@ import {
   fontWeight,
   opacity,
 } from '@/shared/config/theme';
+import { pageIndexFromOffset } from '@/shared/lib/pageIndexFromOffset';
 
 import { ZoomableImage } from './ZoomableImage';
 
@@ -74,6 +75,11 @@ export function ImagePreviewModal({
     scrollRef.current?.scrollTo({ x: nextIndex * width, animated: true });
   };
 
+  const handleScroll = (offsetX: number) => {
+    const nextIndex = pageIndexFromOffset(offsetX, width, uris.length);
+    setCurrentIndex((current) => (current === nextIndex ? current : nextIndex));
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       {/* Modal은 앱 루트 밖에 그려지므로 제스처용 루트를 다시 감싼다 (Android) */}
@@ -90,9 +96,10 @@ export function ImagePreviewModal({
                   pagingEnabled
                   showsHorizontalScrollIndicator={false}
                   scrollEnabled={!zoomed}
+                  scrollEventThrottle={16}
                   style={styles.carousel}
-                  onMomentumScrollEnd={(event) => {
-                    setCurrentIndex(Math.round(event.nativeEvent.contentOffset.x / width));
+                  onScroll={(event) => {
+                    handleScroll(event.nativeEvent.contentOffset.x);
                   }}
                 >
                   {uris.map((uri, index) => (
