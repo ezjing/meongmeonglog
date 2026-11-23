@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   headerMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms },
   switcher: { gap: spacing.sm },
   avatarRow: { gap: spacing.sm, paddingVertical: spacing.xxs },
-  avatarSelected: { borderWidth: borderWidth.thick, borderColor: colors.primary },
+  avatarSelected: { borderWidth: borderWidth.thick, borderColor: colors.primaryFg },
   avatarIdle: { borderWidth: borderWidth.thick, borderColor: colors.bg },
   dogName: { fontSize: fontSize.lg, fontWeight: fontWeight.extrabold, color: colors.fg },
   dogBreed: { fontSize: fontSize.sm, color: colors.fgMuted },
