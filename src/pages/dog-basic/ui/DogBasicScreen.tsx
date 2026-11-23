@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -17,10 +17,12 @@ import { ProfilePhotoPicker } from '@/shared/ui/ProfilePhotoPicker';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
 
 export function DogBasicScreen() {
-  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const { mode, dogId: dogIdParam } = useLocalSearchParams<{ mode?: string; dogId?: string }>();
+  const dogId = Array.isArray(dogIdParam) ? dogIdParam[0] : dogIdParam;
   const isEditMode = mode === 'edit';
+  const isCreateMode = mode === 'create';
   const { data: dogs, isLoading: isDogsLoading } = useDogs();
-  const dog = dogs?.[0];
+  const dog = dogs?.find((item) => item.dogId === dogId);
   const { ref: scrollRef, scrollToEnd } = useScrollToEndOnFocus();
   const {
     name,
@@ -49,6 +51,14 @@ export function DogBasicScreen() {
       reset: s.reset,
     })),
   );
+
+  const didResetRef = useRef(false);
+
+  useEffect(() => {
+    if (!isCreateMode || didResetRef.current) return;
+    didResetRef.current = true;
+    reset();
+  }, [isCreateMode, reset]);
 
   // 수정 모드를 저장 없이 나가면 입력하던 값이 store에 남으므로, 다음 진입 때 서버 값을 다시 채우도록 비운다
   useEffect(() => {
@@ -189,7 +199,7 @@ export function DogBasicScreen() {
               onPress={() =>
                 router.push({
                   pathname: '/(onboarding)/dogPersonality',
-                  params: isEditMode ? { mode: 'edit' } : undefined,
+                  params: isEditMode ? { mode: 'edit', dogId } : undefined,
                 })
               }
               style={isEditMode ? styles.singleBtn : styles.nextBtn}

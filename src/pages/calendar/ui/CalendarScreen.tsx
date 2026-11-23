@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryListCard, useCalendar, useDiariesByDate } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
+import { useSelectedDog } from '@/entities/dog';
 import { useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
@@ -23,9 +24,11 @@ export function CalendarScreen() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const confirmLogout = useConfirmLogout();
 
-  const { data: calendarDays } = useCalendar(year, month);
+  const { dog } = useSelectedDog();
+  const { data: calendarDays } = useCalendar(year, month, dog?.dogId);
   const { data: dayDiaries, isLoading: isDayDiariesLoading } = useDiariesByDate(
     selectedDate ?? undefined,
+    dog?.dogId,
   );
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
 

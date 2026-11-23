@@ -36,7 +36,7 @@ export function useStartWalkSession() {
   const startingRef = useRef(false);
   const [isStarting, setIsStarting] = useState(false);
 
-  const start = async (dogId: string): Promise<StartWalkResult> => {
+  const start = async (dogIds: string[]): Promise<StartWalkResult> => {
     if (startingRef.current) return 'busy';
 
     primeWebWalkSession();
@@ -54,7 +54,7 @@ export function useStartWalkSession() {
 
       // 날씨는 산책 화면에서 GPS로 조회해 채운다. 여기서 위치를 기다리면 GPS가 잡히지 않을 때 로딩이 끝나지 않는다
       try {
-        const walk = await startWalk.mutateAsync({ dogId });
+        const walk = await startWalk.mutateAsync({ dogIds });
         useWalkStore.getState().setActiveWalk(walk);
         return 'started';
       } catch {

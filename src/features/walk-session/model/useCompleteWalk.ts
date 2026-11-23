@@ -1,8 +1,9 @@
 import {
+  getWalkDogIds,
   loadPersistedWalkState,
+  saveWalkEvents,
   stopWalkTracking,
   useFinishWalk,
-  useSaveWalkEvent,
   useUploadWalkPhotos,
   useWalkStore,
   type WalkSession,
@@ -18,7 +19,6 @@ import { flushAllPendingDbLocations } from '../lib/walkLocationProcessor';
  */
 export function useCompleteWalk() {
   const finishWalk = useFinishWalk();
-  const saveEvent = useSaveWalkEvent();
   const uploadPhotos = useUploadWalkPhotos();
 
   const complete = async (activeWalk: WalkSession, form: FinishWalkForm): Promise<void> => {
@@ -28,7 +28,7 @@ export function useCompleteWalk() {
     const finalDistance = persisted?.distanceMeter ?? distanceMeter;
     const finalDuration = getWalkElapsedSec(frozenElapsedSec, activeWalk.startedAt);
 
-    // 산책 종료·이벤트·사진은 서로 독립이라 동시에 저장한다 (다시 시도해도 같은 결과)
+    const dogIds = getWalkDogIds(activeWalk);
     const [, , uploaded] = await Promise.all([
       finishWalk.mutateAsync({
         walkId: activeWalk.walkId,
@@ -41,15 +41,21 @@ export function useCompleteWalk() {
           weatherIcon: activeWalk.weatherIcon ?? undefined,
         },
       }),
-      saveEvent.mutateAsync({
-        walkId: activeWalk.walkId,
-        event: {
-          peeCount: form.peeSelected ? 1 : 0,
-          poopCount: form.poopSelected ? 1 : 0,
-          dogMeetingLevel: form.dogMeetingLevel,
-          memo: form.memo || null,
-        },
-      }),
+      saveWalkEvents(
+        activeWalk.walkId,
+        dogIds.map((dogId) => {
+          const entry = form.eventsByDogId[dogId];
+          return {
+            dogId,
+            event: {
+              peeCount: entry?.peeSelected ? 1 : 0,
+              poopCount: entry?.poopSelected ? 1 : 0,
+              dogMeetingLevel: entry?.dogMeetingLevel ?? 'NONE',
+              memo: form.memo || null,
+            },
+          };
+        }),
+      ),
       uploadPhotos.mutateAsync({ walkId: activeWalk.walkId, uris: form.photoUris }),
     ]);
 

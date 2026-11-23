@@ -53,26 +53,30 @@ function toListItem({ content: _content, photos: _photos, ...item }: DiaryDetail
 
 export const diaryKeys = {
   all: ['diaries'] as const,
-  list: (userId: string, date?: string) =>
-    [...diaryKeys.all, userId, 'list', date ?? 'all'] as const,
-  recent: (userId: string, limit: number) => [...diaryKeys.all, userId, 'recent', limit] as const,
-  pages: (userId: string, ascending: boolean) =>
-    [...diaryKeys.all, userId, 'pages', ascending ? 'asc' : 'desc'] as const,
+  list: (userId: string, dogId: string, date?: string) =>
+    [...diaryKeys.all, userId, 'list', dogId, date ?? 'all'] as const,
+  recent: (userId: string, dogId: string, limit: number) =>
+    [...diaryKeys.all, userId, 'recent', dogId, limit] as const,
+  pages: (userId: string, dogId: string, ascending: boolean) =>
+    [...diaryKeys.all, userId, 'pages', dogId, ascending ? 'asc' : 'desc'] as const,
   detail: (userId: string, id: string) => [...diaryKeys.all, userId, id] as const,
-  calendar: (userId: string, year: number, month: number) =>
-    [...diaryKeys.all, userId, 'calendar', year, month] as const,
+  calendar: (userId: string, dogId: string, year: number, month: number) =>
+    [...diaryKeys.all, userId, 'calendar', dogId, year, month] as const,
 };
 
 /** 특정 날짜(로컬 기준 YYYY-MM-DD)의 일기, 최신순 */
-export async function fetchDiariesByDate(date: string): Promise<DiaryListItem[]> {
+export async function fetchDiariesByDate(date: string, dogId: string): Promise<DiaryListItem[]> {
   if (!isSupabaseConfigured) {
-    return mockDiaries.filter((d) => getLocalDateKey(d.createdAt) === date).map(toListItem);
+    return mockDiaries
+      .filter((d) => d.dogId === dogId && getLocalDateKey(d.createdAt) === date)
+      .map(toListItem);
   }
 
   const { from, to } = getLocalDateRangeIso(date);
   const { data, error } = await supabase
     .from('diaries')
     .select(LIST_SELECT)
+    .eq('dog_id', dogId)
     .gte('created_at', from)
     .lt('created_at', to)
     .order('created_at', { ascending: false })
@@ -86,20 +90,27 @@ export async function fetchDiariesByDate(date: string): Promise<DiaryListItem[]>
 /** 일기 목록 한 페이지. page는 0부터 */
 export async function fetchDiaryPage(
   page: number,
-  { ascending = false, pageSize = DIARY_PAGE_SIZE } = {},
+  {
+    ascending = false,
+    pageSize = DIARY_PAGE_SIZE,
+    dogId,
+  }: { ascending?: boolean; pageSize?: number; dogId: string },
 ): Promise<DiaryListItem[]> {
   const from = page * pageSize;
 
   if (!isSupabaseConfigured) {
-    const sorted = [...mockDiaries].sort((a, b) =>
-      ascending ? a.createdAt.localeCompare(b.createdAt) : b.createdAt.localeCompare(a.createdAt),
-    );
+    const sorted = [...mockDiaries]
+      .filter((d) => d.dogId === dogId)
+      .sort((a, b) =>
+        ascending ? a.createdAt.localeCompare(b.createdAt) : b.createdAt.localeCompare(a.createdAt),
+      );
     return sorted.slice(from, from + pageSize).map(toListItem);
   }
 
   const { data, error } = await supabase
     .from('diaries')
     .select(LIST_SELECT)
+    .eq('dog_id', dogId)
     .order('created_at', { ascending })
     .order('sort_order', FIRST_PHOTO_ONLY)
     .limit(1, FIRST_PHOTO_ONLY)
@@ -152,12 +163,18 @@ function buildCalendarDays(year: number, month: number, diaryDates: Set<string>)
   });
 }
 
-export async function fetchCalendar(year: number, month: number): Promise<CalendarDay[]> {
+export async function fetchCalendar(
+  year: number,
+  month: number,
+  dogId: string,
+): Promise<CalendarDay[]> {
   if (!isSupabaseConfigured) {
     return buildCalendarDays(
       year,
       month,
-      new Set(mockDiaries.map((d) => getLocalDateKey(d.createdAt))),
+      new Set(
+        mockDiaries.filter((d) => d.dogId === dogId).map((d) => getLocalDateKey(d.createdAt)),
+      ),
     );
   }
 
@@ -167,6 +184,7 @@ export async function fetchCalendar(year: number, month: number): Promise<Calend
   const { data, error } = await supabase
     .from('diaries')
     .select('created_at')
+    .eq('dog_id', dogId)
     .gte('created_at', from)
     .lt('created_at', to);
 
@@ -179,14 +197,20 @@ export async function fetchCalendar(year: number, month: number): Promise<Calend
   );
 }
 
-export async function generateDiary(walkId: string): Promise<Diary> {
+export async function generateDiary({
+  walkId,
+  dogId,
+}: {
+  walkId: string;
+  dogId?: string;
+}): Promise<Diary> {
   if (!isSupabaseConfigured) {
     const photos = await fetchWalkPhotos(walkId);
     const walk = getMockWalk(walkId);
     const diary: DiaryDetail = {
       diaryId: `diary-${Date.now()}`,
       walkId,
-      dogId: 'mock-dog',
+      dogId: dogId ?? walk?.dogId ?? 'mock-dog',
       content:
         '오늘은 엄마랑 공원에 다녀왔어! 친구도 만나고 잔디밭도 열심히 뛰어다녔지. 간식도 먹고 냄새 탐험도 많이 해서 정말 즐거운 하루였어!',
       dailyQuote: '친구는 냄새만 맡아도 알 수 있대!',
@@ -202,7 +226,7 @@ export async function generateDiary(walkId: string): Promise<Diary> {
   }
 
   const { data, error } = await supabase.functions.invoke('diaries-generate', {
-    body: { walkId },
+    body: { walkId, dogId },
   });
 
   if (error || (data as { error?: string } | null)?.error) {
@@ -218,7 +242,7 @@ export async function generateDiary(walkId: string): Promise<Diary> {
   return {
     diaryId: result.diaryId,
     walkId,
-    dogId: '',
+    dogId: dogId ?? '',
     content: result.content,
     dailyQuote: result.dailyQuote,
     createdAt: new Date().toISOString(),

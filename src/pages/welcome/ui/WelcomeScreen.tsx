@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useShallow } from 'zustand/react/shallow';
 
-import { DogAvatar, useCreateDog, uploadDogProfileImage } from '@/entities/dog';
+import { DogAvatar, useCreateDog, useSelectedDogStore, uploadDogProfileImage } from '@/entities/dog';
 import { toDogInput, useWelcomeGreeting, useOnboardingStore } from '@/features/onboarding';
 import {
   colors,
@@ -61,7 +61,8 @@ export function WelcomeScreen() {
           profileImageUrl = await uploadDogProfileImage(userId, form.profileImageUri);
         }
 
-        await createDog.mutateAsync(toDogInput(form, profileImageUrl));
+        const created = await createDog.mutateAsync(toDogInput(form, profileImageUrl));
+        useSelectedDogStore.getState().setSelectedDogId(created.dogId);
         dogCreatedRef.current = true;
         trackEvent(AnalyticsEvents.dogRegistered);
       }

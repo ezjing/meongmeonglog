@@ -7,15 +7,23 @@ export {
 export { bindWebWalkWatch } from './lib/webWalkWatch';
 export {
   useCancelWalk,
+  useDeleteDiaryFromWalk,
   useDeleteWalk,
   useFinishWalk,
   useSaveWalkEvent,
   useStartWalk,
   useUploadWalkPhotos,
   useWalk,
+  useWalkDogIds,
   useWalkPhotosQuery,
 } from './api/useWalkMutations';
-export { saveWalkLocations, updateWalkWeather } from './api/walkApi';
+export {
+  countWalkDiaries,
+  saveWalkEvents,
+  saveWalkLocations,
+  updateWalkWeather,
+} from './api/walkApi';
+export { getWalkDogIds } from './lib/walkMappers';
 export { fetchCurrentWeather, toWalkWeatherPayload } from './api/weatherApi';
 export { formatWalkWeather } from './lib/weatherCode';
 export { splitWalkPath } from './lib/walkPathSegments';

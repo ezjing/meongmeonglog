@@ -3,17 +3,24 @@ import { uploadStorageImage } from '@/shared/api/storageUpload';
 import { supabase, isSupabaseConfigured } from '@/shared/api/supabase';
 import { AppError } from '@/shared/lib/AppError';
 
-import { toWalkPhoto, toWalkSession } from '../lib/walkMappers';
+import { getWalkDogIds, toWalkPhoto, toWalkSession } from '../lib/walkMappers';
 import type { WalkEvent, WalkPhoto, WalkSession, WalkWeatherPayload } from '../model/types';
 
 const mockWalks = new Map<string, WalkSession>();
 const mockPhotos = new Map<string, WalkPhoto[]>();
 
-export async function startWalk(dogId: string): Promise<WalkSession> {
+/** dogIds[0]이 대표 강아지. 나머지는 walk_dogs에 넣는다 (대표 행은 DB 트리거) */
+export async function startWalk(dogIds: string[]): Promise<WalkSession> {
+  const representativeId = dogIds[0];
+  if (!representativeId) {
+    throw new AppError('walk_start_failed', 'dog_required');
+  }
+
   if (!isSupabaseConfigured) {
     const walk: WalkSession = {
       walkId: `walk-${Date.now()}`,
-      dogId,
+      dogId: representativeId,
+      dogIds,
       startedAt: new Date().toISOString(),
       endedAt: null,
       durationSec: null,
@@ -29,14 +36,26 @@ export async function startWalk(dogId: string): Promise<WalkSession> {
   const { data, error } = await supabase
     .from('walks')
     .insert({
-      dog_id: dogId,
+      dog_id: representativeId,
       started_at: new Date().toISOString(),
     })
     .select()
     .single();
 
   if (error) throw new AppError('walk_start_failed', error.message);
-  return toWalkSession(data as WalkRow);
+
+  const rest = dogIds.slice(1);
+  if (rest.length > 0) {
+    const { error: linkError } = await supabase.from('walk_dogs').insert(
+      rest.map((dogId) => ({ walk_id: data.id, dog_id: dogId })),
+    );
+    if (linkError) {
+      await supabase.from('walks').delete().eq('id', data.id);
+      throw new AppError('walk_start_failed', linkError.message);
+    }
+  }
+
+  return { ...toWalkSession(data as WalkRow), dogIds };
 }
 
 export async function updateWalkWeather(
@@ -78,6 +97,38 @@ export async function cancelWalk(walkId: string): Promise<void> {
   const { error } = await supabase.from('walks').delete().eq('id', walkId);
 
   if (error) throw new AppError('walk_cancel_failed', error.message);
+}
+
+async function countDiariesForWalk(walkId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('diaries')
+    .select('id', { count: 'exact', head: true })
+    .eq('walk_id', walkId);
+  if (error) throw new AppError('walk_delete_failed', error.message);
+  return count ?? 0;
+}
+
+/** 일기 상세 삭제. 다른 강아지 일기가 남아 있으면 그 일기만, 마지막이면 산책 전체(사진 포함)를 지운다 */
+export async function deleteDiaryFromWalk(diaryId: string, walkId: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mockWalks.delete(walkId);
+    mockPhotos.delete(walkId);
+    return;
+  }
+
+  const remaining = await countDiariesForWalk(walkId);
+  if (remaining <= 1) {
+    await deleteWalk(walkId);
+    return;
+  }
+
+  const { error } = await supabase.from('diaries').delete().eq('id', diaryId);
+  if (error) throw new AppError('walk_delete_failed', error.message);
+}
+
+export async function countWalkDiaries(walkId: string): Promise<number> {
+  if (!isSupabaseConfigured) return mockWalks.has(walkId) ? 1 : 0;
+  return countDiariesForWalk(walkId);
 }
 
 /** 끝난 산책 하나를 지운다. 사진 파일을 먼저 지우고, 이어서 walks 행을 지운다 (일기·공유 링크는 cascade) */
@@ -183,18 +234,75 @@ export async function finishWalk(
   return toWalkSession(data as WalkRow);
 }
 
-export async function saveWalkEvent(walkId: string, event: WalkEvent): Promise<void> {
-  if (!isSupabaseConfigured) return;
-
-  const { error } = await supabase.from('walk_events').upsert({
+function toWalkEventRow(walkId: string, dogId: string, event: WalkEvent) {
+  return {
     walk_id: walkId,
+    dog_id: dogId,
     pee_count: event.peeCount,
     poop_count: event.poopCount,
     dog_meeting_level: event.dogMeetingLevel,
     memo: event.memo,
-  });
+  };
+}
+
+export async function saveWalkEvent(walkId: string, dogId: string, event: WalkEvent): Promise<void> {
+  if (!isSupabaseConfigured) return;
+
+  const { error } = await supabase
+    .from('walk_events')
+    .upsert(toWalkEventRow(walkId, dogId, event), { onConflict: 'walk_id,dog_id' });
 
   if (error) throw new AppError('event_save_failed', error.message);
+}
+
+/** 강아지별 배변·친구 만남. 메모는 산책당 하나라 각 행에 같은 값을 넣는다 */
+export async function saveWalkEvents(
+  walkId: string,
+  events: { dogId: string; event: WalkEvent }[],
+): Promise<void> {
+  if (!isSupabaseConfigured || events.length === 0) return;
+
+  const { error } = await supabase.from('walk_events').upsert(
+    events.map(({ dogId, event }) => toWalkEventRow(walkId, dogId, event)),
+    { onConflict: 'walk_id,dog_id' },
+  );
+
+  if (error) throw new AppError('event_save_failed', error.message);
+}
+
+/** 산책에 포함된 강아지. 대표(walks.dog_id)가 첫 번째, 나머지는 등록이 빠른 순 */
+export async function fetchWalkDogIds(walkId: string): Promise<string[]> {
+  if (!isSupabaseConfigured) {
+    const walk = mockWalks.get(walkId);
+    return walk ? getWalkDogIds(walk) : [];
+  }
+
+  const { data: walk, error } = await supabase
+    .from('walks')
+    .select('dog_id')
+    .eq('id', walkId)
+    .maybeSingle();
+  if (error) throw new AppError('fetch_walk_failed', error.message);
+  if (!walk) return [];
+
+  const { data: links, error: linkError } = await supabase
+    .from('walk_dogs')
+    .select('dog_id, dogs(created_at)')
+    .eq('walk_id', walkId);
+  if (linkError) throw new AppError('fetch_walk_failed', linkError.message);
+
+  const createdAtById = new Map<string, string>();
+  for (const link of links ?? []) {
+    const dogs = link.dogs as { created_at: string } | { created_at: string }[] | null;
+    const createdAt = Array.isArray(dogs) ? dogs[0]?.created_at : dogs?.created_at;
+    createdAtById.set(link.dog_id, createdAt ?? '');
+  }
+
+  const rest = [...createdAtById.keys()]
+    .filter((dogId) => dogId !== walk.dog_id)
+    .sort((a, b) => (createdAtById.get(a) ?? '').localeCompare(createdAtById.get(b) ?? ''));
+
+  return [walk.dog_id, ...rest];
 }
 
 export async function uploadWalkPhotos(walkId: string, uris: string[]): Promise<WalkPhoto[]> {

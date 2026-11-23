@@ -2,10 +2,16 @@ import type { WalkPhotoRow, WalkRow } from '@/shared/api/database';
 
 import type { WalkPhoto, WalkSession } from '../model/types';
 
+export function getWalkDogIds(walk: Pick<WalkSession, 'dogId' | 'dogIds'>): string[] {
+  if (walk.dogIds && walk.dogIds.length > 0) return walk.dogIds;
+  return walk.dogId ? [walk.dogId] : [];
+}
+
 export function toWalkSession(row: WalkRow): WalkSession {
   return {
     walkId: row.id,
     dogId: row.dog_id,
+    dogIds: [row.dog_id],
     startedAt: row.started_at,
     endedAt: row.ended_at,
     durationSec: row.duration_sec,

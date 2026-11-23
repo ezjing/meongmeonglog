@@ -1,10 +1,15 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { useDogDisplayName } from '@/entities/dog';
-import { formatWalkWeather, loadPersistedWalkState, useWalkStore } from '@/entities/walk';
+import { formatWalkPartyName, useDogDisplayName, useSelectedDog } from '@/entities/dog';
+import {
+  formatWalkWeather,
+  getWalkDogIds,
+  loadPersistedWalkState,
+  useWalkStore,
+} from '@/entities/walk';
 import {
   getWalkElapsedSec,
   useAbandonWalk,
@@ -46,13 +51,24 @@ export function WalkFinishScreen() {
   const activeWalk = useWalkStore((s) => s.activeWalk);
   const frozenElapsedSec = useWalkStore((s) => s.frozenElapsedSec);
   const distanceMeter = useWalkStore((s) => s.distanceMeter);
-  const { form, setPhotoUris, togglePee, togglePoop, setDogMeetingLevel, setMemo } =
+  const { form, setPhotoUris, ensureDogs, togglePee, togglePoop, setDogMeetingLevel, setMemo } =
     useFinishWalkStore();
+  const { dogs } = useSelectedDog();
+  const fallbackName = useDogDisplayName();
 
   const { complete } = useCompleteWalk();
   const { abandonWalk, isAbandoning } = useAbandonWalk();
   const { showAlert, showToast } = useOverlay();
-  const dogName = useDogDisplayName();
+  const dogIds = useMemo(() => (activeWalk ? getWalkDogIds(activeWalk) : []), [activeWalk]);
+  const walkDogs = dogIds.map((dogId) => {
+    const match = dogs?.find((item) => item.dogId === dogId);
+    return { dogId, name: match?.name?.trim() || fallbackName };
+  });
+  const sections = walkDogs.length > 0 ? walkDogs : [{ dogId: '', name: fallbackName }];
+  const isMulti = dogIds.length > 1;
+  const partyName = isMulti
+    ? formatWalkPartyName(sections[0]?.name || fallbackName, dogIds.length - 1)
+    : sections[0]?.name || fallbackName;
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -93,6 +109,10 @@ export function WalkFinishScreen() {
   useEffect(() => {
     allowLeaveRef.current = allowLeave;
   }, [allowLeave]);
+
+  useEffect(() => {
+    if (dogIds.length > 0) ensureDogs(dogIds);
+  }, [dogIds, ensureDogs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,7 +187,7 @@ export function WalkFinishScreen() {
       allowLeave();
       router.push({
         pathname: '/diary/generate',
-        params: { walkId: activeWalk.walkId },
+        params: { walkId: activeWalk.walkId, dogIds: dogIds.join(',') },
       });
     } catch {
       setIsSaving(false);
@@ -187,7 +207,7 @@ export function WalkFinishScreen() {
   return (
     <LoadingOverlayScreen
       loading={isSaving}
-      title={`${dogName}의 일기를 만들 준비 중이에요`}
+      title={`${partyName}의 일기를 만들 준비 중이에요`}
       subtitle="산책 기록 저장 · 사진 업로드 중"
     >
       <KeyboardAwareScrollView
@@ -237,23 +257,39 @@ export function WalkFinishScreen() {
           ))}
         </View>
 
-        <Text style={styles.label}>배변 활동</Text>
-        <View style={styles.row}>
-          <Chip label="소변" selected={form.peeSelected} onPress={togglePee} />
-          <Chip label="대변" selected={form.poopSelected} onPress={togglePoop} />
-        </View>
+        {sections.map((dog) => {
+          const event = form.eventsByDogId[dog.dogId];
+          return (
+            <View key={dog.dogId || 'only'}>
+              {isMulti ? <Text style={styles.dogSectionTitle}>{dog.name}</Text> : null}
+              <Text style={styles.label}>배변 활동</Text>
+              <View style={styles.row}>
+                <Chip
+                  label="소변"
+                  selected={event?.peeSelected ?? false}
+                  onPress={() => togglePee(dog.dogId)}
+                />
+                <Chip
+                  label="대변"
+                  selected={event?.poopSelected ?? false}
+                  onPress={() => togglePoop(dog.dogId)}
+                />
+              </View>
 
-        <Text style={styles.label}>친구 만남</Text>
-        <View style={styles.row}>
-          {meetingOptions.map((opt) => (
-            <Chip
-              key={opt.value}
-              label={opt.label}
-              selected={form.dogMeetingLevel === opt.value}
-              onPress={() => setDogMeetingLevel(opt.value)}
-            />
-          ))}
-        </View>
+              <Text style={styles.label}>친구 만남</Text>
+              <View style={styles.row}>
+                {meetingOptions.map((opt) => (
+                  <Chip
+                    key={opt.value}
+                    label={opt.label}
+                    selected={(event?.dogMeetingLevel ?? 'NONE') === opt.value}
+                    onPress={() => setDogMeetingLevel(dog.dogId, opt.value)}
+                  />
+                ))}
+              </View>
+            </View>
+          );
+        })}
 
         <TextInput
           style={styles.memo}
@@ -266,7 +302,7 @@ export function WalkFinishScreen() {
         />
 
         <Button
-          label={`🐾 ${dogName} 일기 쓰기`}
+          label={isMulti ? '🐾 다 같이 일기 쓰기' : `🐾 ${partyName} 일기 쓰기`}
           disabled={isSaving || isAbandoning}
           onPress={handleGenerate}
           style={styles.cta}
@@ -318,6 +354,12 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: fontWeight.bold,
     color: colors.fgMuted,
+    marginBottom: spacing.sm,
+  },
+  dogSectionTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.extrabold,
+    color: colors.fg,
     marginBottom: spacing.sm,
   },
   photoGrid: {

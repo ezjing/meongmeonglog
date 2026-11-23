@@ -31,12 +31,13 @@ const OTHER_OPTION = '기타';
 const CUSTOM_INPUT_MAX_LENGTH = 50;
 
 export function DogPersonalityScreen() {
-  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const { mode, dogId: dogIdParam } = useLocalSearchParams<{ mode?: string; dogId?: string }>();
+  const dogId = Array.isArray(dogIdParam) ? dogIdParam[0] : dogIdParam;
   const navigation = useNavigation();
   const isEditMode = mode === 'edit';
   const userId = useAuthStore((s) => s.userId);
   const { data: dogs } = useDogs();
-  const dog = dogs?.[0];
+  const dog = dogs?.find((item) => item.dogId === dogId);
   const { ref: scrollRef, scrollToEnd } = useScrollToEndOnFocus();
   const updateDog = useUpdateDog();
   const { showToast } = useOverlay();

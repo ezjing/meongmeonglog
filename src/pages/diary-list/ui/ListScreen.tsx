@@ -4,6 +4,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryListCard, useDiaryPages } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
+import { useSelectedDog } from '@/entities/dog';
 import { useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
@@ -18,9 +19,11 @@ export function ListScreen() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const confirmLogout = useConfirmLogout();
   // '날짜별'은 오래된 날짜부터 보여준다
-  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useDiaryPages({
-    ascending: sortByDate,
-  });
+  const { dog } = useSelectedDog();
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useDiaryPages(
+    dog?.dogId,
+    { ascending: sortByDate },
+  );
   const diaries = data?.pages.flat() ?? [];
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
 

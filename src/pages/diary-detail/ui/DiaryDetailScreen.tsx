@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryContentView, useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
+import { countWalkDiaries } from '@/entities/walk';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { goBackOrHome } from '@/shared/lib/navigation';
@@ -24,10 +25,23 @@ export function DiaryDetailScreen() {
   const handleDeletePress = useCallback(async () => {
     if (!diary || isDeleting) return;
 
+    let otherDiariesRemain = false;
+    try {
+      otherDiariesRemain = (await countWalkDiaries(diary.walkId)) > 1;
+    } catch {
+      showToast({
+        message: '기록을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.',
+        variant: 'error',
+      });
+      return;
+    }
+
     const confirmed = await showAlert({
       icon: '🐾',
       title: '이 산책 기록을 삭제할까요?',
-      message: '일기와 사진, 공유 링크가 함께 삭제되고 되돌릴 수 없어요.',
+      message: otherDiariesRemain
+        ? `${dogName}의 일기와 공유 링크가 삭제되고 되돌릴 수 없어요. 함께 산책한 다른 강아지의 일기는 남아요.`
+        : '일기와 사진, 공유 링크가 함께 삭제되고 되돌릴 수 없어요.',
       cancelLabel: '취소',
       confirmLabel: '삭제하기',
       destructive: true,
@@ -44,7 +58,7 @@ export function DiaryDetailScreen() {
         variant: 'error',
       });
     }
-  }, [deleteDiaryRecord, diary, isDeleting, showAlert, showToast]);
+  }, [deleteDiaryRecord, diary, dogName, isDeleting, showAlert, showToast]);
 
   if (isLoading || !diary) {
     return (

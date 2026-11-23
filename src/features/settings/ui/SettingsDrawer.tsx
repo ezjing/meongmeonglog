@@ -1,10 +1,10 @@
 import { openBrowserAsync } from 'expo-web-browser';
 import { useMemo } from 'react';
 
-import { useDogs } from '@/entities/dog';
+import { MAX_DOG_COUNT, useSelectedDog } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
 import { EXTERNAL_LINKS } from '@/shared/config/links';
-import { openDogEdit, openGuardianEdit } from '@/shared/lib/navigation';
+import { openDogCreate, openDogEdit, openGuardianEdit } from '@/shared/lib/navigation';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Drawer, type DrawerItem, useOverlay } from '@/shared/ui/overlay';
 
@@ -17,10 +17,9 @@ interface SettingsDrawerProps {
 
 export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerProps) {
   const checkLocationPermission = useLocationPermissionCheck();
-  const { data: dogs } = useDogs();
+  const { dog, dogs } = useSelectedDog();
   const { data: guardianProfile } = useGuardianProfile();
   const { showToast } = useOverlay();
-  const dog = dogs?.[0];
   const guardianTitle = guardianProfile?.guardianTitle?.trim();
 
   const items = useMemo<DrawerItem[]>(
@@ -33,7 +32,24 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
       {
         icon: '🐶',
         label: '강아지 정보 관리',
-        onPress: openDogEdit,
+        onPress: () => {
+          if (dog) openDogEdit(dog.dogId);
+        },
+      },
+      {
+        icon: '➕',
+        label: '강아지 추가',
+        onPress: () => {
+          if (!dogs) return;
+          if (dogs.length >= MAX_DOG_COUNT) {
+            showToast({
+              message: '강아지는 최대 10마리까지 등록할 수 있어요',
+              variant: 'warning',
+            });
+            return;
+          }
+          openDogCreate();
+        },
       },
       {
         icon: '🔔',
@@ -80,7 +96,7 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
         onPress: onLogout,
       },
     ],
-    [checkLocationPermission, onLogout, showToast],
+    [checkLocationPermission, dog, dogs, onLogout, showToast],
   );
 
   const profileName = guardianTitle

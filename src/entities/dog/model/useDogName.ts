@@ -1,4 +1,4 @@
-import { useDogs } from '../api/dogQueries';
+import { useSelectedDog } from './useSelectedDog';
 import { DEFAULT_DOG_NAME } from '../config/dog';
 
 function resolveDogDisplayName(...candidates: (string | null | undefined)[]): string {
@@ -10,8 +10,8 @@ function resolveDogDisplayName(...candidates: (string | null | undefined)[]): st
 }
 
 function useRegisteredDogName(): string | undefined {
-  const { data: dogs } = useDogs();
-  return dogs?.[0]?.name?.trim() || undefined;
+  const { dog } = useSelectedDog();
+  return dog?.name?.trim() || undefined;
 }
 
 export function useDogDisplayName(): string {

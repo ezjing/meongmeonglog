@@ -13,8 +13,8 @@ import {
 
 import { DiaryListCard, useDiariesByDate, useRecentDiaries } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
-import { DogAvatar, useDogs } from '@/entities/dog';
-import { useWalkStore } from '@/entities/walk';
+import { DogAvatar, orderWalkDogs, useSelectedDog, useSelectedDogStore } from '@/entities/dog';
+import { getWalkDogIds, useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
 import { resumeWalkSession, useStartWalkSession } from '@/features/walk-session';
@@ -27,6 +27,7 @@ import {
   opacity,
   shadows,
   scale,
+  borderWidth,
 } from '@/shared/config/theme';
 import { formatDistance, calculateAge } from '@/shared/lib/formatDistance';
 import { getLocalDateKey } from '@/shared/lib/localDate';
@@ -35,6 +36,8 @@ import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';
 import { LoadingOverlay } from '@/shared/ui/LoadingOverlay';
 import { useOverlay } from '@/shared/ui/overlay';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
+
+import { WalkDogPickerSheet } from './WalkDogPickerSheet';
 
 const WALK_CTA_SIZE = 118;
 const EXIT_CONFIRM_WINDOW_MS = 2000;
@@ -75,14 +78,16 @@ function getTodayWalkStatus(
 }
 
 export function HomeScreen() {
-  const { data: dogs } = useDogs();
+  const { dog, dogs = [], hydrated } = useSelectedDog();
   const todayKey = getLocalDateKey();
-  const { data: todayDiaries = [] } = useDiariesByDate(todayKey);
-  const { data: recentDiaries = [] } = useRecentDiaries(RECENT_DIARY_COUNT);
+  const { data: todayDiaries = [] } = useDiariesByDate(todayKey, dog?.dogId);
+  const { data: recentDiaries = [] } = useRecentDiaries(RECENT_DIARY_COUNT, dog?.dogId);
   const { start: startWalkSession, isStarting: isStartingWalk } = useStartWalkSession();
   const activeWalk = useWalkStore((s) => s.activeWalk);
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [checkedDogIds, setCheckedDogIds] = useState<string[]>([]);
   const confirmLogout = useConfirmLogout();
   const [profilePreviewVisible, setProfilePreviewVisible] = useState(false);
   const { showToast } = useOverlay();
@@ -108,17 +113,17 @@ export function HomeScreen() {
     }, [showToast]),
   );
 
-  const dog = dogs?.[0];
   const openDiary = useCallback(
     (diary: DiaryListItem) => router.push(`/diary/${diary.diaryId}`),
     [],
   );
-  const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries);
+  const walkForDog =
+    activeWalk && dog && getWalkDogIds(activeWalk).includes(dog.dogId) ? activeWalk : null;
+  const walkStatus = getTodayWalkStatus(walkForDog, todayDiaries);
+  const showSwitcher = dogs.length > 1;
 
-  const handleStartWalk = async () => {
-    if (!dog) return;
-
-    const result = await startWalkSession(dog.dogId);
+  const beginWalk = async (dogIds: string[]) => {
+    const result = await startWalkSession(dogIds);
     if (result === 'started') {
       router.push('/walk/active');
     } else if (result === 'permission_denied') {
@@ -136,23 +141,90 @@ export function HomeScreen() {
     }
   };
 
+  const handleStartWalk = () => {
+    if (!dog) return;
+    if (dogs.length <= 1) {
+      void beginWalk([dog.dogId]);
+      return;
+    }
+    setCheckedDogIds([dog.dogId]);
+    setPickerVisible(true);
+  };
+
+  const handleToggleDog = (dogId: string) => {
+    setCheckedDogIds((current) =>
+      current.includes(dogId) ? current.filter((id) => id !== dogId) : [...current, dogId],
+    );
+  };
+
+  const handleConfirmParty = () => {
+    if (!dog) return;
+    if (checkedDogIds.length === 0) {
+      showToast({
+        message: '함께 산책할 강아지를 골라 주세요',
+        variant: 'warning',
+      });
+      return;
+    }
+    const ordered = orderWalkDogs(
+      dogs.filter((item) => checkedDogIds.includes(item.dogId)),
+      dog.dogId,
+    ).map((item) => item.dogId);
+    setPickerVisible(false);
+    void beginWalk(ordered);
+  };
+
   return (
     <>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        {dog ? (
+        {dog && (dogs.length <= 1 || hydrated) ? (
           <TabAppBar onMenuPress={() => setDrawerVisible(true)}>
-            <View style={styles.headerMain}>
-              <Pressable onPress={() => setProfilePreviewVisible(true)}>
-                <DogAvatar imageUri={dog.profileImageUrl} />
-              </Pressable>
-              <View>
+            {showSwitcher ? (
+              <View style={styles.switcher}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.avatarRow}
+                >
+                  {dogs.map((item) => {
+                    const selected = item.dogId === dog.dogId;
+                    return (
+                      <Pressable
+                        key={item.dogId}
+                        onPress={() => useSelectedDogStore.getState().setSelectedDogId(item.dogId)}
+                        accessibilityRole="button"
+                        accessibilityLabel={item.name}
+                        accessibilityState={{ selected }}
+                      >
+                        <DogAvatar
+                          imageUri={item.profileImageUrl}
+                          style={selected ? styles.avatarSelected : styles.avatarIdle}
+                        />
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
                 <Text style={styles.dogName}>{dog.name}</Text>
                 <Text style={styles.dogBreed}>
                   {dog.breed} · {calculateAge(dog.birthDate)}살
                 </Text>
               </View>
-            </View>
+            ) : (
+              <View style={styles.headerMain}>
+                <Pressable onPress={() => setProfilePreviewVisible(true)}>
+                  <DogAvatar imageUri={dog.profileImageUrl} />
+                </Pressable>
+                <View>
+                  <Text style={styles.dogName}>{dog.name}</Text>
+                  <Text style={styles.dogBreed}>
+                    {dog.breed} · {calculateAge(dog.birthDate)}살
+                  </Text>
+                </View>
+              </View>
+            )}
           </TabAppBar>
+        ) : dogs.length > 1 ? (
+          <TabAppBar onMenuPress={() => setDrawerVisible(true)} />
         ) : null}
 
         <Pressable onPress={walkStatus.onPress}>
@@ -204,6 +276,14 @@ export function HomeScreen() {
         imageUri={dog?.profileImageUrl}
         onClose={() => setProfilePreviewVisible(false)}
       />
+      <WalkDogPickerSheet
+        visible={pickerVisible}
+        dogs={dogs}
+        checkedDogIds={checkedDogIds}
+        onToggle={handleToggleDog}
+        onStart={handleConfirmParty}
+        onClose={() => setPickerVisible(false)}
+      />
       <Modal visible={isStartingWalk} transparent animationType="fade" statusBarTranslucent>
         <LoadingOverlay title="산책 준비 중이에요" subtitle="위치와 날씨를 확인하고 있어요" />
       </Modal>
@@ -215,6 +295,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   headerMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms },
+  switcher: { gap: spacing.sm },
+  avatarRow: { gap: spacing.sm, paddingVertical: spacing.xxs },
+  avatarSelected: { borderWidth: borderWidth.thick, borderColor: colors.primary },
+  avatarIdle: { borderWidth: borderWidth.thick, borderColor: colors.bg },
   dogName: { fontSize: fontSize.lg, fontWeight: fontWeight.extrabold, color: colors.fg },
   dogBreed: { fontSize: fontSize.sm, color: colors.fgMuted },
   statusCard: {

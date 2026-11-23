@@ -7,10 +7,12 @@ import {
   finishWalk,
   cancelWalk,
   deleteWalk,
+  deleteDiaryFromWalk,
   saveWalkEvent,
   uploadWalkPhotos,
   fetchWalk,
   fetchWalkPhotos,
+  fetchWalkDogIds,
 } from './walkApi';
 import type { WalkEvent } from '../model/types';
 
@@ -18,6 +20,7 @@ const walkKeys = {
   all: ['walks'] as const,
   detail: (walkId: string) => [...walkKeys.all, walkId] as const,
   photos: (walkId: string) => [...walkKeys.all, walkId, 'photos'] as const,
+  dogs: (walkId: string) => [...walkKeys.all, walkId, 'dogs'] as const,
 };
 
 export function useWalk(walkId: string | undefined) {
@@ -30,7 +33,7 @@ export function useWalk(walkId: string | undefined) {
 
 export function useStartWalk() {
   return useMutation({
-    mutationFn: ({ dogId }: { dogId: string }) => startWalk(dogId),
+    mutationFn: ({ dogIds }: { dogIds: string[] }) => startWalk(dogIds),
     onSuccess: () => trackEvent(AnalyticsEvents.walkStarted),
   });
 }
@@ -66,10 +69,23 @@ export function useDeleteWalk() {
   });
 }
 
+export function useDeleteDiaryFromWalk() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ diaryId, walkId }: { diaryId: string; walkId: string }) =>
+      deleteDiaryFromWalk(diaryId, walkId),
+    onSuccess: (_data, { walkId }) => {
+      queryClient.removeQueries({ queryKey: walkKeys.detail(walkId) });
+      queryClient.removeQueries({ queryKey: walkKeys.photos(walkId) });
+    },
+  });
+}
+
 export function useSaveWalkEvent() {
   return useMutation({
-    mutationFn: ({ walkId, event }: { walkId: string; event: WalkEvent }) =>
-      saveWalkEvent(walkId, event),
+    mutationFn: ({ walkId, dogId, event }: { walkId: string; dogId: string; event: WalkEvent }) =>
+      saveWalkEvent(walkId, dogId, event),
   });
 }
 
@@ -77,6 +93,14 @@ export function useUploadWalkPhotos() {
   return useMutation({
     mutationFn: ({ walkId, uris }: { walkId: string; uris: string[] }) =>
       uploadWalkPhotos(walkId, uris),
+  });
+}
+
+export function useWalkDogIds(walkId: string | undefined) {
+  return useQuery({
+    queryKey: walkKeys.dogs(walkId ?? ''),
+    queryFn: () => fetchWalkDogIds(walkId!),
+    enabled: !!walkId,
   });
 }
 

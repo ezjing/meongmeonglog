@@ -2,7 +2,10 @@ import type { DogMeetingLevel } from '@/shared/api/database';
 
 export interface WalkSession {
   walkId: string;
+  /** 산책을 시작한 대표 강아지 (walks.dog_id) */
   dogId: string;
+  /** 함께 산책한 강아지. 첫 번째가 대표. 이전 저장분에는 없을 수 있다 */
+  dogIds?: string[];
   startedAt: string;
   endedAt: string | null;
   durationSec: number | null;

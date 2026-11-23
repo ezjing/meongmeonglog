@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 
-import { useDogs } from '@/entities/dog';
+import { useSelectedDog } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
 import { PROVIDER_LABEL, useAccountEmail, useAuthSession, useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
@@ -19,11 +19,10 @@ export function SettingsScreen() {
   const confirmLogout = useConfirmLogout();
   const checkLocationPermission = useLocationPermissionCheck();
   const { data: accountEmail } = useAccountEmail();
-  const { data: dogs } = useDogs();
+  const { dog } = useSelectedDog();
   const { showAlert, showToast } = useOverlay();
   const { data: guardianProfile } = useGuardianProfile();
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const dog = dogs?.[0];
   const guardianTitle = guardianProfile?.guardianTitle?.trim();
 
   const handleDeleteAccount = async () => {
@@ -84,7 +83,7 @@ export function SettingsScreen() {
               <Button
                 label="강아지 정보 수정"
                 variant="secondary"
-                onPress={openDogEdit}
+                onPress={() => openDogEdit(dog.dogId)}
                 style={styles.btn}
               />
             </>
