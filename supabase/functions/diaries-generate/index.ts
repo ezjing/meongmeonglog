@@ -10,26 +10,48 @@ import {
 } from "../_shared/speechStyle.ts";
 
 serveJson(async (req) => {
-  const { walkId } = await req.json();
+  const body = await req.json();
+  const walkId = body.walkId as string | undefined;
+  // dogId가 없으면 대표 강아지(walks.dog_id). 옛 앱은 walkId만 보낸다.
+  const requestedDogId =
+    typeof body.dogId === "string" && body.dogId.length > 0 ? (body.dogId as string) : undefined;
+  if (!walkId) throw new Error("Walk not found");
+
   const supabase = createAdminClient();
   const userId = await getRequestUserId(req, supabase);
 
-  // 산책·기존 일기·보호자 정보는 서로 의존하지 않으므로 함께 조회한다 (보호자 = 요청한 사용자)
-  const [walkResult, existingDiaryResult, guardianResult] = await Promise.all([
+  const { data: walk, error: walkError } = await supabase
+    .from("walks")
+    .select(
+      "dog_id, duration_sec, distance_meter, weather_condition, weather_temp, walk_photos(image_url, sort_order)",
+    )
+    .eq("id", walkId)
+    .single();
+
+  if (walkError || !walk) throw new Error("Walk not found");
+
+  const dogId = requestedDogId ?? walk.dog_id;
+
+  const [linkResult, dogResult, existingDiaryResult, eventResult, guardianResult] = await Promise.all([
+    supabase.from("walk_dogs").select("dog_id").eq("walk_id", walkId).eq("dog_id", dogId).maybeSingle(),
     supabase
-      .from("walks")
+      .from("dogs")
       .select(
-        "duration_sec, distance_meter, weather_condition, weather_temp, " +
-          "dogs(id, user_id, name, breed, personality, custom_personality, speech_style, custom_speech_style), " +
-          "walk_events(pee_count, poop_count, dog_meeting_level, memo), " +
-          "walk_photos(image_url, sort_order)",
+        "id, user_id, name, breed, personality, custom_personality, speech_style, custom_speech_style",
       )
-      .eq("id", walkId)
-      .single(),
+      .eq("id", dogId)
+      .maybeSingle(),
     supabase
       .from("diaries")
       .select("id, diary_content, daily_quote, ai_model")
       .eq("walk_id", walkId)
+      .eq("dog_id", dogId)
+      .maybeSingle(),
+    supabase
+      .from("walk_events")
+      .select("pee_count, poop_count, dog_meeting_level, memo")
+      .eq("walk_id", walkId)
+      .eq("dog_id", dogId)
       .maybeSingle(),
     supabase
       .from("users")
@@ -38,15 +60,11 @@ serveJson(async (req) => {
       .maybeSingle(),
   ]);
 
-  const { data: walk, error: walkError } = walkResult;
-  if (walkError || !walk) throw new Error("Walk not found");
+  const dog = dogResult.data;
+  // 그 산책에 포함된 강아지이고, 요청한 사람의 강아지인지 확인한다
+  if (!dog || dog.user_id !== userId || !linkResult.data) throw new Error("Walk not found");
 
-  const dog = walk.dogs;
-  if (dog?.user_id !== userId) throw new Error("Walk not found");
-
-  // 재시도 등으로 이미 생성된 일기가 있으면 새로 만들지 않고 그대로 반환
   const existingDiary = existingDiaryResult.data;
-
   if (existingDiary) {
     return {
       diaryId: existingDiary.id,
@@ -57,12 +75,10 @@ serveJson(async (req) => {
   }
 
   const guardian = guardianResult.data;
-  const event = walk.walk_events?.[0] ?? walk.walk_events;
-  // 대표 사진은 첫 번째(sort_order가 가장 작은) 사진
+  const event = eventResult.data;
   const photos = [...(walk.walk_photos ?? [])].sort(
     (a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order,
   );
-
   const guardianTitle = guardian?.guardian_title?.trim() || "보호자";
 
   const { text: content, model } = await generateGroqContent({
