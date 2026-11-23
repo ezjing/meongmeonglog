@@ -137,11 +137,11 @@ function GuardianBasicForm({ isEditMode, initialProfile }: GuardianBasicFormProp
           {!isEditMode ? (
             <>
               <Text style={styles.title}>먼저, 보호자님을 알려주세요</Text>
-              <Text style={styles.subtitle}>AI 일기에서 보호자님을 부르는 호칭이에요</Text>
+              <Text style={styles.subtitle}>강아지가 일기에서 보호자님을 부르는 호칭이에요</Text>
             </>
           ) : (
             <Text style={styles.editSubtitle}>
-              AI 일기에 반영되는 호칭과 양육 정보를 수정할 수 있어요
+              일기에 반영되는 호칭과 양육 정보를 수정할 수 있어요
             </Text>
           )}
 

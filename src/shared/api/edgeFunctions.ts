@@ -4,12 +4,15 @@ import {
   FunctionsRelayError,
 } from '@supabase/supabase-js';
 
+const DIARY_UNAVAILABLE_MESSAGE = '지금은 일기를 쓸 수 없어요. 잠시 후 다시 시도해 주세요.';
+
 function toUserFriendlyMessage(message: string): string {
-  if (message.includes('429') || message.toLowerCase().includes('quota')) {
-    return 'AI API 사용 한도를 초과했습니다. API 키/크레딧을 확인해주세요.';
-  }
-  if (message.includes('GROQ_API_KEY')) {
-    return 'Groq API 키가 설정되지 않았습니다. Supabase secret을 확인해주세요.';
+  if (
+    message.includes('429') ||
+    message.toLowerCase().includes('quota') ||
+    message.includes('GROQ_API_KEY')
+  ) {
+    return DIARY_UNAVAILABLE_MESSAGE;
   }
   if (message.includes('Walk not found')) {
     return '산책 기록을 찾을 수 없습니다.';

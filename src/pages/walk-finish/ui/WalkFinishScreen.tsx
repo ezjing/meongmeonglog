@@ -266,7 +266,7 @@ export function WalkFinishScreen() {
         />
 
         <Button
-          label="🐾 AI 일기 만들기"
+          label={`🐾 ${dogName} 일기 쓰기`}
           disabled={isSaving || isAbandoning}
           onPress={handleGenerate}
           style={styles.cta}

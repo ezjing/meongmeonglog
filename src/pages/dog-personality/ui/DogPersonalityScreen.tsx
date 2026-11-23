@@ -140,7 +140,7 @@ export function DogPersonalityScreen() {
         <DogAvatar imageUri={profileImageUri} size={AVATAR_SIZE} style={styles.avatar} />
 
         <Text style={styles.title}>{name || DEFAULT_DOG_NAME}는 어떤 성격인가요?</Text>
-        <Text style={styles.subtitle}>중복 선택 가능 · AI 일기 말투에 반영돼요</Text>
+        <Text style={styles.subtitle}>중복 선택 가능 · 일기 말투에 반영돼요</Text>
 
         <View style={styles.chipRow}>
           {personalityOptions.map((item) => (
