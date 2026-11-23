@@ -14,6 +14,9 @@ const MAX_IMAGE_EDGE: Record<StorageBucket, number> = {
   'dog-profiles': 512,
 };
 
+/** Groq에 보낼 산책 사진 사본의 긴 변. 원본(1600)과 같은 JPEG 품질 */
+const WALK_PHOTO_SMALL_EDGE = 768;
+
 function getImageSize(uri: string): Promise<{ width: number; height: number } | null> {
   return new Promise((resolve) => {
     Image.getSize(
@@ -51,10 +54,11 @@ async function normalizeImageForUpload(
   };
 }
 
-export async function uploadStorageImage(
+async function uploadNormalizedImage(
   bucket: StorageBucket,
   path: string,
   uri: string,
+  maxEdge: number,
 ): Promise<string> {
   if (!isSupabaseConfigured) {
     return uri;
@@ -70,7 +74,7 @@ export async function uploadStorageImage(
     throw new AppError('storage_user_mismatch', '로그인 사용자와 업로드 경로가 일치하지 않습니다.');
   }
 
-  const normalized = await normalizeImageForUpload(uri, MAX_IMAGE_EDGE[bucket]);
+  const normalized = await normalizeImageForUpload(uri, maxEdge);
   const bytes = await readStorageImageBytes(normalized.uri);
 
   const { error: uploadError } = await supabase.storage
@@ -83,4 +87,17 @@ export async function uploadStorageImage(
 
   const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
   return urlData.publicUrl;
+}
+
+export async function uploadStorageImage(
+  bucket: StorageBucket,
+  path: string,
+  uri: string,
+): Promise<string> {
+  return uploadNormalizedImage(bucket, path, uri, MAX_IMAGE_EDGE[bucket]);
+}
+
+/** 산책 사진의 Groq용 사본. 실패해도 원본 업로드는 그대로 둔다 */
+export async function uploadWalkPhotoSmallCopy(path: string, uri: string): Promise<void> {
+  await uploadNormalizedImage('walk-photos', path, uri, WALK_PHOTO_SMALL_EDGE);
 }

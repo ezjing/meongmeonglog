@@ -1,5 +1,5 @@
 import type { WalkRow } from '@/shared/api/database';
-import { uploadStorageImage } from '@/shared/api/storageUpload';
+import { uploadStorageImage, uploadWalkPhotoSmallCopy } from '@/shared/api/storageUpload';
 import { supabase, isSupabaseConfigured } from '@/shared/api/supabase';
 import { AppError } from '@/shared/lib/AppError';
 
@@ -327,9 +327,15 @@ export async function uploadWalkPhotos(walkId: string, uris: string[]): Promise<
   const { error: clearError } = await supabase.from('walk_photos').delete().eq('walk_id', walkId);
   if (clearError) throw new AppError('photo_save_failed', clearError.message);
 
-  // 파일은 동시에 올리고(최대 5장), 사진 행은 한 번에 저장한다
+  // 원본과 Groq용 사본을 같이 올린다. 사본 실패는 무시하고 원본 주소만 저장한다
   const publicUrls = await Promise.all(
-    uris.map((uri, i) => uploadStorageImage('walk-photos', `${ownerId}/${walkId}/${i}.jpg`, uri)),
+    uris.map(async (uri, i) => {
+      const [url] = await Promise.all([
+        uploadStorageImage('walk-photos', `${ownerId}/${walkId}/${i}.jpg`, uri),
+        uploadWalkPhotoSmallCopy(`${ownerId}/${walkId}/${i}_small.jpg`, uri).catch(() => undefined),
+      ]);
+      return url;
+    }),
   );
 
   const { data, error } = await supabase

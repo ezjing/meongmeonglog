@@ -93,14 +93,39 @@ function readTotalSize(response: Response): number | null {
   return null;
 }
 
-async function prepareGroqImageInput(
-  imageUrl: string,
-): Promise<{ url: string } | null> {
+/** 원본 `0.jpg`에 대응하는 Groq용 사본 주소. `.jpg`가 아니면 null */
+function smallJpegUrl(imageUrl: string): string | null {
+  const match = imageUrl.match(/^(.*?)(\.jpg)(\?.*)?$/i);
+  if (!match || match[1].endsWith("_small")) return null;
+  return `${match[1]}_small.jpg${match[3] ?? ""}`;
+}
+
+function fetchImagePrefix(imageUrl: string): Promise<Response> {
   // 형식 판별에 필요한 앞부분만 받는다 (Groq가 URL로 사진을 직접 받으므로 전체를 내려받지 않음)
-  const headResponse = await fetch(imageUrl, {
+  return fetch(imageUrl, {
     headers: { Range: "bytes=0-15" },
     signal: externalApiSignal(),
   });
+}
+
+async function prepareGroqImageInput(
+  imageUrl: string,
+): Promise<{ url: string } | null> {
+  const smallUrl = smallJpegUrl(imageUrl);
+  let resolvedUrl = imageUrl;
+  let headResponse: Response;
+  if (smallUrl) {
+    const smallResponse = await fetchImagePrefix(smallUrl);
+    if (smallResponse.ok) {
+      resolvedUrl = smallUrl;
+      headResponse = smallResponse;
+    } else {
+      if (smallResponse.body) await smallResponse.body.cancel();
+      headResponse = await fetchImagePrefix(imageUrl);
+    }
+  } else {
+    headResponse = await fetchImagePrefix(imageUrl);
+  }
   if (!headResponse.ok) {
     throw new Error("산책 사진을 불러오지 못했습니다.");
   }
@@ -108,7 +133,7 @@ async function prepareGroqImageInput(
   const headerContentType = headResponse.headers.get("content-type") ??
     "image/jpeg";
   const prefix = await headResponse.arrayBuffer();
-  const mime = detectMimeFromBuffer(prefix, headerContentType, imageUrl);
+  const mime = detectMimeFromBuffer(prefix, headerContentType, resolvedUrl);
 
   if (!isGroqCompatibleMime(mime)) {
     return null;
@@ -116,14 +141,14 @@ async function prepareGroqImageInput(
 
   const totalSize = readTotalSize(headResponse);
   if (
-    imageUrl.startsWith("https://") && totalSize != null &&
+    resolvedUrl.startsWith("https://") && totalSize != null &&
     totalSize <= 20 * 1024 * 1024
   ) {
-    return { url: imageUrl };
+    return { url: resolvedUrl };
   }
 
   // URL로 넘길 수 없으면 base64로 보낸다. 서버가 Range를 무시했으면 이미 전체를 받은 상태
-  const buffer = headResponse.status === 200 ? prefix : await (await fetch(imageUrl, {
+  const buffer = headResponse.status === 200 ? prefix : await (await fetch(resolvedUrl, {
     signal: externalApiSignal(),
   })).arrayBuffer();
 
