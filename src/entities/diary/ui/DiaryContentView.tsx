@@ -8,7 +8,9 @@ import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';
 
 import { QuoteCard } from './QuoteCard';
 
-const PHOTO_HEIGHT_RATIO = 0.3;
+/** 일기 사진 영역. 가로는 화면 너비, 세로는 4:3 */
+const PHOTO_WIDTH_UNITS = 4;
+const PHOTO_HEIGHT_UNITS = 3;
 
 interface DiaryContentViewProps {
   photos: WalkPhoto[];
@@ -31,7 +33,7 @@ export function DiaryContentView({
   quote,
   chips = [],
 }: DiaryContentViewProps) {
-  const { width, height: screenHeight } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   return (
@@ -40,7 +42,7 @@ export function DiaryContentView({
         <WalkPhotoCarousel
           photos={photos}
           width={width}
-          height={Math.round(screenHeight * PHOTO_HEIGHT_RATIO)}
+          height={Math.round((width * PHOTO_HEIGHT_UNITS) / PHOTO_WIDTH_UNITS)}
           onPhotoPress={(_, index) => setPreviewIndex(index)}
         />
       </View>
