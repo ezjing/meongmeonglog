@@ -130,7 +130,8 @@ export function ZoomableImage({
   }));
 
   return (
-    <GestureDetector gesture={gesture}>
+    // 웹 전용. 확대 전에는 가로 밀기를 브라우저 스크롤에 맡긴다.
+    <GestureDetector gesture={gesture} touchAction={panEnabled ? 'none' : 'pan-x'}>
       <Animated.View style={[{ width: size, height: size }, animatedStyle]}>
         <Image source={{ uri }} style={styles.image} contentFit="contain" />
       </Animated.View>
