@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 1 | [T05](tasks/T05-delete-walk-record.md) | 산책 기록 삭제 | 웹 + OTA |
 | 2 | [T06](tasks/T06-multi-dog.md) | 다견 지원: 강아지 추가·전환, 여러 마리 산책, 강아지별 일기 | DB + Edge Function + 웹 + OTA |
-| 3 | T08 (예정) | 가족: 집 단위 초대, 같이 간 가족, 탈퇴 시 넘기기 | DB + Edge Function + 웹 + OTA, 개인정보처리방침 개정 |
+| 3 | [T08](tasks/T08-family-household.md) + T09 (예정) | 가족: 집 단위 초대, 같이 간 가족, 탈퇴 시 넘기기 | DB + Edge Function + 웹 + OTA, 개인정보처리방침 개정 |
 
 단계마다 따로 배포한다. 앞 단계가 배포된 뒤 다음 지시서를 쓴다.
 
