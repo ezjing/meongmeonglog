@@ -14,7 +14,7 @@ import {
 import { DiaryListCard, useDiariesByDate, useRecentDiaries } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { DogAvatar, orderWalkDogs, useSelectedDog, useSelectedDogStore } from '@/entities/dog';
-import { getWalkDogIds, useWalkStore } from '@/entities/walk';
+import { useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
 import { resumeWalkSession, useStartWalkSession } from '@/features/walk-session';
@@ -117,9 +117,7 @@ export function HomeScreen() {
     (diary: DiaryListItem) => router.push(`/diary/${diary.diaryId}`),
     [],
   );
-  const walkForDog =
-    activeWalk && dog && getWalkDogIds(activeWalk).includes(dog.dogId) ? activeWalk : null;
-  const walkStatus = getTodayWalkStatus(walkForDog, todayDiaries);
+  const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries);
   const showSwitcher = dogs.length > 1;
 
   const beginWalk = async (dogIds: string[]) => {
