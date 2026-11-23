@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { useCallback } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryContentView, useDiary } from '@/entities/diary';
@@ -6,13 +7,44 @@ import { useDiaryDogName } from '@/entities/dog';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { goBackOrHome } from '@/shared/lib/navigation';
+import { Button } from '@/shared/ui/Button';
+import { useOverlay } from '@/shared/ui/overlay';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
+
+import { useDeleteDiaryRecord } from '../model/useDeleteDiaryRecord';
 
 export function DiaryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: diary, isLoading } = useDiary(id ?? '');
   const dogName = useDiaryDogName(diary?.dogName);
   const photos = diary?.photos ?? [];
+  const { showAlert, showToast } = useOverlay();
+  const { deleteDiaryRecord, isDeleting } = useDeleteDiaryRecord();
+
+  const handleDeletePress = useCallback(async () => {
+    if (!diary || isDeleting) return;
+
+    const confirmed = await showAlert({
+      icon: '🐾',
+      title: '이 산책 기록을 삭제할까요?',
+      message: '일기와 사진, 공유 링크가 함께 삭제되고 되돌릴 수 없어요.',
+      cancelLabel: '취소',
+      confirmLabel: '삭제하기',
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    try {
+      await deleteDiaryRecord(diary);
+      showToast({ message: '기록을 삭제했어요', variant: 'success' });
+      goBackOrHome();
+    } catch {
+      showToast({
+        message: '기록을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.',
+        variant: 'error',
+      });
+    }
+  }, [deleteDiaryRecord, diary, isDeleting, showAlert, showToast]);
 
   if (isLoading || !diary) {
     return (
@@ -41,6 +73,13 @@ export function DiaryDetailScreen() {
             photos.length > 0 ? `📷 ${photos.length}장` : null,
           ].filter((chip): chip is string => chip != null)}
         />
+        <Button
+          label="기록 삭제"
+          variant="danger"
+          loading={isDeleting}
+          onPress={handleDeletePress}
+          style={styles.deleteButton}
+        />
       </ScrollView>
     </View>
   );
@@ -50,6 +89,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
+  deleteButton: { marginTop: spacing.lg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loading: { color: colors.fgMuted },
 });
