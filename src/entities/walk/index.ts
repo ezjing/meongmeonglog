@@ -7,6 +7,7 @@ export {
 export { bindWebWalkWatch } from './lib/webWalkWatch';
 export {
   useCancelWalk,
+  useDeleteWalk,
   useFinishWalk,
   useSaveWalkEvent,
   useStartWalk,

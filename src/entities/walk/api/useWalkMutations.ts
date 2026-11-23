@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { AnalyticsEvents, trackEvent } from '@/shared/lib/analytics';
 
@@ -6,6 +6,7 @@ import {
   startWalk,
   finishWalk,
   cancelWalk,
+  deleteWalk,
   saveWalkEvent,
   uploadWalkPhotos,
   fetchWalk,
@@ -50,6 +51,18 @@ export function useFinishWalk() {
 export function useCancelWalk() {
   return useMutation({
     mutationFn: cancelWalk,
+  });
+}
+
+export function useDeleteWalk() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteWalk,
+    onSuccess: (_data, walkId) => {
+      queryClient.removeQueries({ queryKey: walkKeys.detail(walkId) });
+      queryClient.removeQueries({ queryKey: walkKeys.photos(walkId) });
+    },
   });
 }
 

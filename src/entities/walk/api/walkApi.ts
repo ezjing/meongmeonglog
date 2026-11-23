@@ -80,6 +80,34 @@ export async function cancelWalk(walkId: string): Promise<void> {
   if (error) throw new AppError('walk_cancel_failed', error.message);
 }
 
+/** 끝난 산책 하나를 지운다. 사진 파일을 먼저 지우고, 이어서 walks 행을 지운다 (일기·공유 링크는 cascade) */
+export async function deleteWalk(walkId: string): Promise<void> {
+  if (!isSupabaseConfigured) {
+    mockWalks.delete(walkId);
+    mockPhotos.delete(walkId);
+    return;
+  }
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const ownerId = sessionData.session?.user.id;
+  if (!ownerId) {
+    throw new AppError('storage_auth_required', '사진 업로드를 위해 로그인이 필요합니다.');
+  }
+
+  const folder = `${ownerId}/${walkId}`;
+  const { data: files, error: listError } = await supabase.storage.from('walk-photos').list(folder);
+  if (listError) throw new AppError('walk_delete_failed', listError.message);
+
+  const paths = (files ?? []).filter((file) => file.name.length > 0).map((file) => `${folder}/${file.name}`);
+  if (paths.length > 0) {
+    const { error: removeError } = await supabase.storage.from('walk-photos').remove(paths);
+    if (removeError) throw new AppError('walk_delete_failed', removeError.message);
+  }
+
+  const { error } = await supabase.from('walks').delete().eq('id', walkId);
+  if (error) throw new AppError('walk_delete_failed', error.message);
+}
+
 /** 한 번에 insert하는 좌표 수. 오프라인으로 많이 쌓였을 때 요청 하나가 너무 커지지 않게 나눈다 */
 const LOCATION_INSERT_CHUNK_SIZE = 500;
 
