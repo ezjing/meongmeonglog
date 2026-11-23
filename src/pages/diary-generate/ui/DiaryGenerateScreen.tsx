@@ -21,6 +21,10 @@ function parseDogIds(value: string | string[] | undefined): string[] {
   return raw.split(',').filter((id) => id.length > 0);
 }
 
+function diaryGenerateErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : '일기 생성에 실패했어요';
+}
+
 function useLeaveToHome(hasSavedDiary: boolean) {
   const resetForm = useFinishWalkStore((s) => s.reset);
   const { showToast } = useOverlay();
@@ -84,8 +88,7 @@ function SingleDogGenerate({ walkId, dogId }: { walkId: string; dogId?: string }
   }, [walkId, runGenerate]);
 
   if (generateDiary.isError) {
-    const message =
-      generateDiary.error instanceof Error ? generateDiary.error.message : '일기 생성에 실패했어요';
+    const message = diaryGenerateErrorMessage(generateDiary.error);
     return (
       <View style={styles.center}>
         <Text style={styles.error}>{message}</Text>
@@ -136,6 +139,7 @@ interface DogSlot {
   dogId: string;
   phase: 'waiting' | 'done' | 'error';
   diary?: Diary;
+  errorMessage?: string;
 }
 
 function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[] }) {
@@ -174,9 +178,12 @@ function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[]
           setSlots((current) =>
             current.map((slot) => (slot.dogId === dogId ? { dogId, phase: 'done', diary } : slot)),
           );
-        } catch {
+        } catch (error) {
+          const errorMessage = diaryGenerateErrorMessage(error);
           setSlots((current) =>
-            current.map((slot) => (slot.dogId === dogId ? { dogId, phase: 'error' } : slot)),
+            current.map((slot) =>
+              slot.dogId === dogId ? { dogId, phase: 'error', errorMessage } : slot,
+            ),
           );
         }
       }
@@ -194,9 +201,12 @@ function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[]
       setSlots((current) =>
         current.map((slot) => (slot.dogId === dogId ? { dogId, phase: 'done', diary } : slot)),
       );
-    } catch {
+    } catch (error) {
+      const errorMessage = diaryGenerateErrorMessage(error);
       setSlots((current) =>
-        current.map((slot) => (slot.dogId === dogId ? { dogId, phase: 'error' } : slot)),
+        current.map((slot) =>
+          slot.dogId === dogId ? { dogId, phase: 'error', errorMessage } : slot,
+        ),
       );
     } finally {
       setRetryingId(null);
@@ -230,6 +240,7 @@ function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[]
         {viewed?.phase === 'error' ? (
           <View style={styles.centerInline}>
             <Text style={styles.error}>{viewedName}의 일기를 만들지 못했어요</Text>
+            {viewed.errorMessage ? <Text style={styles.error}>{viewed.errorMessage}</Text> : null}
             <Button label="다시 시도" onPress={() => retry(viewed.dogId)} />
           </View>
         ) : (
