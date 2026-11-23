@@ -5,6 +5,11 @@ import { externalApiSignal } from "./http.ts";
 /** 사진 유무와 관계없이 같은 모델(비전 지원)을 쓴다 */
 export const GROQ_MODEL = "qwen/qwen3.8-27b";
 
+/** 429에서 이 시간 이하만 기다렸다가 같은 요청을 다시 보낸다 */
+const GROQ_RATE_LIMIT_RETRY_MAX_WAIT_SEC = 10;
+/** 429 재요청은 한 번만 */
+const GROQ_RATE_LIMIT_RETRY_LIMIT = 1;
+
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MAX_BASE64_IMAGE_BYTES = 4 * 1024 * 1024;
 const GROQ_SUPPORTED_MIMES = new Set([
@@ -155,6 +160,38 @@ function parseGroqError(errorText: string, status: number): string {
   return errorText || `Groq API error: ${status}`;
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** retry-after가 초이면 그 값. 헤더가 없을 때만 본문의 `try again in 7.5s` */
+function readGroqRetryWaitSec(response: Response, errorText: string): number | null {
+  const header = response.headers.get("retry-after")?.trim();
+  if (header) {
+    const fromHeader = Number(header);
+    if (Number.isFinite(fromHeader) && fromHeader >= 0) return fromHeader;
+  } else {
+    const match = errorText.match(/try again in\s+(\d+(?:\.\d+)?)s/i);
+    if (match) {
+      const fromMessage = Number(match[1]);
+      if (Number.isFinite(fromMessage) && fromMessage >= 0) return fromMessage;
+    }
+  }
+  return null;
+}
+
+function postGroq(apiKey: string, body: Record<string, unknown>): Promise<Response> {
+  return fetch(GROQ_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+    signal: externalApiSignal(),
+  });
+}
+
 /** qwen3 등 reasoning 모델이 content에 포함하는 추론 블록 제거 */
 export function stripModelReasoning(text: string): string {
   let result = text;
@@ -236,15 +273,18 @@ export async function generateGroqContent(options: {
     body.response_format = { type: "json_object" };
   }
 
-  const response = await fetch(GROQ_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
-    signal: externalApiSignal(),
-  });
+  let response = await postGroq(apiKey, body);
+
+  for (let retry = 0; !response.ok && retry < GROQ_RATE_LIMIT_RETRY_LIMIT; retry++) {
+    if (response.status !== 429) break;
+    const errorText = await response.text();
+    const waitSec = readGroqRetryWaitSec(response, errorText);
+    if (waitSec == null || waitSec > GROQ_RATE_LIMIT_RETRY_MAX_WAIT_SEC) {
+      throw new Error(parseGroqError(errorText, response.status));
+    }
+    await delay(waitSec * 1000);
+    response = await postGroq(apiKey, body);
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
