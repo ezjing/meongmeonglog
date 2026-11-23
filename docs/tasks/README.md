@@ -24,9 +24,9 @@
 | [T02](T02-small-cleanups.md) | 작은 정리 (웹 위치 감시, 일기 생성 새로 고침 범위, 중복 상수, slice 정리) | 완료 (배포됨) | 웹 + OTA |
 | [T03](T03-web-bundle-split-research.md) | 웹 번들 나누기 가능 여부 조사 (코드 변경 없음) | 완료 | 없음 |
 | [T04](T04-web-share-icon.md) | 웹 공유 아이콘을 SVG로 (`expo-symbols`를 웹 번들에서 제거) | 완료 (배포됨) | 웹 |
-| [T05](T05-delete-walk-record.md) | 산책 기록 삭제 (가족·다견 계획 1단계) | 완료 (커밋·배포 전) | 웹 + OTA |
+| [T05](T05-delete-walk-record.md) | 산책 기록 삭제 (가족·다견 계획 1단계) | 완료 (배포됨) | 웹 + OTA |
 | [T06](T06-multi-dog.md) | 다견 지원 (가족·다견 계획 2단계). T07 다음에 | 준비됨 | DB + Edge Function + 웹 + OTA |
-| [T07](T07-hide-ai-wording.md) | 화면에서 'AI' 단어 빼기. T06보다 먼저 | 완료 (5·6번 되돌림 커밋 전) | 웹 + OTA |
+| [T07](T07-hide-ai-wording.md) | 화면에서 'AI' 단어 빼기. T06보다 먼저 | 완료 (배포됨, 5·6번 되돌림) | 웹 + OTA |
 
 상태: `준비됨` → `진행 중` → `검토 대기` → `완료`. Cursor는 시작할 때와 끝낼 때 이 표의 상태를 바꾼다.
 
