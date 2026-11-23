@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     height: APP_BAR_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: spacing.md,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.bg,
     position: 'relative',
@@ -63,7 +64,6 @@ const styles = StyleSheet.create({
   backIcon: {
     fontSize: fontSize.display,
     lineHeight: lineHeight.lg,
-    fontWeight: fontWeight.bold,
     color: colors.fg,
     marginTop: -spacing.xxs,
   },
