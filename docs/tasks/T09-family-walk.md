@@ -155,6 +155,7 @@
 
 - 커밋:
   - `ce0305a` fix: 같이 간 가족을 다시 저장할 때 새 사람만 추가한다
+  - `e696114` docs: T09 수정 지시 1 반영 결과를 적는다
 - 반영: `saveWalkCompanions`를 `upsert(..., { onConflict: 'walk_id,user_id', ignoreDuplicates: true })`로 바꿨다. 23505 예외 처리는 지웠다. 선택을 뺀 가족은 지우지 않는다. 마이그레이션은 바꾸지 않았다
 - 지시서와 달라진 점: 없음
 - 확인한 것: 로컬 DB에서 기록한 사람 계정으로 엄마를 넣은 뒤 엄마·아빠를 다시 저장하면 두 행이고 오류가 없다. 앱과 같은 API(`ignore-duplicates`)로도 같고, 시험 데이터는 지웠다
