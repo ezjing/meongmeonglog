@@ -4,10 +4,21 @@ import { supabase, isSupabaseConfigured } from '@/shared/api/supabase';
 import { AppError } from '@/shared/lib/AppError';
 
 import { getWalkDogIds, toWalkPhoto, toWalkSession } from '../lib/walkMappers';
-import type { WalkEvent, WalkPhoto, WalkSession, WalkWeatherPayload } from '../model/types';
+import type {
+  ActiveDogWalk,
+  WalkEvent,
+  WalkPerson,
+  WalkPhoto,
+  WalkSession,
+  WalkWeatherPayload,
+} from '../model/types';
 
 const mockWalks = new Map<string, WalkSession>();
 const mockPhotos = new Map<string, WalkPhoto[]>();
+
+function isWalkInProgressError(error: { message: string; details?: string | null }): boolean {
+  return `${error.message} ${error.details ?? ''}`.includes('walk_in_progress');
+}
 
 /** dogIds[0]이 대표 강아지. 나머지는 walk_dogs에 넣는다 (대표 행은 DB 트리거) */
 export async function startWalk(dogIds: string[]): Promise<WalkSession> {
@@ -42,7 +53,12 @@ export async function startWalk(dogIds: string[]): Promise<WalkSession> {
     .select()
     .single();
 
-  if (error) throw new AppError('walk_start_failed', error.message);
+  if (error) {
+    throw new AppError(
+      isWalkInProgressError(error) ? 'walk_in_progress' : 'walk_start_failed',
+      error.message,
+    );
+  }
 
   const rest = dogIds.slice(1);
   if (rest.length > 0) {
@@ -51,7 +67,10 @@ export async function startWalk(dogIds: string[]): Promise<WalkSession> {
     );
     if (linkError) {
       await supabase.from('walks').delete().eq('id', data.id);
-      throw new AppError('walk_start_failed', linkError.message);
+      throw new AppError(
+        isWalkInProgressError(linkError) ? 'walk_in_progress' : 'walk_start_failed',
+        linkError.message,
+      );
     }
   }
 
@@ -294,6 +313,65 @@ export async function saveWalkEvent(walkId: string, dogId: string, event: WalkEv
     .upsert(toWalkEventRow(walkId, dogId, event), { onConflict: 'walk_id,dog_id' });
 
   if (error) throw new AppError('event_save_failed', error.message);
+}
+
+/** 같이 간 가족. 기록한 사람은 넣지 않는다. 없으면 아무 것도 하지 않는다. */
+export async function saveWalkCompanions(walkId: string, userIds: string[]): Promise<void> {
+  const uniqueIds = [...new Set(userIds.filter((userId) => userId.length > 0))];
+  if (!isSupabaseConfigured || uniqueIds.length === 0) return;
+
+  const { error } = await supabase.from('walk_companions').insert(
+    uniqueIds.map((userId) => ({ walk_id: walkId, user_id: userId })),
+  );
+  // 사진 업로드가 실패해 종료 저장을 다시 하면 이미 넣은 가족은 그대로 둔다
+  if (error && error.code !== '23505') throw new AppError('companion_save_failed', error.message);
+}
+
+interface WalkPersonRow {
+  userId?: string | null;
+  title?: string | null;
+  isRecorder?: boolean;
+}
+
+/** 기록한 사람(맨 앞)과 같이 간 가족의 호칭. 볼 수 없는 산책이면 빈 목록. */
+export async function fetchWalkPeople(walkId: string): Promise<WalkPerson[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase.rpc('walk_people', { walk_id: walkId });
+  if (error) throw new AppError('fetch_walk_people_failed', error.message);
+
+  const rows = (Array.isArray(data) ? data : []) as WalkPersonRow[];
+  return rows.map((row) => ({
+    userId: row.userId ?? null,
+    title: row.title ?? null,
+    isRecorder: row.isRecorder === true,
+  }));
+}
+
+interface ActiveDogWalkRow {
+  dogId?: string;
+  dogName?: string;
+  recorderTitle?: string | null;
+}
+
+/** 다른 가족이 진행 중인 산책에 들어 있는 강아지. 집 구성원인 강아지만 돌아온다. */
+export async function fetchActiveWalksForDogs(dogIds: string[]): Promise<ActiveDogWalk[]> {
+  if (!isSupabaseConfigured || dogIds.length === 0) return [];
+
+  const { data, error } = await supabase.rpc('active_walks_for_dogs', { dog_ids: dogIds });
+  if (error) throw new AppError('fetch_active_walks_failed', error.message);
+
+  const rows = (Array.isArray(data) ? data : []) as ActiveDogWalkRow[];
+  return rows.flatMap((row) => {
+    if (!row.dogId) return [];
+    return [
+      {
+        dogId: row.dogId,
+        dogName: row.dogName ?? '',
+        recorderTitle: row.recorderTitle ?? null,
+      },
+    ];
+  });
 }
 
 /** 강아지별 배변·친구 만남. 메모는 산책당 하나라 각 행에 같은 값을 넣는다 */

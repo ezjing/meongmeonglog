@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { formatWalkPartyName, useDogDisplayName, useSelectedDog } from '@/entities/dog';
+import { useHouseholds } from '@/entities/household';
 import {
   formatWalkWeather,
   getWalkDogIds,
@@ -30,6 +31,7 @@ import {
 import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { pickImageFromCamera, pickImageFromLibrary } from '@/shared/lib/pickImage';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
+import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
 import { Chip } from '@/shared/ui/Chip';
 import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';
@@ -55,6 +57,9 @@ export function WalkFinishScreen() {
     useFinishWalkStore();
   const { dogs } = useSelectedDog();
   const fallbackName = useDogDisplayName();
+  const userId = useAuthStore((s) => s.userId);
+  const { data: households } = useHouseholds();
+  const [companionIds, setCompanionIds] = useState<string[]>([]);
 
   const { complete } = useCompleteWalk();
   const { abandonWalk, isAbandoning } = useAbandonWalk();
@@ -65,6 +70,12 @@ export function WalkFinishScreen() {
     return { dogId, name: match?.name?.trim() || fallbackName };
   });
   const sections = walkDogs.length > 0 ? walkDogs : [{ dogId: '', name: fallbackName }];
+  const householdId = dogs?.find((dog) => dogIds.includes(dog.dogId))?.householdId;
+  const companionGroup = households?.find((item) => item.householdId === householdId);
+  const companionChoices =
+    companionGroup && userId
+      ? companionGroup.members.filter((member) => member.userId !== userId)
+      : [];
   const isMulti = dogIds.length > 1;
   const partyName = isMulti
     ? formatWalkPartyName(sections[0]?.name || fallbackName, dogIds.length - 1)
@@ -183,7 +194,7 @@ export function WalkFinishScreen() {
 
     setIsSaving(true);
     try {
-      await complete(activeWalk, form);
+      await complete(activeWalk, form, companionIds);
       allowLeave();
       router.push({
         pathname: '/diary/generate',
@@ -290,6 +301,28 @@ export function WalkFinishScreen() {
             </View>
           );
         })}
+
+        {companionChoices.length > 0 ? (
+          <>
+            <Text style={styles.label}>같이 간 가족</Text>
+            <View style={styles.row}>
+              {companionChoices.map((member) => (
+                <Chip
+                  key={member.userId}
+                  label={member.guardianTitle?.trim() || '보호자'}
+                  selected={companionIds.includes(member.userId)}
+                  onPress={() =>
+                    setCompanionIds((current) =>
+                      current.includes(member.userId)
+                        ? current.filter((id) => id !== member.userId)
+                        : [...current, member.userId],
+                    )
+                  }
+                />
+              ))}
+            </View>
+          </>
+        ) : null}
 
         <TextInput
           style={styles.memo}

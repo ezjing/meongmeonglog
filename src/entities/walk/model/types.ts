@@ -29,6 +29,20 @@ export interface WalkPhoto {
   sortOrder: number;
 }
 
+/** 산책에 같이 있던 사람. 기록한 사람이 탈퇴하면 userId가 비어 있다. */
+export interface WalkPerson {
+  userId: string | null;
+  title: string | null;
+  isRecorder: boolean;
+}
+
+/** 다른 가족이 진행 중인 산책에 들어 있는 강아지 */
+export interface ActiveDogWalk {
+  dogId: string;
+  dogName: string;
+  recorderTitle: string | null;
+}
+
 export interface WalkWeatherPayload {
   weatherCondition: string;
   weatherTemp: number;

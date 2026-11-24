@@ -1,6 +1,7 @@
 import {
   getWalkDogIds,
   loadPersistedWalkState,
+  saveWalkCompanions,
   saveWalkEvents,
   stopWalkTracking,
   useFinishWalk,
@@ -14,14 +15,18 @@ import { getWalkElapsedSec } from './useElapsedSec';
 import { flushAllPendingDbLocations } from '../lib/walkLocationProcessor';
 
 /**
- * 산책 종료 저장: 남은 좌표 전송 → 종료·이벤트·사진 저장(동시) → 위치 추적 중지 → 상태 초기화.
+ * 산책 종료 저장: 남은 좌표 전송 → 종료·같이 간 가족·이벤트·사진 저장(동시) → 위치 추적 중지 → 상태 초기화.
  * 화면 이동·안내는 호출한 쪽에서 한다. 실패하면 예외를 던지고 진행 중 산책은 그대로 둔다.
  */
 export function useCompleteWalk() {
   const finishWalk = useFinishWalk();
   const uploadPhotos = useUploadWalkPhotos();
 
-  const complete = async (activeWalk: WalkSession, form: FinishWalkForm): Promise<void> => {
+  const complete = async (
+    activeWalk: WalkSession,
+    form: FinishWalkForm,
+    companionUserIds: string[],
+  ): Promise<void> => {
     await flushAllPendingDbLocations();
     const { distanceMeter, frozenElapsedSec } = useWalkStore.getState();
     const persisted = await loadPersistedWalkState();
@@ -29,7 +34,7 @@ export function useCompleteWalk() {
     const finalDuration = getWalkElapsedSec(frozenElapsedSec, activeWalk.startedAt);
 
     const dogIds = getWalkDogIds(activeWalk);
-    const [, , uploaded] = await Promise.all([
+    const [, , , uploaded] = await Promise.all([
       finishWalk.mutateAsync({
         walkId: activeWalk.walkId,
         payload: {
@@ -41,6 +46,7 @@ export function useCompleteWalk() {
           weatherIcon: activeWalk.weatherIcon ?? undefined,
         },
       }),
+      saveWalkCompanions(activeWalk.walkId, companionUserIds),
       saveWalkEvents(
         activeWalk.walkId,
         dogIds.map((dogId) => {

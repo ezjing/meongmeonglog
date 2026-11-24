@@ -14,7 +14,7 @@ import {
 import { DiaryListCard, useDiariesByDate, useRecentDiaries } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { DogAvatar, orderWalkDogs, useSelectedDog, useSelectedDogStore } from '@/entities/dog';
-import { useWalkStore } from '@/entities/walk';
+import { useActiveWalksForDogs, useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
 import { resumeWalkSession, useStartWalkSession } from '@/features/walk-session';
@@ -30,6 +30,7 @@ import {
   borderWidth,
 } from '@/shared/config/theme';
 import { formatDistance, calculateAge } from '@/shared/lib/formatDistance';
+import { josa } from '@/shared/lib/josa';
 import { getLocalDateKey } from '@/shared/lib/localDate';
 import { Card } from '@/shared/ui/Card';
 import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';
@@ -46,6 +47,7 @@ const RECENT_DIARY_COUNT = 5;
 function getTodayWalkStatus(
   activeWalk: ReturnType<typeof useWalkStore.getState>['activeWalk'],
   todayDiaries: DiaryListItem[],
+  familyWalkerTitle: string | null,
 ) {
   if (activeWalk && !activeWalk.endedAt) {
     return {
@@ -56,6 +58,15 @@ function getTodayWalkStatus(
         resumeWalkSession();
         router.push('/walk/active');
       },
+    };
+  }
+
+  if (familyWalkerTitle) {
+    return {
+      title: `${familyWalkerTitle}님이 산책 중이에요`,
+      subtitle: null,
+      emoji: '🐾',
+      onPress: undefined,
     };
   }
 
@@ -84,6 +95,10 @@ export function HomeScreen() {
   const { data: recentDiaries = [] } = useRecentDiaries(RECENT_DIARY_COUNT, dog?.dogId);
   const { start: startWalkSession, isStarting: isStartingWalk } = useStartWalkSession();
   const activeWalk = useWalkStore((s) => s.activeWalk);
+  const selectedDogId = dog?.dogId;
+  const { data: activeByFamily = [], refetch: refetchActiveWalks } = useActiveWalksForDogs(
+    selectedDogId ? [selectedDogId] : [],
+  );
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -92,6 +107,14 @@ export function HomeScreen() {
   const [profilePreviewVisible, setProfilePreviewVisible] = useState(false);
   const { showToast } = useOverlay();
   const lastBackPressRef = useRef(0);
+
+  // 홈에 들어올 때마다 다른 가족의 진행 중 산책을 다시 확인한다
+  useFocusEffect(
+    useCallback(() => {
+      if (!selectedDogId) return;
+      void refetchActiveWalks();
+    }, [refetchActiveWalks, selectedDogId]),
+  );
 
   // 안드로이드: 홈에서 뒤로가기를 한 번 더 눌러야 종료
   useFocusEffect(
@@ -117,14 +140,16 @@ export function HomeScreen() {
     (diary: DiaryListItem) => router.push(`/diary/${diary.diaryId}`),
     [],
   );
-  const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries);
+  const familyWalk = activeByFamily.find((row) => row.dogId === selectedDogId);
+  const familyWalkerTitle = familyWalk ? familyWalk.recorderTitle?.trim() || '보호자' : null;
+  const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries, familyWalkerTitle);
   const showSwitcher = dogs.length > 1;
 
   const beginWalk = async (dogIds: string[]) => {
     const result = await startWalkSession(dogIds);
-    if (result === 'started') {
+    if (result.status === 'started') {
       router.push('/walk/active');
-    } else if (result === 'permission_denied') {
+    } else if (result.status === 'permission_denied') {
       showToast({
         message:
           Platform.OS === 'ios'
@@ -134,7 +159,12 @@ export function HomeScreen() {
               : '산책 기록을 위해 위치(앱 사용 중)와 알림 권한을 허용해 주세요.',
         variant: 'warning',
       });
-    } else if (result === 'failed') {
+    } else if (result.status === 'in_progress') {
+      showToast({
+        message: `${result.dogName}${josa(result.dogName, '은', '는')} 지금 ${result.guardianTitle}님과 산책 중이에요`,
+        variant: 'warning',
+      });
+    } else if (result.status === 'failed') {
       showToast({ message: '산책을 시작하지 못했어요. 다시 시도해주세요.', variant: 'error' });
     }
   };

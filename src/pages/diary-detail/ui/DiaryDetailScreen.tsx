@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { DiaryContentView, useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
 import { isHouseholdAdmin, useHouseholds } from '@/entities/household';
-import { countWalkDiaries } from '@/entities/walk';
+import { countWalkDiaries, formatWalkCompanyChip, useWalkPeople } from '@/entities/walk';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { goBackOrHome } from '@/shared/lib/navigation';
@@ -19,6 +19,7 @@ import { useDeleteDiaryRecord } from '../model/useDeleteDiaryRecord';
 export function DiaryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: diary, isLoading } = useDiary(id ?? '');
+  const { data: walkPeople = [] } = useWalkPeople(diary?.walkId);
   const userId = useAuthStore((s) => s.userId);
   const { data: households } = useHouseholds();
   const dogName = useDiaryDogName(diary?.dogName);
@@ -94,6 +95,11 @@ export function DiaryDetailScreen() {
             diary.distanceMeter ? `🚶 ${formatDistance(diary.distanceMeter)}` : null,
             diary.durationSec ? `⏱ ${formatDuration(diary.durationSec)}` : null,
             photos.length > 0 ? `📷 ${photos.length}장` : null,
+            formatWalkCompanyChip(
+              walkPeople,
+              households?.find((group) => group.householdId === diary.householdId)?.members.length ??
+                0,
+            ),
           ].filter((chip): chip is string => chip != null)}
         />
         {canDelete ? (

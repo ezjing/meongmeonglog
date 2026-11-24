@@ -1,12 +1,20 @@
 import { useRef, useState } from 'react';
 
-import { stopWalkTracking, useStartWalk, useWalkStore } from '@/entities/walk';
+import { fetchActiveWalksForDogs, stopWalkTracking, useStartWalk, useWalkStore } from '@/entities/walk';
+import { AppError } from '@/shared/lib/AppError';
 import { requestWalkLocationPermissions } from '@/shared/lib/locationPermission';
 
 import { acquireWebWalkWakeLock, releaseWebWalkWakeLock } from '../lib/webWakeLock';
 import { primeWebWalkGeolocation, releaseWebWalkGeolocation } from '../lib/webWalkGeolocation';
 
-export type StartWalkResult = 'started' | 'permission_denied' | 'failed' | 'busy';
+const FALLBACK_GUARDIAN_TITLE = '보호자';
+
+export type StartWalkResult =
+  | { status: 'started' }
+  | { status: 'permission_denied' }
+  | { status: 'failed' }
+  | { status: 'busy' }
+  | { status: 'in_progress'; dogName: string; guardianTitle: string };
 
 /**
  * 웹: 위치 권한 창·화면 꺼짐 방지는 탭 직후에만 요청할 수 있어 탭 처리 안에서 바로 켠다.
@@ -37,7 +45,7 @@ export function useStartWalkSession() {
   const [isStarting, setIsStarting] = useState(false);
 
   const start = async (dogIds: string[]): Promise<StartWalkResult> => {
-    if (startingRef.current) return 'busy';
+    if (startingRef.current) return { status: 'busy' };
 
     primeWebWalkSession();
     startingRef.current = true;
@@ -46,7 +54,7 @@ export function useStartWalkSession() {
       const granted = await requestWalkLocationPermissions();
       if (!granted) {
         releaseWebWalkSession();
-        return 'permission_denied';
+        return { status: 'permission_denied' };
       }
 
       await stopWalkTracking();
@@ -56,10 +64,27 @@ export function useStartWalkSession() {
       try {
         const walk = await startWalk.mutateAsync({ dogIds });
         useWalkStore.getState().setActiveWalk(walk);
-        return 'started';
-      } catch {
+        return { status: 'started' };
+      } catch (error) {
         releaseWebWalkSession();
-        return 'failed';
+        if (error instanceof AppError && error.code === 'walk_in_progress') {
+          try {
+            const active = await fetchActiveWalksForDogs(dogIds);
+            const blocked = dogIds
+              .map((dogId) => active.find((row) => row.dogId === dogId))
+              .find((row) => row != null);
+            if (blocked) {
+              return {
+                status: 'in_progress',
+                dogName: blocked.dogName,
+                guardianTitle: blocked.recorderTitle?.trim() || FALLBACK_GUARDIAN_TITLE,
+              };
+            }
+          } catch {
+            // 누구와 걷는지 못 읽으면 일반 실패로 안내한다
+          }
+        }
+        return { status: 'failed' };
       }
     } finally {
       startingRef.current = false;

@@ -13,6 +13,8 @@ import {
   fetchWalk,
   fetchWalkPhotos,
   fetchWalkDogIds,
+  fetchWalkPeople,
+  fetchActiveWalksForDogs,
 } from './walkApi';
 import type { WalkEvent } from '../model/types';
 
@@ -21,6 +23,8 @@ const walkKeys = {
   detail: (walkId: string) => [...walkKeys.all, walkId] as const,
   photos: (walkId: string) => [...walkKeys.all, walkId, 'photos'] as const,
   dogs: (walkId: string) => [...walkKeys.all, walkId, 'dogs'] as const,
+  people: (walkId: string) => [...walkKeys.all, walkId, 'people'] as const,
+  activeForDogs: (dogIds: string[]) => [...walkKeys.all, 'active', ...dogIds] as const,
 };
 
 export function useWalk(walkId: string | undefined) {
@@ -101,6 +105,25 @@ export function useWalkDogIds(walkId: string | undefined) {
     queryKey: walkKeys.dogs(walkId ?? ''),
     queryFn: () => fetchWalkDogIds(walkId!),
     enabled: !!walkId,
+  });
+}
+
+/** 기록한 사람·같이 간 가족. 일기 상세 칩에서 쓴다. */
+export function useWalkPeople(walkId: string | undefined) {
+  return useQuery({
+    queryKey: walkKeys.people(walkId ?? ''),
+    queryFn: () => fetchWalkPeople(walkId!),
+    enabled: !!walkId,
+  });
+}
+
+/** 다른 가족이 진행 중인 강아지. 홈에 들어올 때마다 다시 확인한다. */
+export function useActiveWalksForDogs(dogIds: string[]) {
+  return useQuery({
+    queryKey: walkKeys.activeForDogs(dogIds),
+    queryFn: () => fetchActiveWalksForDogs(dogIds),
+    enabled: dogIds.length > 0,
+    staleTime: 0,
   });
 }
 
