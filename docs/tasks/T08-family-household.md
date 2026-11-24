@@ -344,3 +344,10 @@
 - 정책 페이지는 사용자가 push해 GitHub Pages에 반영됐다
 - T09와 함께 웹 정식 주소와 Android OTA(`a4d72075-3438-4b0f-8882-3ae75e496da9`)로 배포했다. 가족 화면이 열렸다
 - 남은 것 (사용자): 두 계정으로 초대 코드 → 가족 되기 → 서로의 일기 보기, 가족이 남의 기록 못 지우기, 관리자 탈퇴 시 넘기기
+
+### 배포 후 장애 (Claude, 2026-11-25)
+
+- 증상: 010 적용(2026-11-24) 뒤 산책 시작이 모두 실패. 운영 DB에 그 뒤 산책이 0건
+- 원인: `walks_select_member`가 `walk_household_id(id)`로 산책 행을 다시 조회해, 앱의 `insert … returning`에서 방금 넣은 행이 보이지 않아 RLS 위반. 로컬 테스트는 returning 없이 넣어 놓쳤다
+- 조치: 마이그레이션 `012_fix_walks_select_returning.sql` — 행의 `dog_id`로 직접 집 구성원을 확인 (보는 범위 같음). 운영 적용 후 returning 포함 insert 성공 확인(롤백)
+- 앞으로 RLS 테스트는 앱과 같은 방식(`returning`/`.select()`)으로 한다
