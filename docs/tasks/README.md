@@ -28,7 +28,7 @@
 | [T06](T06-multi-dog.md)                 | 다견 지원 (가족·다견 계획 2단계). T07 다음에                                                       | 완료 (배포됨)                 | DB + Edge Function + 웹 + OTA               |
 | [T07](T07-hide-ai-wording.md)           | 화면에서 'AI' 단어 빼기. T06보다 먼저                                                              | 완료 (배포됨, 5·6번 되돌림)   | 웹 + OTA                                    |
 | [T08](T08-family-household.md)          | 가족: 집·초대 코드·권한·탈퇴 (가족·다견 계획 3단계 앞부분)                     | 서버 배포됨 (웹·OTA 전)       | DB + Edge Function + 정책 페이지 + 웹 + OTA |
-| [T09](T09-family-walk.md)               | 가족: 같이 산책 (동시 산책 막기, 같이 간 가족, 일기 호칭). T08 배포 후                              | 수정 지시 1 대기               | DB + Edge Function + 웹 + OTA               |
+| [T09](T09-family-walk.md)               | 가족: 같이 산책 (동시 산책 막기, 같이 간 가족, 일기 호칭). T08 배포 후                              | 검토 대기                      | DB + Edge Function + 웹 + OTA               |
 | [T10](T10-web-photo-swipe.md)           | 웹 사진 넘기기: 점 표시·카운터 멈춤, 크게 보기 스와이프 렉 (iPhone 웹 제보). T09 번호는 가족 2부용 | 완료 (배포됨)                 | 웹                                          |
 
 상태: `준비됨` → `진행 중` → `검토 대기` → `완료`. Cursor는 시작할 때와 끝낼 때 이 표의 상태를 바꾼다.

@@ -148,5 +148,14 @@
 **고칠 것:** `src/entities/walk/api/walkApi.ts`의 `saveWalkCompanions`를 `upsert(rows, { onConflict: 'walk_id,user_id', ignoreDuplicates: true })`로 바꿔 이미 있는 행은 건너뛰고 나머지만 넣는다. 23505 예외 처리는 지운다. 선택을 뺀 가족은 지우지 않는다 (G6, 삭제 정책 없음). DB 마이그레이션은 바꾸지 않는다.
 
 **완료 조건:**
-- [ ] 로컬 DB에서 엄마를 넣은 뒤 엄마·아빠로 다시 저장하면 두 행이 되고 오류가 없다 (기록한 사람 계정으로)
-- [ ] `npx tsc --noEmit`, `npm run lint` 통과
+- [x] 로컬 DB에서 엄마를 넣은 뒤 엄마·아빠로 다시 저장하면 두 행이 되고 오류가 없다 (기록한 사람 계정으로)
+- [x] `npx tsc --noEmit`, `npm run lint` 통과
+
+## 수정 지시 1 반영 (Cursor)
+
+- 커밋:
+  - `ce0305a` fix: 같이 간 가족을 다시 저장할 때 새 사람만 추가한다
+- 반영: `saveWalkCompanions`를 `upsert(..., { onConflict: 'walk_id,user_id', ignoreDuplicates: true })`로 바꿨다. 23505 예외 처리는 지웠다. 선택을 뺀 가족은 지우지 않는다. 마이그레이션은 바꾸지 않았다
+- 지시서와 달라진 점: 없음
+- 확인한 것: 로컬 DB에서 기록한 사람 계정으로 엄마를 넣은 뒤 엄마·아빠를 다시 저장하면 두 행이고 오류가 없다. 앱과 같은 API(`ignore-duplicates`)로도 같고, 시험 데이터는 지웠다
+- 확인하지 못한 것: 사진 업로드가 실패한 뒤 종료 화면에서 다시 저장하는 흐름은 눌러 보지 못했다. 배포하지 않았다
