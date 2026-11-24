@@ -37,13 +37,30 @@ export function SettingsScreen() {
   );
   const pickingHouse = pickIndex != null ? housesNeedingSuccessor[pickIndex] : null;
 
-  const confirmDelete = async (hasFamily: boolean, successors: { householdId: string; userId: string }[]) => {
+  const confirmDelete = async (
+    pickedNewAdmin: boolean,
+    successors: { householdId: string; userId: string }[],
+  ) => {
+    const groups = households ?? [];
+    const hasSharedHouse = groups.some((group) =>
+      group.members.some((member) => member.userId !== userId),
+    );
+    const hasSoloHouse = groups.some(
+      (group) =>
+        group.members.length > 0 && group.members.every((member) => member.userId === userId),
+    );
+    const message = [
+      pickedNewAdmin ? '선택한 가족이 그 집의 강아지를 맡아요.' : null,
+      hasSharedHouse ? '가족과 함께 쓰는 집에 남긴 기록은 그대로 남아요.' : null,
+      hasSoloHouse ? '혼자 쓰는 집의 강아지와 기록은 모두 삭제돼요.' : null,
+      '계정과 개인정보는 삭제되어 되돌릴 수 없어요.',
+    ]
+      .filter((part): part is string => part != null)
+      .join(' ');
     const confirmed = await showAlert({
       icon: '⚠️',
       title: '정말 탈퇴하시겠어요?',
-      message: hasFamily
-        ? '선택한 가족이 그 집의 강아지를 맡아요. 내가 남긴 산책 기록은 집에 남고, 계정과 개인정보는 삭제되어 되돌릴 수 없어요.'
-        : '반려견 정보, 산책 기록, 사진, 다이어리 등 모든 데이터가 영구적으로 삭제되며 되돌릴 수 없어요.',
+      message,
       cancelLabel: '취소',
       confirmLabel: '탈퇴하기',
       destructive: true,
@@ -278,6 +295,6 @@ const styles = StyleSheet.create({
   },
   successorName: { flex: 1, fontSize: fontSize.md, fontWeight: fontWeight.bold, color: colors.fg },
   successorOff: { width: spacing.lg, color: colors.fgMuted },
-  successorOn: { width: spacing.lg, color: colors.primary, fontSize: fontSize.lg },
+  successorOn: { width: spacing.lg, color: colors.primaryFg, fontSize: fontSize.lg },
   successorNext: { marginTop: spacing.md },
 });
