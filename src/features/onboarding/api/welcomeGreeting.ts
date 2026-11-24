@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 import { isSupabaseConfigured, supabase } from '@/shared/api/supabase';
+import { josa } from '@/shared/lib/josa';
 
 async function fetchWelcomeGreeting(
   dogName: string,
@@ -10,7 +11,7 @@ async function fetchWelcomeGreeting(
 ): Promise<string> {
   if (!isSupabaseConfigured) {
     const traits = personality.slice(0, 2).join('하고 ');
-    return `안녕! 나는 ${dogName}야~ ${traits ? `${traits} ` : ''}말투로 매일매일 산책일기 같이 써보자, 멍멍!`;
+    return `안녕! 나는 ${dogName}${josa(dogName, '이야', '야')}~ ${traits ? `${traits} ` : ''}말투로 매일매일 산책일기 같이 써보자, 멍멍!`;
   }
 
   const { data, error } = await supabase.functions.invoke('welcome-greeting', {
@@ -18,7 +19,7 @@ async function fetchWelcomeGreeting(
   });
 
   if (error) {
-    return `안녕! 나는 ${dogName}야~ 오늘부터 매일매일 산책일기 같이 써보자, 멍멍!`;
+    return `안녕! 나는 ${dogName}${josa(dogName, '이야', '야')}~ 오늘부터 매일매일 산책일기 같이 써보자, 멍멍!`;
   }
 
   return (data as { greeting: string }).greeting;

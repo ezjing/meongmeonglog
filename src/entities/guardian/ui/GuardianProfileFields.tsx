@@ -9,6 +9,7 @@ import {
   lineHeight,
   borderWidth,
 } from '@/shared/config/theme';
+import { josa } from '@/shared/lib/josa';
 
 const MULTILINE_MIN_HEIGHT = 72;
 
@@ -31,6 +32,7 @@ export function GuardianProfileFields({
   onFieldFocus,
 }: GuardianProfileFieldsProps) {
   const displayTitle = values.guardianTitle.trim() || '엄마';
+  const titleExample = `오늘은 ${displayTitle}${josa(displayTitle, '이랑', '랑')} 공원에 다녀왔어!`;
 
   return (
     <>
@@ -73,8 +75,7 @@ export function GuardianProfileFields({
 
       <View style={styles.relationNote}>
         <Text style={styles.relationNoteText}>
-          🐾 &quot;오늘은 {displayTitle}랑 공원에 다녀왔어!&quot; — 입력한 호칭이 일기 속에 그대로
-          등장해요
+          🐾 &quot;{titleExample}&quot; — 입력한 호칭이 일기 속에 그대로 등장해요
         </Text>
       </View>
     </>

@@ -9,6 +9,7 @@ import { formatWalkWeather, useWalk, useWalkDogIds, useWalkStore } from '@/entit
 import { useWalkPhotos, useFinishWalkStore } from '@/features/walk-session';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';
+import { josa } from '@/shared/lib/josa';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
 import { Button } from '@/shared/ui/Button';
 import { Chip } from '@/shared/ui/Chip';
@@ -222,7 +223,7 @@ function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[]
   return (
     <LoadingOverlayScreen
       loading={showOverlay}
-      title={`${progressName}가 일기를 쓰고 있어요 (${progressIndex + 1}/${dogIds.length})`}
+      title={`${progressName}${josa(progressName, '이', '가')} 일기를 쓰고 있어요 (${progressIndex + 1}/${dogIds.length})`}
       subtitle="성격·말투와 산책 기록을 반영하는 중"
     >
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>

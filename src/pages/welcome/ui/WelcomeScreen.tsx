@@ -15,6 +15,7 @@ import {
   shadows,
 } from '@/shared/config/theme';
 import { AnalyticsEvents, trackEvent } from '@/shared/lib/analytics';
+import { josa } from '@/shared/lib/josa';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
@@ -81,7 +82,7 @@ export function WelcomeScreen() {
         customSpeechStyle: form.customSpeechStyle.trim(),
       });
     } catch {
-      text = `안녕! 나는 ${form.name}야. 앞으로 같이 산책 많이 하자!`;
+      text = `안녕! 나는 ${form.name}${josa(form.name, '이야', '야')}. 앞으로 같이 산책 많이 하자!`;
     }
     setGreeting(text);
     setStatus('done');
@@ -110,7 +111,7 @@ export function WelcomeScreen() {
   }
 
   if (status === 'creating' || !greeting) {
-    return <LoadingPaws message={`${name}가 인사말을 쓰고 있어요`} />;
+    return <LoadingPaws message={`${name}${josa(name, '이', '가')} 인사말을 쓰고 있어요`} />;
   }
 
   return (

@@ -13,6 +13,7 @@ import {
 } from '@/entities/dog';
 import { toDogInput, useOnboardingStore } from '@/features/onboarding';
 import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/shared/config/theme';
+import { josa } from '@/shared/lib/josa';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
 import { Chip } from '@/shared/ui/Chip';
@@ -140,7 +141,9 @@ export function DogPersonalityScreen() {
 
         <DogAvatar imageUri={profileImageUri} size={AVATAR_SIZE} style={styles.avatar} />
 
-        <Text style={styles.title}>{name || DEFAULT_DOG_NAME}는 어떤 성격인가요?</Text>
+        <Text style={styles.title}>
+          {`${name || DEFAULT_DOG_NAME}${josa(name || DEFAULT_DOG_NAME, '은', '는')} 어떤 성격인가요?`}
+        </Text>
         <Text style={styles.subtitle}>중복 선택 가능 · 일기 말투에 반영돼요</Text>
 
         <View style={styles.chipRow}>
