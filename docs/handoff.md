@@ -30,9 +30,9 @@
 |---|---|
 | Edge Functions 5개 | 배포 완료 (auth-kakao, auth-naver, diaries-generate, welcome-greeting, delete-account). 웹 로그인 반영본 포함. 쓰지 않던 share-card는 2026-11-18 삭제 |
 | DB 마이그레이션 | 001~008 원격 적용. 008은 일기 공유 링크 |
-| 웹 미리보기 | `https://meongmeonglog--preview.expo.app` (alias `preview`). 2026-11-23 T05·T07 반영본 |
-| 웹 정식 주소 | `https://meongmeonglog.expo.app` 배포됨 (2026-11-23 T05·T07 반영). 카카오·네이버 콜백에 이 주소가 등록된 상태 |
-| 앱 OTA | 2026-11-23 production 채널, runtime 1.1.0, Android — Update group `c98bca8b-9d2f-4e62-a5fb-b2f6ab2114b4` (T05 기록 삭제, T07 AI 문구, 앱바 여백). 이전: `7d7c0c76-…`(T02 작은 정리), `022e79be-…`(좌표 묶음 전송·리사이즈·속도), `b55d06dc-…`(네이버 브라우저 로그인) |
+| 웹 미리보기 | `https://meongmeonglog--preview.expo.app` (alias `preview`). 2026-11-23 T06·T10·사진 4:3 반영본 |
+| 웹 정식 주소 | `https://meongmeonglog.expo.app` 배포됨 (2026-11-23 T06·T10·사진 4:3 반영). 카카오·네이버 콜백에 이 주소가 등록된 상태 |
+| 앱 OTA | 2026-11-23 production 채널, runtime 1.1.0, Android — Update group `24f2ada5-7f4b-46eb-8fdf-09fb4040ab9b` (T06 다견, T10 사진 넘기기, 일기 사진 4:3). 이전: `c98bca8b-…`(T05 기록 삭제, T07 AI 문구, 앱바 여백), `7d7c0c76-…`(T02 작은 정리), `022e79be-…`(좌표 묶음 전송·리사이즈·속도), `b55d06dc-…`(네이버 브라우저 로그인) |
 | 스토어 빌드 | production 1.1.0 (version code 6). preview 프로필 빌드는 없음 |
 | 정책 페이지 | GitHub Pages: `/meongmeonglog/terms-of-service`, `/privacy-policy`, `/account-deletion` |
 
