@@ -320,11 +320,11 @@ export async function saveWalkCompanions(walkId: string, userIds: string[]): Pro
   const uniqueIds = [...new Set(userIds.filter((userId) => userId.length > 0))];
   if (!isSupabaseConfigured || uniqueIds.length === 0) return;
 
-  const { error } = await supabase.from('walk_companions').insert(
+  const { error } = await supabase.from('walk_companions').upsert(
     uniqueIds.map((userId) => ({ walk_id: walkId, user_id: userId })),
+    { onConflict: 'walk_id,user_id', ignoreDuplicates: true },
   );
-  // 사진 업로드가 실패해 종료 저장을 다시 하면 이미 넣은 가족은 그대로 둔다
-  if (error && error.code !== '23505') throw new AppError('companion_save_failed', error.message);
+  if (error) throw new AppError('companion_save_failed', error.message);
 }
 
 interface WalkPersonRow {
