@@ -327,10 +327,39 @@ for insert with check (
   )
 );
 
+-- 로그인한 사용자는 기록한 사람을 바꾸지 못한다.
+-- 계정 삭제는 사용자 JWT가 없는 세션에서 recorded_by를 비우므로, 그때는 그대로 둔다.
+create or replace function public.tg_walks_keep_recorded_by()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if auth.uid() is not null then
+    new.recorded_by := old.recorded_by;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger walks_keep_recorded_by
+before update on public.walks
+for each row
+execute function public.tg_walks_keep_recorded_by();
+
+revoke all on function public.tg_walks_keep_recorded_by() from public, anon, authenticated;
+
 create policy "walks_update_member" on public.walks
 for update
 using (public.is_household_member(public.walk_household_id(id)))
-with check (public.is_household_member(public.walk_household_id(id)));
+with check (
+  exists (
+    select 1
+    from public.dogs as dog
+    where dog.id = dog_id
+      and public.is_household_member(dog.household_id)
+  )
+);
 
 create policy "walks_delete_admin_or_recorder" on public.walks
 for delete using (
@@ -338,10 +367,40 @@ for delete using (
   or public.is_household_admin(public.walk_household_id(id))
 );
 
-create policy "walk_locations_member" on public.walk_locations
+-- 좌표는 기록한 사람만 읽고 쓴다.
+-- 삭제는 산책을 지울 수 있는 사람(기록자·집 관리자)도 허용해 cascade가 막히지 않게 한다.
+create policy "walk_locations_recorder" on public.walk_locations
 for all
-using (public.is_household_member(public.walk_household_id(walk_id)))
-with check (public.is_household_member(public.walk_household_id(walk_id)));
+using (
+  exists (
+    select 1
+    from public.walks as walk
+    where walk.id = walk_id
+      and walk.recorded_by = auth.uid()
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.walks as walk
+    where walk.id = walk_id
+      and walk.recorded_by = auth.uid()
+  )
+);
+
+create policy "walk_locations_delete_with_walk" on public.walk_locations
+for delete
+using (
+  exists (
+    select 1
+    from public.walks as walk
+    where walk.id = walk_id
+      and (
+        walk.recorded_by = auth.uid()
+        or public.is_household_admin(public.walk_household_id(walk.id))
+      )
+  )
+);
 
 create policy "walk_events_member" on public.walk_events
 for all
