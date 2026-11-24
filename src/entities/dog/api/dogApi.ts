@@ -13,10 +13,10 @@ export async function fetchDogs(userId: string): Promise<DogProfile[]> {
     return mockDogs.filter((d) => d.userId === userId);
   }
 
+  // 내가 속한 모든 집의 강아지. 권한은 RLS가 거른다.
   const { data, error } = await supabase
     .from('dogs')
     .select('*')
-    .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
   if (error) throw new AppError('fetch_dogs_failed', error.message);
@@ -28,6 +28,7 @@ export async function createDog(userId: string, input: CreateDogInput): Promise<
     const dog: DogProfile = {
       dogId: `dog-${Date.now()}`,
       userId,
+      householdId: 'mock-household',
       name: input.name,
       breed: input.breed,
       birthDate: input.birthDate,

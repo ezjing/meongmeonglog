@@ -131,6 +131,49 @@ export async function countWalkDiaries(walkId: string): Promise<number> {
   return countDiariesForWalk(walkId);
 }
 
+function storagePathFromPublicUrl(url: string, bucket: string): string | null {
+  const marker = `/object/public/${bucket}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return null;
+  const path = url.slice(index + marker.length).split('?')[0];
+  try {
+    return decodeURIComponent(path);
+  } catch {
+    return path;
+  }
+}
+
+/** 사진이 올라간 폴더. 관리자가 다른 가족 사진을 지울 때도 올린 사람 폴더를 쓴다. */
+async function walkPhotoFolders(walkId: string): Promise<string[]> {
+  const { data: photos, error } = await supabase
+    .from('walk_photos')
+    .select('image_url')
+    .eq('walk_id', walkId);
+  if (error) throw new AppError('walk_delete_failed', error.message);
+
+  const folders = new Set<string>();
+  for (const photo of photos ?? []) {
+    const path = storagePathFromPublicUrl(photo.image_url, 'walk-photos');
+    if (!path) continue;
+    const [ownerId, folderWalkId] = path.split('/');
+    if (ownerId && folderWalkId) folders.add(`${ownerId}/${folderWalkId}`);
+  }
+
+  if (folders.size > 0) return [...folders];
+
+  const { data: walk, error: walkError } = await supabase
+    .from('walks')
+    .select('recorded_by')
+    .eq('id', walkId)
+    .maybeSingle();
+  if (walkError) throw new AppError('walk_delete_failed', walkError.message);
+  if (walk?.recorded_by) return [`${walk.recorded_by}/${walkId}`];
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const ownerId = sessionData.session?.user.id;
+  return ownerId ? [`${ownerId}/${walkId}`] : [];
+}
+
 /** 끝난 산책 하나를 지운다. 사진 파일을 먼저 지우고, 이어서 walks 행을 지운다 (일기·공유 링크는 cascade) */
 export async function deleteWalk(walkId: string): Promise<void> {
   if (!isSupabaseConfigured) {
@@ -139,18 +182,16 @@ export async function deleteWalk(walkId: string): Promise<void> {
     return;
   }
 
-  const { data: sessionData } = await supabase.auth.getSession();
-  const ownerId = sessionData.session?.user.id;
-  if (!ownerId) {
-    throw new AppError('storage_auth_required', '사진 업로드를 위해 로그인이 필요합니다.');
-  }
+  const folders = await walkPhotoFolders(walkId);
+  for (const folder of folders) {
+    const { data: files, error: listError } = await supabase.storage.from('walk-photos').list(folder);
+    if (listError) throw new AppError('walk_delete_failed', listError.message);
 
-  const folder = `${ownerId}/${walkId}`;
-  const { data: files, error: listError } = await supabase.storage.from('walk-photos').list(folder);
-  if (listError) throw new AppError('walk_delete_failed', listError.message);
+    const paths = (files ?? [])
+      .filter((file) => file.name.length > 0)
+      .map((file) => `${folder}/${file.name}`);
+    if (paths.length === 0) continue;
 
-  const paths = (files ?? []).filter((file) => file.name.length > 0).map((file) => `${folder}/${file.name}`);
-  if (paths.length > 0) {
     const { error: removeError } = await supabase.storage.from('walk-photos').remove(paths);
     if (removeError) throw new AppError('walk_delete_failed', removeError.message);
   }

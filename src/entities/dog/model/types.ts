@@ -2,7 +2,8 @@ import type { DogGender } from '@/shared/api/database';
 
 export interface DogProfile {
   dogId: string;
-  userId: string;
+  userId: string | null;
+  householdId: string;
   name: string;
   breed: string;
   birthDate: string;

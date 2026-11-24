@@ -205,6 +205,13 @@ export function DogBasicScreen() {
               style={isEditMode ? styles.singleBtn : styles.nextBtn}
             />
           </View>
+          {!isEditMode && !isCreateMode ? (
+            <Button
+              label="초대 코드가 있어요"
+              variant="text"
+              onPress={() => router.push('/family/join')}
+            />
+          ) : null}
         </KeyboardAwareScrollView>
       </View>
     </>

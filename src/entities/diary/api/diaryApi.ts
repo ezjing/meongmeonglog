@@ -128,7 +128,7 @@ export async function fetchDiary(diaryId: string): Promise<DiaryDetail | null> {
   const { data, error } = await supabase
     .from('diaries')
     .select(
-      'id, walk_id, dog_id, diary_content, daily_quote, created_at, walks(distance_meter, duration_sec, walk_photos(id, image_url, sort_order)), dogs(name)',
+      'id, walk_id, dog_id, diary_content, daily_quote, created_at, walks(distance_meter, duration_sec, recorded_by, walk_photos(id, image_url, sort_order)), dogs(name, household_id)',
     )
     .eq('id', diaryId)
     .maybeSingle();
@@ -138,7 +138,8 @@ export async function fetchDiary(diaryId: string): Promise<DiaryDetail | null> {
 
   const row = data as Record<string, unknown>;
   const diary = toDiary(row as unknown as DiaryRow);
-  const walks = row.walks as WalkWithPhotos | null;
+  const walks = row.walks as (WalkWithPhotos & { recorded_by?: string | null }) | null;
+  const dogs = row.dogs as { name?: string; household_id?: string } | null;
   const photos = sortPhotos(walks?.walk_photos).map((photo) => ({
     id: photo.id ?? `${diary.walkId}-${photo.sort_order}`,
     walkId: diary.walkId,
@@ -147,7 +148,9 @@ export async function fetchDiary(diaryId: string): Promise<DiaryDetail | null> {
   }));
   return {
     ...diary,
-    dogName: (row.dogs as { name: string } | null)?.name,
+    dogName: dogs?.name,
+    householdId: dogs?.household_id,
+    recordedBy: walks?.recorded_by ?? null,
     distanceMeter: walks?.distance_meter,
     durationSec: walks?.duration_sec,
     thumbnailUrl: photos[0]?.imageUrl ?? null,

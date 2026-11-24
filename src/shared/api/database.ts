@@ -19,7 +19,8 @@ export interface UserRow {
 
 export interface DogRow {
   id: string;
-  user_id: string;
+  user_id: string | null;
+  household_id: string;
   name: string;
   breed: string;
   birth_date: string;
@@ -36,6 +37,7 @@ export interface DogRow {
 export interface WalkRow {
   id: string;
   dog_id: string;
+  recorded_by: string | null;
   started_at: string;
   ended_at: string | null;
   duration_sec: number | null;

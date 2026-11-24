@@ -3,8 +3,9 @@ import { useMemo } from 'react';
 
 import { MAX_DOG_COUNT, useSelectedDog } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
+import { isHouseholdAdmin, ownHouseholdId, useHouseholds } from '@/entities/household';
 import { EXTERNAL_LINKS } from '@/shared/config/links';
-import { openDogCreate, openDogEdit, openGuardianEdit } from '@/shared/lib/navigation';
+import { openDogCreate, openDogEdit, openFamilyManage, openGuardianEdit } from '@/shared/lib/navigation';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Drawer, type DrawerItem, useOverlay } from '@/shared/ui/overlay';
 
@@ -18,6 +19,7 @@ interface SettingsDrawerProps {
 export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerProps) {
   const checkLocationPermission = useLocationPermissionCheck();
   const { dog, dogs } = useSelectedDog();
+  const { data: households } = useHouseholds();
   const { data: guardianProfile } = useGuardianProfile();
   const { showToast } = useOverlay();
   const guardianTitle = guardianProfile?.guardianTitle?.trim();
@@ -33,15 +35,25 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
         icon: '🐶',
         label: '강아지 정보 관리',
         onPress: () => {
-          if (dog) openDogEdit(dog.dogId);
+          if (!dog) return;
+          if (households && !isHouseholdAdmin(households, dog.householdId)) {
+            showToast({
+              message: '강아지 정보는 집 관리자만 바꿀 수 있어요',
+              variant: 'warning',
+            });
+            return;
+          }
+          openDogEdit(dog.dogId);
         },
       },
       {
         icon: '➕',
         label: '강아지 추가',
         onPress: () => {
-          if (!dogs) return;
-          if (dogs.length >= MAX_DOG_COUNT) {
+          if (!dogs || !households) return;
+          const ownId = ownHouseholdId(households);
+          const ownCount = dogs.filter((item) => item.householdId === ownId).length;
+          if (ownCount >= MAX_DOG_COUNT) {
             showToast({
               message: '강아지는 최대 10마리까지 등록할 수 있어요',
               variant: 'warning',
@@ -50,6 +62,11 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
           }
           openDogCreate();
         },
+      },
+      {
+        icon: '🏠',
+        label: '가족 관리',
+        onPress: openFamilyManage,
       },
       {
         icon: '🔔',
@@ -96,7 +113,7 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
         onPress: onLogout,
       },
     ],
-    [checkLocationPermission, dog, dogs, onLogout, showToast],
+    [checkLocationPermission, dog, dogs, households, onLogout, showToast],
   );
 
   const profileName = guardianTitle

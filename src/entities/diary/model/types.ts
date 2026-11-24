@@ -20,6 +20,8 @@ export interface DiaryListItem extends Omit<Diary, 'content'> {
 /** 상세용 일기 (본문 + 산책 사진 전체) */
 export interface DiaryDetail extends Diary {
   dogName?: string;
+  householdId?: string;
+  recordedBy?: string | null;
   distanceMeter?: number | null;
   durationSec?: number | null;
   thumbnailUrl?: string | null;

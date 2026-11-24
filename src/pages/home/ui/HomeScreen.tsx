@@ -139,9 +139,11 @@ export function HomeScreen() {
     }
   };
 
+  const partyDogs = dog ? dogs.filter((item) => item.householdId === dog.householdId) : [];
+
   const handleStartWalk = () => {
     if (!dog) return;
-    if (dogs.length <= 1) {
+    if (partyDogs.length <= 1) {
       void beginWalk([dog.dogId]);
       return;
     }
@@ -165,7 +167,7 @@ export function HomeScreen() {
       return;
     }
     const ordered = orderWalkDogs(
-      dogs.filter((item) => checkedDogIds.includes(item.dogId)),
+      partyDogs.filter((item) => checkedDogIds.includes(item.dogId)),
       dog.dogId,
     ).map((item) => item.dogId);
     setPickerVisible(false);
@@ -276,7 +278,7 @@ export function HomeScreen() {
       />
       <WalkDogPickerSheet
         visible={pickerVisible}
-        dogs={dogs}
+        dogs={partyDogs}
         checkedDogIds={checkedDogIds}
         onToggle={handleToggleDog}
         onStart={handleConfirmParty}

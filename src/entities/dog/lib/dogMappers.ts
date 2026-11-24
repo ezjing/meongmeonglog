@@ -6,6 +6,7 @@ export function toDogProfile(row: DogRow): DogProfile {
   return {
     dogId: row.id,
     userId: row.user_id,
+    householdId: row.household_id,
     name: row.name,
     breed: row.breed,
     birthDate: row.birth_date,

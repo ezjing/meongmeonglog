@@ -4,10 +4,12 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryContentView, useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
+import { isHouseholdAdmin, useHouseholds } from '@/entities/household';
 import { countWalkDiaries } from '@/entities/walk';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
 import { goBackOrHome } from '@/shared/lib/navigation';
+import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
 import { useOverlay } from '@/shared/ui/overlay';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
@@ -17,7 +19,14 @@ import { useDeleteDiaryRecord } from '../model/useDeleteDiaryRecord';
 export function DiaryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: diary, isLoading } = useDiary(id ?? '');
+  const userId = useAuthStore((s) => s.userId);
+  const { data: households } = useHouseholds();
   const dogName = useDiaryDogName(diary?.dogName);
+  const canDelete =
+    (diary?.recordedBy != null && diary.recordedBy === userId) ||
+    (diary?.householdId != null &&
+      households != null &&
+      isHouseholdAdmin(households, diary.householdId));
   const photos = diary?.photos ?? [];
   const { showAlert, showToast } = useOverlay();
   const { deleteDiaryRecord, isDeleting } = useDeleteDiaryRecord();
@@ -87,13 +96,15 @@ export function DiaryDetailScreen() {
             photos.length > 0 ? `📷 ${photos.length}장` : null,
           ].filter((chip): chip is string => chip != null)}
         />
-        <Button
-          label="기록 삭제"
-          variant="danger"
-          loading={isDeleting}
-          onPress={handleDeletePress}
-          style={styles.deleteButton}
-        />
+        {canDelete ? (
+          <Button
+            label="기록 삭제"
+            variant="danger"
+            loading={isDeleting}
+            onPress={handleDeletePress}
+            style={styles.deleteButton}
+          />
+        ) : null}
       </ScrollView>
     </View>
   );

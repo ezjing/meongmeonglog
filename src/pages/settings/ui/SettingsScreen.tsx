@@ -1,9 +1,11 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
-import { useSelectedDog } from '@/entities/dog';
+import { formatWalkPartyName, useDogs, useSelectedDog } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
+import { formatHouseholdTitle, isHouseholdAdmin, useHouseholds } from '@/entities/household';
+import type { HouseholdGroup } from '@/entities/household';
 import { PROVIDER_LABEL, useAccountEmail, useAuthSession, useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
 import { colors, spacing, fontSize, fontWeight, lineHeight } from '@/shared/config/theme';
@@ -11,26 +13,37 @@ import { openDogEdit, openGuardianEdit } from '@/shared/lib/navigation';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
-import { useOverlay } from '@/shared/ui/overlay';
+import { BottomSheet, useOverlay } from '@/shared/ui/overlay';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
 
 export function SettingsScreen() {
-  const { provider, deleteAccount, isDeletingAccount } = useAuthSession();
+  const { userId, provider, deleteAccount, isDeletingAccount } = useAuthSession();
   const confirmLogout = useConfirmLogout();
   const checkLocationPermission = useLocationPermissionCheck();
   const { data: accountEmail } = useAccountEmail();
   const { dog } = useSelectedDog();
+  const { data: dogs = [] } = useDogs();
+  const { data: households, isLoading: isHouseholdLoading, isError: isHouseholdError } =
+    useHouseholds();
   const { showAlert, showToast } = useOverlay();
   const { data: guardianProfile } = useGuardianProfile();
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [pickIndex, setPickIndex] = useState<number | null>(null);
+  const [pickedSuccessor, setPickedSuccessor] = useState<Record<string, string>>({});
   const guardianTitle = guardianProfile?.guardianTitle?.trim();
 
-  const handleDeleteAccount = async () => {
+  const housesNeedingSuccessor = (households ?? []).filter(
+    (group) => group.myRole === 'admin' && group.members.some((member) => member.userId !== userId),
+  );
+  const pickingHouse = pickIndex != null ? housesNeedingSuccessor[pickIndex] : null;
+
+  const confirmDelete = async (hasFamily: boolean, successors: { householdId: string; userId: string }[]) => {
     const confirmed = await showAlert({
       icon: '⚠️',
       title: '정말 탈퇴하시겠어요?',
-      message:
-        '반려견 정보, 산책 기록, 사진, 다이어리 등 모든 데이터가 영구적으로 삭제되며 되돌릴 수 없어요.',
+      message: hasFamily
+        ? '선택한 가족이 그 집의 강아지를 맡아요. 내가 남긴 산책 기록은 집에 남고, 계정과 개인정보는 삭제되어 되돌릴 수 없어요.'
+        : '반려견 정보, 산책 기록, 사진, 다이어리 등 모든 데이터가 영구적으로 삭제되며 되돌릴 수 없어요.',
       cancelLabel: '취소',
       confirmLabel: '탈퇴하기',
       destructive: true,
@@ -38,11 +51,41 @@ export function SettingsScreen() {
     if (!confirmed) return;
 
     try {
-      await deleteAccount();
+      await deleteAccount(successors);
       router.replace('/(auth)/login');
     } catch {
       showToast({ message: '계정 삭제에 실패했어요. 다시 시도해주세요.', variant: 'error' });
     }
+  };
+
+  const handleDeleteAccount = () => {
+    if (isHouseholdLoading) return;
+    if (isHouseholdError || !households) {
+      showToast({ message: '가족 정보를 불러오지 못했어요', variant: 'error' });
+      return;
+    }
+    if (housesNeedingSuccessor.length === 0) {
+      void confirmDelete(false, []);
+      return;
+    }
+    setPickedSuccessor({});
+    setPickIndex(0);
+  };
+
+  const handleSuccessorNext = () => {
+    if (pickingHouse == null || pickIndex == null) return;
+    const successorId = pickedSuccessor[pickingHouse.householdId];
+    if (!successorId) return;
+    if (pickIndex < housesNeedingSuccessor.length - 1) {
+      setPickIndex(pickIndex + 1);
+      return;
+    }
+    const successors = housesNeedingSuccessor.map((group) => ({
+      householdId: group.householdId,
+      userId: pickedSuccessor[group.householdId] ?? '',
+    }));
+    setPickIndex(null);
+    void confirmDelete(true, successors);
   };
 
   return (
@@ -83,7 +126,16 @@ export function SettingsScreen() {
               <Button
                 label="강아지 정보 수정"
                 variant="secondary"
-                onPress={() => openDogEdit(dog.dogId)}
+                onPress={() => {
+                  if (households && !isHouseholdAdmin(households, dog.householdId)) {
+                    showToast({
+                      message: '강아지 정보는 집 관리자만 바꿀 수 있어요',
+                      variant: 'warning',
+                    });
+                    return;
+                  }
+                  openDogEdit(dog.dogId);
+                }}
                 style={styles.btn}
               />
             </>
@@ -126,7 +178,75 @@ export function SettingsScreen() {
         onClose={() => setDrawerVisible(false)}
         onLogout={confirmLogout}
       />
+      <SuccessorPickSheet
+        house={pickingHouse}
+        dogs={dogs}
+        userId={userId}
+        selectedUserId={pickingHouse ? pickedSuccessor[pickingHouse.householdId] : undefined}
+        onSelect={(memberId) => {
+          if (!pickingHouse) return;
+          setPickedSuccessor((current) => ({ ...current, [pickingHouse.householdId]: memberId }));
+        }}
+        onNext={handleSuccessorNext}
+        onClose={() => setPickIndex(null)}
+      />
     </>
+  );
+}
+
+function SuccessorPickSheet({
+  house,
+  dogs,
+  userId,
+  selectedUserId,
+  onSelect,
+  onNext,
+  onClose,
+}: {
+  house: HouseholdGroup | null;
+  dogs: { householdId: string; name: string; createdAt: string }[];
+  userId: string | null;
+  selectedUserId?: string;
+  onSelect: (userId: string) => void;
+  onNext: () => void;
+  onClose: () => void;
+}) {
+  const admin = house?.members.find((member) => member.role === 'admin');
+  const houseDogs = dogs
+    .filter((dog) => dog.householdId === house?.householdId)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const candidates = house?.members.filter((member) => member.userId !== userId) ?? [];
+
+  return (
+    <BottomSheet
+      visible={house != null}
+      title="강아지를 맡을 가족을 골라 주세요"
+      subtitle={house ? formatHouseholdTitle(admin?.guardianTitle) : undefined}
+      onClose={onClose}
+    >
+      {houseDogs.length > 0 ? (
+        <Text style={styles.successorDogs}>
+          {formatWalkPartyName(houseDogs[0]?.name ?? '', Math.max(houseDogs.length - 1, 0))}
+        </Text>
+      ) : null}
+      {candidates.map((member) => {
+        const selected = member.userId === selectedUserId;
+        const label = member.guardianTitle?.trim() || '보호자';
+        return (
+          <Pressable
+            key={member.userId}
+            style={styles.successorRow}
+            onPress={() => onSelect(member.userId)}
+            accessibilityRole="radio"
+            accessibilityState={{ selected }}
+          >
+            <Text style={styles.successorName}>{label}</Text>
+            <Text style={selected ? styles.successorOn : styles.successorOff}>{selected ? '✓' : ''}</Text>
+          </Pressable>
+        );
+      })}
+      <Button label="다음" onPress={onNext} disabled={!selectedUserId} style={styles.successorNext} />
+    </BottomSheet>
   );
 }
 
@@ -150,4 +270,14 @@ const styles = StyleSheet.create({
   },
   logout: { marginTop: spacing.lg },
   deleteAccount: { marginTop: spacing.sm },
+  successorDogs: { fontSize: fontSize.base, color: colors.fgSecondary, marginBottom: spacing.sm },
+  successorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  successorName: { flex: 1, fontSize: fontSize.md, fontWeight: fontWeight.bold, color: colors.fg },
+  successorOff: { width: spacing.lg, color: colors.fgMuted },
+  successorOn: { width: spacing.lg, color: colors.primary, fontSize: fontSize.lg },
+  successorNext: { marginTop: spacing.md },
 });

@@ -23,3 +23,7 @@ export function openDogEdit(dogId: string) {
 export function openDogCreate() {
   router.push({ pathname: '/(onboarding)/dogBasic', params: { mode: 'create' } });
 }
+
+export function openFamilyManage() {
+  router.push('/family');
+}

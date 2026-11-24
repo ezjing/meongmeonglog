@@ -51,6 +51,7 @@ export default function RootLayout() {
                 <Stack.Screen name="walk" />
                 <Stack.Screen name="diary" />
                 <Stack.Screen name="share" />
+                <Stack.Screen name="family" />
               </Stack.Protected>
             </Stack>
             <AddToHomeBanner />

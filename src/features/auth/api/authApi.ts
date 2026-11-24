@@ -177,11 +177,15 @@ export async function signOut(): Promise<void> {
   }
 }
 
-export async function deleteAccount(): Promise<void> {
+export async function deleteAccount(
+  successors: { householdId: string; userId: string }[] = [],
+): Promise<void> {
   const storedAuth = await loadAuthSession();
 
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase.functions.invoke('delete-account');
+    const { data, error } = await supabase.functions.invoke('delete-account', {
+      body: { successors },
+    });
     const responseError = (data as { error?: string } | null)?.error;
     if (error || responseError) {
       // 서버·SDK 오류 문구(영어, 내부 정보)는 사용자에게 보여주지 않는다
