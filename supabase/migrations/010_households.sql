@@ -327,7 +327,7 @@ for insert with check (
   )
 );
 
--- 로그인한 사용자는 기록한 사람을 바꾸지 못한다.
+-- 로그인한 사용자는 기록한 사람과 강아지(dog_id)를 바꾸지 못한다.
 -- 계정 삭제는 사용자 JWT가 없는 세션에서 recorded_by를 비우므로, 그때는 그대로 둔다.
 create or replace function public.tg_walks_keep_recorded_by()
 returns trigger
@@ -337,6 +337,7 @@ as $$
 begin
   if auth.uid() is not null then
     new.recorded_by := old.recorded_by;
+    new.dog_id := old.dog_id;
   end if;
   return new;
 end;
