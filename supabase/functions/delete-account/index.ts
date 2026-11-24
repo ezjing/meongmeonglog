@@ -85,33 +85,174 @@ async function unlinkKakaoIfNeeded(supabaseAdmin: SupabaseClient, userId: string
   }
 }
 
-async function deleteUserFiles(
+function pathFromPublicUrl(url: string | null, bucket: string): string | null {
+  if (!url) return null;
+  const marker = `/object/public/${bucket}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return null;
+  const path = url.slice(index + marker.length).split('?')[0];
+  try {
+    return decodeURIComponent(path);
+  } catch {
+    return path;
+  }
+}
+
+async function removeStoragePaths(
+  supabaseAdmin: SupabaseClient,
+  bucket: string,
+  paths: string[],
+) {
+  const unique = [...new Set(paths)];
+  for (let i = 0; i < unique.length; i += LIST_PAGE_SIZE) {
+    const chunk = unique.slice(i, i + LIST_PAGE_SIZE);
+    if (chunk.length === 0) continue;
+    const { error } = await supabaseAdmin.storage.from(bucket).remove(chunk);
+    if (error) throw error;
+  }
+}
+
+interface HouseholdFiles {
+  walkFolders: string[];
+  dogPaths: string[];
+}
+
+async function loadHouseholdFiles(
+  supabaseAdmin: SupabaseClient,
+  householdIds: string[],
+): Promise<HouseholdFiles> {
+  if (householdIds.length === 0) return { walkFolders: [], dogPaths: [] };
+
+  const { data: dogs, error: dogError } = await supabaseAdmin
+    .from('dogs')
+    .select('id, profile_image_url')
+    .in('household_id', householdIds);
+  if (dogError) throw dogError;
+
+  const dogPaths = (dogs ?? [])
+    .map((dog) => pathFromPublicUrl(dog.profile_image_url, 'dog-profiles'))
+    .filter((path): path is string => path != null);
+
+  const dogIds = (dogs ?? []).map((dog) => dog.id as string);
+  if (dogIds.length === 0) return { walkFolders: [], dogPaths };
+
+  const { data: walks, error: walkError } = await supabaseAdmin
+    .from('walks')
+    .select('id')
+    .in('dog_id', dogIds);
+  if (walkError) throw walkError;
+
+  const walkIds = (walks ?? []).map((walk) => walk.id as string);
+  if (walkIds.length === 0) return { walkFolders: [], dogPaths };
+
+  const { data: photos, error: photoError } = await supabaseAdmin
+    .from('walk_photos')
+    .select('image_url')
+    .in('walk_id', walkIds);
+  if (photoError) throw photoError;
+
+  const folders = new Set<string>();
+  for (const photo of photos ?? []) {
+    const path = pathFromPublicUrl(photo.image_url, 'walk-photos');
+    if (!path) continue;
+    const [ownerId, walkId] = path.split('/');
+    if (ownerId && walkId) folders.add(`${ownerId}/${walkId}`);
+  }
+
+  return { walkFolders: [...folders], dogPaths };
+}
+
+function isKeptUserFile(path: string, userId: string, keepWalkIds: Set<string>, keepDogPaths: Set<string>) {
+  if (keepDogPaths.has(path)) return true;
+  const [ownerId, walkId] = path.split('/');
+  return ownerId === userId && keepWalkIds.has(walkId ?? '');
+}
+
+interface SuccessorChoice {
+  householdId: string;
+  userId: string;
+}
+
+function readSuccessors(body: unknown): SuccessorChoice[] {
+  if (!body || typeof body !== 'object' || !('successors' in body)) return [];
+  const value = (body as { successors?: unknown }).successors;
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (!item || typeof item !== 'object') return [];
+    const householdId = (item as { householdId?: unknown }).householdId;
+    const successorId = (item as { userId?: unknown }).userId;
+    if (typeof householdId !== 'string' || typeof successorId !== 'string') return [];
+    return [{ householdId, userId: successorId }];
+  });
+}
+
+async function deleteAccountFiles(
   supabaseAdmin: SupabaseClient,
   userId: string,
+  keepHouseholdIds: string[],
+  dropHouseholdIds: string[],
 ) {
-  // 버킷끼리는 독립적이라 함께 지운다
+  const [keepFiles, dropFiles] = await Promise.all([
+    loadHouseholdFiles(supabaseAdmin, keepHouseholdIds),
+    loadHouseholdFiles(supabaseAdmin, dropHouseholdIds),
+  ]);
+
+  const keepWalkIds = new Set(
+    keepFiles.walkFolders
+      .filter((folder) => folder.startsWith(`${userId}/`))
+      .map((folder) => folder.split('/')[1] ?? ''),
+  );
+  const keepDogPaths = new Set(keepFiles.dogPaths.filter((path) => path.startsWith(`${userId}/`)));
+
   await Promise.all(
     STORAGE_BUCKETS.map(async (bucket) => {
       const paths = await listAllFilePaths(supabaseAdmin, bucket, userId);
-
-      for (let i = 0; i < paths.length; i += LIST_PAGE_SIZE) {
-        const { error } = await supabaseAdmin.storage
-          .from(bucket)
-          .remove(paths.slice(i, i + LIST_PAGE_SIZE));
-        if (error) throw error;
-      }
+      const removing =
+        bucket === 'share-cards'
+          ? paths
+          : paths.filter((path) => !isKeptUserFile(path, userId, keepWalkIds, keepDogPaths));
+      await removeStoragePaths(supabaseAdmin, bucket, removing);
     }),
   );
+
+  await Promise.all(
+    dropFiles.walkFolders.map(async (folder) => {
+      const paths = await listAllFilePaths(supabaseAdmin, 'walk-photos', folder);
+      await removeStoragePaths(supabaseAdmin, 'walk-photos', paths);
+    }),
+  );
+  await removeStoragePaths(supabaseAdmin, 'dog-profiles', dropFiles.dogPaths);
 }
 
 serveJson(async (req) => {
   const supabaseAdmin = createAdminClient();
   const userId = await getRequestUserId(req, supabaseAdmin);
+  const successors = readSuccessors(await req.json().catch(() => ({})));
 
-  // dogs/walks/diaries/... all cascade-delete from `public.users`,
-  // which itself cascades from `auth.users` (see 001_initial.sql).
+  // 새 관리자가 빠졌거나 그 집 구성원이 아니면 파일을 지우기 전에 실패한다.
+  const { data: transfer, error: transferError } = await supabaseAdmin.rpc(
+    'transfer_household_admins',
+    { target_user: userId, successors },
+  );
+  if (transferError) throw new Error('계정 삭제에 실패했습니다.');
+
+  const result = transfer as { dropHouseholdIds?: string[]; keepHouseholdIds?: string[] } | null;
+  const dropHouseholdIds = result?.dropHouseholdIds ?? [];
+  const keepHouseholdIds = result?.keepHouseholdIds ?? [];
+
   // 파일 삭제가 실패하면 계정을 지우기 전에 중단한다 (재시도 가능하도록).
-  await deleteUserFiles(supabaseAdmin, userId);
+  // 남는 집의 사진 파일은 지우지 않는다. 혼자인 집만 사진까지 지운다.
+  await deleteAccountFiles(supabaseAdmin, userId, keepHouseholdIds, dropHouseholdIds);
+
+  if (dropHouseholdIds.length > 0) {
+    const { error: dropError } = await supabaseAdmin
+      .from('households')
+      .delete()
+      .in('id', dropHouseholdIds);
+    if (dropError) throw dropError;
+  }
+
   await unlinkKakaoIfNeeded(supabaseAdmin, userId);
 
   const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId);

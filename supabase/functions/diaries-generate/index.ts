@@ -37,7 +37,7 @@ serveJson(async (req) => {
     supabase
       .from("dogs")
       .select(
-        "id, user_id, name, breed, personality, custom_personality, speech_style, custom_speech_style",
+        "id, user_id, household_id, name, breed, personality, custom_personality, speech_style, custom_speech_style",
       )
       .eq("id", dogId)
       .maybeSingle(),
@@ -61,8 +61,16 @@ serveJson(async (req) => {
   ]);
 
   const dog = dogResult.data;
-  // 그 산책에 포함된 강아지이고, 요청한 사람의 강아지인지 확인한다
-  if (!dog || dog.user_id !== userId || !linkResult.data) throw new Error("Walk not found");
+  const memberResult = dog?.household_id
+    ? await supabase
+        .from("household_members")
+        .select("user_id")
+        .eq("household_id", dog.household_id)
+        .eq("user_id", userId)
+        .maybeSingle()
+    : { data: null };
+  // 그 산책에 포함된 강아지이고, 요청자가 그 집의 구성원인지 확인한다
+  if (!dog || !memberResult.data || !linkResult.data) throw new Error("Walk not found");
 
   const existingDiary = existingDiaryResult.data;
   if (existingDiary) {
