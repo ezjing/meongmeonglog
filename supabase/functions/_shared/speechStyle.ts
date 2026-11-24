@@ -207,7 +207,8 @@ export function buildDiaryUserPrompt(options: {
   customPersonality?: string | null;
   speechStyle?: string | null;
   customSpeechStyle?: string | null;
-  guardianTitle: string;
+  /** 한 명이면 기존 문장, 두 명 이상이면 함께한 보호자 문장 */
+  guardianTitles: string[];
   parentingStyle?: string | null;
   currentConcern?: string | null;
   durationSec?: number | null;
@@ -233,6 +234,12 @@ export function buildDiaryUserPrompt(options: {
   ]);
   const weather = formatWeather(options.weatherCondition, options.weatherTemp);
   const memo = options.memo?.trim();
+  const guardianTitles = options.guardianTitles
+    .map((title) => title.trim())
+    .filter((title) => title.length > 0);
+  const guardianLine = guardianTitles.length > 1
+    ? `함께한 보호자: ${guardianTitles.join(", ")} (이 호칭들만 사용)`
+    : `보호자 호칭: ${guardianTitles[0] ?? "보호자"} (이 호칭만 사용)`;
 
   const lines = [
     `오늘 산책 일기. 화자: 강아지 ${options.dogName}${
@@ -244,7 +251,7 @@ export function buildDiaryUserPrompt(options: {
         : "아래 예시와 같은 종결어미만 사용"
     }`,
     personality ? `성격(말투는 유지하고 소재만 살짝 반영): ${personality}` : "",
-    `보호자 호칭: ${options.guardianTitle} (이 호칭만 사용)`,
+    guardianLine,
     options.parentingStyle?.trim()
       ? `양육 스타일: ${options.parentingStyle.trim()}`
       : "",

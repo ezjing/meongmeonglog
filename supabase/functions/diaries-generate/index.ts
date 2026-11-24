@@ -23,7 +23,7 @@ serveJson(async (req) => {
   const { data: walk, error: walkError } = await supabase
     .from("walks")
     .select(
-      "dog_id, duration_sec, distance_meter, weather_condition, weather_temp, walk_photos(image_url, sort_order)",
+      "dog_id, recorded_by, duration_sec, distance_meter, weather_condition, weather_temp, walk_photos(image_url, sort_order)",
     )
     .eq("id", walkId)
     .single();
@@ -32,7 +32,7 @@ serveJson(async (req) => {
 
   const dogId = requestedDogId ?? walk.dog_id;
 
-  const [linkResult, dogResult, existingDiaryResult, eventResult, guardianResult] = await Promise.all([
+  const [linkResult, dogResult, existingDiaryResult, eventResult, companionResult] = await Promise.all([
     supabase.from("walk_dogs").select("dog_id").eq("walk_id", walkId).eq("dog_id", dogId).maybeSingle(),
     supabase
       .from("dogs")
@@ -53,11 +53,7 @@ serveJson(async (req) => {
       .eq("walk_id", walkId)
       .eq("dog_id", dogId)
       .maybeSingle(),
-    supabase
-      .from("users")
-      .select("guardian_title, parenting_style, current_concern")
-      .eq("id", userId)
-      .maybeSingle(),
+    supabase.from("walk_companions").select("user_id").eq("walk_id", walkId).order("user_id"),
   ]);
 
   const dog = dogResult.data;
@@ -82,12 +78,40 @@ serveJson(async (req) => {
     };
   }
 
-  const guardian = guardianResult.data;
+  if (companionResult.error) throw companionResult.error;
+
   const event = eventResult.data;
   const photos = [...(walk.walk_photos ?? [])].sort(
     (a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order,
   );
-  const guardianTitle = guardian?.guardian_title?.trim() || "보호자";
+  const recorderId = (walk.recorded_by as string | null) ?? null;
+  const companionIds = (companionResult.data ?? []).map((row: { user_id: string }) => row.user_id);
+  const profileIds = [...new Set([recorderId, userId, ...companionIds].filter((id): id is string => !!id))];
+  const { data: profiles, error: profileError } = await supabase
+    .from("users")
+    .select("id, guardian_title, parenting_style, current_concern")
+    .in("id", profileIds);
+  if (profileError) throw profileError;
+
+  const profileRows = (profiles ?? []) as {
+    id: string;
+    guardian_title: string | null;
+    parenting_style: string | null;
+    current_concern: string | null;
+  }[];
+  const profileOf = (id: string | null) => profileRows.find((row) => row.id === id);
+  const titleOf = (id: string | null): string | null => {
+    const row = profileOf(id);
+    if (!row) return null;
+    return row.guardian_title?.trim() || "보호자";
+  };
+  // 호칭은 기록한 사람 다음 같이 간 가족. 기록한 사람이 탈퇴했으면 그 호칭은 빠지고, 양육 정보는 요청자 것을 쓴다.
+  const guardianTitles = [
+    ...(recorderId ? [titleOf(recorderId)] : []),
+    ...companionIds.map((id) => titleOf(id)),
+  ].filter((title): title is string => !!title);
+  if (guardianTitles.length === 0) guardianTitles.push(titleOf(userId) || "보호자");
+  const styleSource = profileOf(recorderId ?? userId);
 
   const { text: content, model } = await generateGroqContent({
     systemInstruction: buildDiarySystemInstruction({
@@ -102,9 +126,9 @@ serveJson(async (req) => {
       customPersonality: dog.custom_personality,
       speechStyle: dog.speech_style,
       customSpeechStyle: dog.custom_speech_style,
-      guardianTitle,
-      parentingStyle: guardian?.parenting_style,
-      currentConcern: guardian?.current_concern,
+      guardianTitles,
+      parentingStyle: styleSource?.parenting_style,
+      currentConcern: styleSource?.current_concern,
       durationSec: walk.duration_sec,
       distanceMeter: walk.distance_meter,
       weatherCondition: walk.weather_condition,
