@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -56,10 +56,7 @@ export function Drawer({
       <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
         <OverlayBackdrop onPress={onClose} style={styles.backdrop}>
           <Pressable
-            style={[
-              styles.drawer,
-              { paddingTop: insets.top + spacing.xl, paddingBottom: insets.bottom + spacing.ml },
-            ]}
+            style={[styles.drawer, { paddingTop: insets.top + spacing.xl }]}
             onPress={(event) => event.stopPropagation()}
           >
             <Pressable
@@ -70,39 +67,48 @@ export function Drawer({
               <Text style={styles.closeText}>✕</Text>
             </Pressable>
 
-            <View style={styles.profile}>
-              <Pressable style={styles.avatar} onPress={() => setProfilePreviewVisible(true)}>
-                {profileImageUri ? (
-                  <Image
-                    source={{ uri: profileImageUri }}
-                    style={styles.avatarImage}
-                    contentFit="cover"
-                  />
-                ) : (
-                  <Text style={styles.avatarEmoji}>{profileEmoji}</Text>
-                )}
-              </Pressable>
-              <View style={styles.profileText}>
-                <Text style={styles.profileName}>{profileName}</Text>
-                {profileSubtitle ? <Text style={styles.profileSub}>{profileSubtitle}</Text> : null}
+            {/* 메뉴가 화면보다 길면(작은 화면·가로 모드) 프로필과 메뉴를 함께 스크롤한다. 닫기 버튼은 고정 */}
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={{ paddingBottom: insets.bottom + spacing.ml }}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.profile}>
+                <Pressable style={styles.avatar} onPress={() => setProfilePreviewVisible(true)}>
+                  {profileImageUri ? (
+                    <Image
+                      source={{ uri: profileImageUri }}
+                      style={styles.avatarImage}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <Text style={styles.avatarEmoji}>{profileEmoji}</Text>
+                  )}
+                </Pressable>
+                <View style={styles.profileText}>
+                  <Text style={styles.profileName}>{profileName}</Text>
+                  {profileSubtitle ? (
+                    <Text style={styles.profileSub}>{profileSubtitle}</Text>
+                  ) : null}
+                </View>
               </View>
-            </View>
 
-            {items.map((item) => (
-              <Pressable
-                key={item.label}
-                style={[styles.item, item.danger && styles.itemDanger]}
-                onPress={() => {
-                  onClose();
-                  item.onPress();
-                }}
-              >
-                <Text style={styles.itemIcon}>{item.icon}</Text>
-                <Text style={[styles.itemLabel, item.danger && styles.itemLabelDanger]}>
-                  {item.label}
-                </Text>
-              </Pressable>
-            ))}
+              {items.map((item) => (
+                <Pressable
+                  key={item.label}
+                  style={[styles.item, item.danger && styles.itemDanger]}
+                  onPress={() => {
+                    onClose();
+                    item.onPress();
+                  }}
+                >
+                  <Text style={styles.itemIcon}>{item.icon}</Text>
+                  <Text style={[styles.itemLabel, item.danger && styles.itemLabelDanger]}>
+                    {item.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </Pressable>
         </OverlayBackdrop>
       </Modal>
@@ -127,6 +133,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.ml,
     ...shadows.drawer,
+  },
+  scroll: {
+    flex: 1,
   },
   closeBtn: {
     position: 'absolute',
