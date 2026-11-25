@@ -224,21 +224,25 @@ npx eas update --channel production --environment production --message "변경 �
 - **네이티브를 바꿨다면 반드시 `app.json`의 `version`을 올린다** (예: 1.0.0 → 1.1.0). 올리지 않으면 이전 네이티브 앱에 맞지 않는 JS가 내려가 앱이 깨질 수 있다.
 - 문제가 생긴 업데이트는 `npx eas update:rollback`으로 되돌린다.
 
-### 2. EAS Build (Android)
+### 2. 빌드 (Android, 내 컴퓨터에서)
+
+빌드는 로컬에서 하고, 서명 키·versionCode는 EAS 서버 것을 쓴다 (EAS 무료 빌드 횟수·대기열을 쓰지 않음). JDK 17과 Android SDK가 필요하다.
 
 ```bash
 set -a && source .env && set +a   # eas-cli가 dynamic config(app.config.ts) 평가 시 .env를 못 읽는 버그 우회
-npx eas build --platform android --profile production --non-interactive --no-wait
+export ANDROID_HOME="$ANDROID_SDK_PATH"
+npx eas build --platform android --profile production --local --non-interactive --output ./build/meongmeonglog.aab
 ```
 
-- `eas.json`의 `build.production.autoIncrement: true`로 `versionCode`가 매번 자동 증가한다.
-- 빌드 상태 확인: `npx eas build:view <BUILD_ID> --json` (역시 `.env` source 필요)
+- `eas.json`의 `build.production.autoIncrement: true`로 `versionCode`가 매번 자동 증가한다 (`--local`이어도 EAS 서버 기준).
+- **Gradle로 직접 빌드(`./gradlew bundleRelease`)하지 않는다.** `android/`는 개발용(debug) 키로 서명하게 돼 있어 Play가 거부한다.
+- 원격 빌드가 필요하면 `--local` 대신 `--no-wait`로 EAS 서버에서 빌드하고, 3번에서 `--path` 대신 `--id <BUILD_ID>`를 쓴다.
 
 ### 3. EAS Submit (Play 프로덕션 트랙)
 
 ```bash
 set -a && source .env && set +a
-npx eas submit --platform android --id <BUILD_ID> --non-interactive
+npx eas submit --platform android --path ./build/meongmeonglog.aab --non-interactive
 ```
 
 - `eas.json`의 `submit.production.android.track: "production"`으로 Play 정식 출시 트랙에 제출한다 (alpha는 "비공개 테스트", internal은 "내부 테스트"). 제출 후 Google 검토가 끝나면 자동 공개된다.

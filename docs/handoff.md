@@ -33,7 +33,7 @@
 | 웹 미리보기 | `https://meongmeonglog--preview.expo.app` (alias `preview`). 2026-11-23 T06·T10·사진 4:3 반영본 |
 | 웹 정식 주소 | `https://meongmeonglog.expo.app` 배포됨 (2026-11-25 앱바 여백·홈 메뉴 높이·공유 일기 시작 버튼. 이전 2026-11-24 T08·T09). 카카오·네이버 콜백에 이 주소가 등록된 상태 |
 | 앱 OTA | 2026-11-25 production 채널, runtime 1.1.0, Android — Update group `6e8a0ca9-40d9-4f68-b69f-ba876c23882d` (T15 여러 마리 일기). 이전 기록은 git 기록과 docs/tasks 참고 |
-| 스토어 빌드 | production 1.1.0 (version code 6). preview 프로필 빌드는 없음 |
+| 스토어 빌드 | production 1.1.0 (version code 7), 2026-11-25 로컬 빌드(`eas build --local`) → Play 프로덕션 제출. 2026-11-25까지의 OTA 내용 포함, T16 변경은 미포함. 이전 version code 6. preview 프로필 빌드는 없음 |
 | 정책 페이지 | GitHub Pages: `/meongmeonglog/terms-of-service`, `/privacy-policy`, `/account-deletion` |
 
 **사용자 확인 대기**: OTA 적용 후 실기기에서 로그인, 실제 걸으며 산책 기록, 종료(메모 키보드)·일기 생성, 리스트 스크롤, 강아지 정보 수정.

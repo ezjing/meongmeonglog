@@ -39,7 +39,7 @@ OTA로는 못 바꾸는 네이티브 변경을 한 번에 모아 새 빌드(스�
 ## 배포 (사용자가 실행)
 
 1. `app.json`의 `version`을 올릴지(예: 1.2.0) 사용자가 정한다. runtimeVersion 정책이 `appVersion`이라 버전을 올리면 새 빌드부터 새 OTA 채널 버전이 된다
-2. `.env`를 불러온 셸에서 EAS 빌드 → 스토어 제출 (`eas.json`의 production 프로필)
+2. `.env`를 불러온 셸에서 **로컬 빌드**(`eas build --local`) → `eas submit --path`로 스토어 제출. 명령은 `README.md`의 "2. 빌드 (Android, 내 컴퓨터에서)"
 3. 스토어 배포 뒤부터 이 코드가 들어간 OTA 가능
 
 ## 구현 결과 (Cursor가 작성)
