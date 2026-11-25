@@ -12,6 +12,7 @@ export {
   useInvitePreview,
 } from './api/householdQueries';
 export {
+  canManageRecord,
   formatHouseholdTitle,
   formatInviteAcceptTitle,
   formatInviteShareMessage,

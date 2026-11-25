@@ -52,6 +52,22 @@ export function isHouseholdAdmin(groups: HouseholdGroup[], householdId: string):
 }
 
 /**
+ * 기록한 사람이거나 그 산책 집의 관리자.
+ * SQL `is_walk_recorder_or_admin`(011_walk_companions.sql)과 같다.
+ */
+export function canManageRecord(
+  recordedBy: string | null | undefined,
+  householdId: string | null | undefined,
+  userId: string | null,
+  groups: HouseholdGroup[] | null | undefined,
+): boolean {
+  return (
+    (recordedBy != null && recordedBy === userId) ||
+    (householdId != null && groups != null && isHouseholdAdmin(groups, householdId))
+  );
+}
+
+/**
  * 다른 가족이 있는 관리자 집. 탈퇴하려면 그 집의 강아지를 맡을 가족을 골라야 한다.
  * SQL `transfer_household_admins`(010_households.sql)와 같다.
  */

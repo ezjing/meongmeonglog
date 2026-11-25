@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryContentView, useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
-import { isHouseholdAdmin, useHouseholds } from '@/entities/household';
+import { canManageRecord, useHouseholds } from '@/entities/household';
 import { countWalkDiaries, formatWalkCompanyChip, useWalkPeople } from '@/entities/walk';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
@@ -23,11 +23,7 @@ export function DiaryDetailScreen() {
   const userId = useAuthStore((s) => s.userId);
   const { data: households } = useHouseholds();
   const dogName = useDiaryDogName(diary?.dogName);
-  const canDelete =
-    (diary?.recordedBy != null && diary.recordedBy === userId) ||
-    (diary?.householdId != null &&
-      households != null &&
-      isHouseholdAdmin(households, diary.householdId));
+  const canDelete = canManageRecord(diary?.recordedBy, diary?.householdId, userId, households);
   const photos = diary?.photos ?? [];
   const { showAlert, showToast } = useOverlay();
   const { deleteDiaryRecord, isDeleting } = useDeleteDiaryRecord();
