@@ -17,7 +17,10 @@ const INVITE_CODES = [
   'invite_household_full',
   'invite_not_admin',
   'invite_create_failed',
+  'invite_failed',
 ] as const;
+
+const INVITE_FAILED_MESSAGE = '초대 코드를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.';
 
 export function normalizeInviteCode(raw: string): string {
   return raw.replace(/\s/g, '').toUpperCase();
@@ -26,6 +29,11 @@ export function normalizeInviteCode(raw: string): string {
 export function inviteWarningMessage(error: unknown): string | null {
   if (!(error instanceof AppError)) return null;
   return INVITE_WARNING[error.code] ?? null;
+}
+
+export function inviteFailedMessage(error: unknown): string | null {
+  if (!(error instanceof AppError) || error.code !== 'invite_failed') return null;
+  return INVITE_FAILED_MESSAGE;
 }
 
 export function throwHouseholdRpcError(error: { message: string }, fallback: string): never {

@@ -15,6 +15,7 @@ export {
   formatHouseholdTitle,
   formatInviteAcceptTitle,
   formatInviteShareMessage,
+  inviteFailedMessage,
   inviteWarningMessage,
   isHouseholdAdmin,
   normalizeInviteCode,

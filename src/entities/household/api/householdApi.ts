@@ -93,7 +93,7 @@ export async function previewHouseholdInvite(code: string): Promise<InvitePrevie
   }
 
   const { data, error } = await supabase.rpc('preview_household_invite', { raw_code: code });
-  if (error) throwHouseholdRpcError(error, 'invite_invalid');
+  if (error) throwHouseholdRpcError(error, 'invite_failed');
 
   const row = data as {
     error?: string;
@@ -118,7 +118,7 @@ export async function acceptHouseholdInvite(code: string): Promise<string> {
   if (!isSupabaseConfigured) return 'mock-household';
 
   const { data, error } = await supabase.rpc('accept_household_invite', { raw_code: code });
-  if (error) throwHouseholdRpcError(error, 'invite_invalid');
+  if (error) throwHouseholdRpcError(error, 'invite_failed');
   const row = data as { error?: string; householdId?: string } | null;
   if (row?.error) throw new AppError(row.error, row.error);
   if (!row?.householdId) throw new AppError('invite_invalid', 'empty household');

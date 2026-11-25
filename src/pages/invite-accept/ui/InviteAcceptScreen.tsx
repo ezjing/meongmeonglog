@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { DogAvatar, formatWalkPartyName } from '@/entities/dog';
 import {
   formatInviteAcceptTitle,
+  inviteFailedMessage,
   inviteWarningMessage,
   useInvitePreview,
 } from '@/entities/household';
@@ -35,7 +36,10 @@ export function InviteAcceptScreen() {
     } catch (acceptError) {
       const warning = inviteWarningMessage(acceptError);
       showToast({
-        message: warning ?? '가족이 되지 못했어요. 잠시 후 다시 시도해 주세요.',
+        message:
+          warning ??
+          inviteFailedMessage(acceptError) ??
+          '가족이 되지 못했어요. 잠시 후 다시 시도해 주세요.',
         variant: warning ? 'warning' : 'error',
       });
     }

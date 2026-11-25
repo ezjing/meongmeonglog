@@ -2,15 +2,13 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
-import { inviteWarningMessage, normalizeInviteCode, previewHouseholdInvite } from '@/entities/household';
 import {
-  colors,
-  spacing,
-  radius,
-  fontSize,
-  fontWeight,
-  borderWidth,
-} from '@/shared/config/theme';
+  inviteFailedMessage,
+  inviteWarningMessage,
+  normalizeInviteCode,
+  previewHouseholdInvite,
+} from '@/entities/household';
+import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
 import { KeyboardAwareScrollView } from '@/shared/ui/KeyboardAwareScrollView';
 import { useOverlay } from '@/shared/ui/overlay';
@@ -33,7 +31,7 @@ export function InviteCodeScreen() {
     } catch (error) {
       const warning = inviteWarningMessage(error);
       showToast({
-        message: warning ?? '초대 정보를 불러오지 못했어요',
+        message: warning ?? inviteFailedMessage(error) ?? '초대 정보를 불러오지 못했어요',
         variant: warning ? 'warning' : 'error',
       });
     } finally {
