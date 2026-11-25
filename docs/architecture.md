@@ -11,8 +11,8 @@
 src/
 ├─ app/        Expo Router 라우트 (FSD의 app 레이어 역할: 레이아웃·프로바이더·라우팅)
 ├─ pages/      화면 단위 slice
-├─ features/   여러 화면에서 재사용하는 사용자 행동 (로그인, 산책 기록, 링크 공유, family …)
-├─ entities/   도메인 데이터 (dog, guardian, walk, diary): API·타입·조회 hook·표시용 UI
+├─ features/   여러 화면에서 재사용하는 사용자 행동 (auth, onboarding, walk-session, settings, share-link, family)
+├─ entities/   도메인 데이터 (dog, guardian, household, walk, diary): API·타입·조회 hook·표시용 UI
 └─ shared/     도메인을 모르는 공용 코드 (ui, api, lib, config, session)
 ```
 
@@ -43,7 +43,7 @@ slice 안은 목적별 세그먼트로 나눈다. 필요한 것만 만든다.
    - 공통 로직이 필요하면 아래 레이어(entities/shared)로 내린다.
 2. **entities끼리는 `@x` 공개 API로만** 참조한다.
    - `entities/<대상>/@x/<사용하는 쪽>.ts`에 그 slice 전용 export를 둔다.
-   - 예: `entities/walk/@x/diary.ts`를 `entities/diary`가 사용한다.
+   - 지금 있는 것: `entities/walk/@x/diary.ts`, `entities/dog/@x/diary.ts`(`entities/diary`가 사용), `entities/guardian/@x/walk.ts`(`entities/walk`), `entities/guardian/@x/household.ts`(`entities/household`).
    - `@x`는 최후의 수단이다. 먼저 slice를 합치거나 shared로 내릴 수 있는지 검토한다.
 3. **다른 slice는 public API(`index.ts`)로만 import한다.**
    - `import { useDogs } from '@/entities/dog'` ✅
@@ -79,6 +79,7 @@ slice 안은 목적별 세그먼트로 나눈다. 필요한 것만 만든다.
 | 사용자가 하는 행동(버튼 → 여러 단계 처리)이 여러 화면에서 쓰임 | `features/<행동>` |
 | 한 화면에서만 쓰는 조합 | `pages/<화면>` |
 | 로그인 사용자 id 등 전역 세션 | `shared/session` |
+| 앱·서버에 같이 있는 값 | 해당 slice의 `config` 상수 + SQL과 같다는 동기화 주석 (예: `entities/household/config/household.ts`) |
 
 ## 디자인 토큰
 
