@@ -8,8 +8,9 @@ alwaysApply: false
 
 | 데이터 | 도구 | 위치 |
 |--------|------|------|
-| 서버 데이터 조회·변경 | TanStack Query | 각 entity의 `api/` (`diaryQueries.ts`, `dogQueries.ts`, `guardianQueries.ts`, `walkQueries.ts`, `useWalkMutations.ts`) |
+| 서버 데이터 조회·변경 | TanStack Query | 각 entity의 `api/` (`diaryQueries.ts`, `dogQueries.ts`, `guardianQueries.ts`, `householdQueries.ts`, `walkQueries.ts`, `useWalkMutations.ts`). `diaryKeys`는 `diaryApi.ts` |
 | 로그인 사용자(userId, provider) | zustand `useAuthStore` | `shared/session/sessionStore.ts` |
+| 선택한 강아지 | zustand `useSelectedDogStore` + AsyncStorage | `entities/dog/model/selectedDogStore.ts` |
 | 진행 중 산책(경로·거리·시간) | zustand `useWalkStore` + AsyncStorage | `entities/walk/model/walkStore.ts`, `walkSessionStorage.ts` |
 | 온보딩·강아지 정보 입력 폼 | zustand `useOnboardingStore` | `features/onboarding/model/onboardingStore.ts` |
 | 산책 종료 폼(사진·배변·메모) | zustand `useFinishWalkStore` | `features/walk-session/model/finishWalkStore.ts` |
@@ -21,14 +22,26 @@ alwaysApply: false
 - query key는 entity별 key 객체로 만든다. 사용자별 데이터는 key에 userId 포함
 
 ```typescript
+// src/entities/diary/api/diaryApi.ts
 export const diaryKeys = {
   all: ['diaries'] as const,
-  list: (userId: string, date?: string) => [...diaryKeys.all, userId, 'list', date ?? 'all'] as const,
-  recent: (userId: string, limit: number) => [...diaryKeys.all, userId, 'recent', limit] as const,
-  pages: (userId: string, ascending: boolean) => [...diaryKeys.all, userId, 'pages', ascending ? 'asc' : 'desc'] as const,
+  list: (userId: string, dogId: string, date?: string) =>
+    [...diaryKeys.all, userId, 'list', dogId, date ?? 'all'] as const,
+  recent: (userId: string, dogId: string, limit: number) =>
+    [...diaryKeys.all, userId, 'recent', dogId, limit] as const,
+  pages: (userId: string, dogId: string, ascending: boolean) =>
+    [...diaryKeys.all, userId, 'pages', dogId, ascending ? 'asc' : 'desc'] as const,
   detail: (userId: string, id: string) => [...diaryKeys.all, userId, id] as const,
+  calendar: (userId: string, dogId: string, year: number, month: number) =>
+    [...diaryKeys.all, userId, 'calendar', dogId, year, month] as const,
+  recentAll: (userId: string) => [...diaryKeys.all, userId, 'recent'] as const,
+  listAll: (userId: string) => [...diaryKeys.all, userId, 'list'] as const,
+  calendarAll: (userId: string) => [...diaryKeys.all, userId, 'calendar'] as const,
+  pagesAll: (userId: string) => [...diaryKeys.all, userId, 'pages'] as const,
 };
 ```
+
+- 가족·강아지가 바뀌는 변경(초대 수락·나가기·내보내기)은 `features/family`의 hook(`useAcceptInvite`, `useLeaveHousehold`, `useRemoveMember`)으로 하고, 가족 목록·강아지·일기·진행 중 산책을 한 번에 새로 고친다 (`refreshFamilyQueries`)
 
 - 화면 밖(라우팅 판단 등)에서 미리 조회할 때는 화면 hook과 **같은 key**로 `queryClient.fetchQuery`를 써서 캐시를 공유한다 (예: `features/onboarding/lib/onboardingRoute.ts`)
 - 목록은 필요한 컬럼만 select, 긴 목록은 `useInfiniteQuery` + `.range()` (리스트 20개 단위)

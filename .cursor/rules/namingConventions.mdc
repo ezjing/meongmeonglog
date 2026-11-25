@@ -26,7 +26,7 @@ alwaysApply: true
 - API: `fetchDiaryPage`, `createDog`, `finishWalk`, `saveWalkLocations`
 - Query hook: `useDiary(id)`, `useDiaryPages()`, `useRecentDiaries(5)`
 - Mutation hook: `useCreateDog()`, `useGenerateDiary()`
-- Query key 객체: `diaryKeys`, `dogKeys`, `guardianKeys`, `walkKeys` (각 entity의 api 세그먼트)
+- Query key 객체: `diaryKeys`(`entities/diary/api/diaryApi.ts`), `dogKeys`, `guardianKeys`, `householdKeys`, `walkKeys`(각 entity의 `api`), `shareLinkKeys`(`features/share-link/api/shareLinkApi.ts`)
 - Handler: `handleGenerate()`, 흐름 hook: `useConfirmLogout()`, `useAbandonWalk()`
 - Boolean: `isWalkActive`, `hasPhotos`, `canGenerate`
 
