@@ -185,6 +185,7 @@ function formatWeather(
   return parts.length ? parts.join(", ") : null;
 }
 
+/** 앱 `WalkFinishScreen` 친구 만남 라벨과 같다. */
 function formatMeetingLevel(level?: string | null): string {
   if (level === "ONE_TO_TWO") return "1~2마리";
   if (level === "THREE_OR_MORE") return "3마리 이상";

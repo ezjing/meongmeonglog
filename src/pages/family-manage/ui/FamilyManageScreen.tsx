@@ -8,6 +8,7 @@ import { guardianTitleOrDefault, useGuardianProfile } from '@/entities/guardian'
 import {
   formatInviteShareMessage,
   householdTitle,
+  INVITE_EXPIRES_DAYS,
   useCreateHouseholdInvite,
   useHouseholds,
 } from '@/entities/household';
@@ -180,7 +181,7 @@ export function FamilyManageScreen() {
       <BottomSheet
         visible={inviteCode != null}
         title="초대 코드"
-        subtitle="가족에게 이 코드를 알려 주세요. 7일 동안 한 번만 쓸 수 있어요."
+        subtitle={`가족에게 이 코드를 알려 주세요. ${INVITE_EXPIRES_DAYS}일 동안 한 번만 쓸 수 있어요.`}
         onClose={() => setInviteCode(null)}
       >
         <Text style={styles.code}>{inviteCode}</Text>

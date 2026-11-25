@@ -4,6 +4,7 @@ export {
   pauseWalkLocationUpdates,
   stopWalkTracking,
 } from './lib/walkTracking';
+export { MAX_WALK_PHOTOS } from './config/walk';
 export { bindWebWalkWatch } from './lib/webWalkWatch';
 export {
   activeWalksQueryKey,

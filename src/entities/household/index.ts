@@ -6,6 +6,12 @@ export {
   removeHouseholdMember,
 } from './api/householdApi';
 export {
+  INVITE_ATTEMPT_BLOCK_HOURS,
+  INVITE_CODE_LENGTH,
+  INVITE_EXPIRES_DAYS,
+  MAX_HOUSEHOLD_MEMBERS,
+} from './config/household';
+export {
   householdKeys,
   useCreateHouseholdInvite,
   useHouseholds,

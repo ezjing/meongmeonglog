@@ -51,7 +51,7 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
           const ownCount = dogsOfHousehold(dogs, ownId).length;
           if (ownCount >= MAX_DOG_COUNT) {
             showToast({
-              message: '강아지는 최대 10마리까지 등록할 수 있어요',
+              message: `강아지는 최대 ${MAX_DOG_COUNT}마리까지 등록할 수 있어요`,
               variant: 'warning',
             });
             return;

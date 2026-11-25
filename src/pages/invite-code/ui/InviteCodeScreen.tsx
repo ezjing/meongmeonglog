@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import {
+  INVITE_CODE_LENGTH,
   inviteFailedMessage,
   inviteWarningMessage,
   normalizeInviteCode,
@@ -22,8 +23,6 @@ import { KeyboardAwareScrollView } from '@/shared/ui/KeyboardAwareScrollView';
 import { useOverlay } from '@/shared/ui/overlay';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
 
-const CODE_LENGTH = 6;
-
 export function InviteCodeScreen() {
   const [code, setCode] = useState('');
   const [isChecking, setIsChecking] = useState(false);
@@ -31,7 +30,7 @@ export function InviteCodeScreen() {
   const normalized = normalizeInviteCode(code);
 
   const handleConfirm = async () => {
-    if (normalized.length !== CODE_LENGTH || isChecking) return;
+    if (normalized.length !== INVITE_CODE_LENGTH || isChecking) return;
     setIsChecking(true);
     try {
       await previewHouseholdInvite(normalized);
@@ -54,17 +53,17 @@ export function InviteCodeScreen() {
         <TextInput
           style={styles.input}
           value={code}
-          onChangeText={(text) => setCode(normalizeInviteCode(text).slice(0, CODE_LENGTH))}
-          placeholder="6자리 코드"
+          onChangeText={(text) => setCode(normalizeInviteCode(text).slice(0, INVITE_CODE_LENGTH))}
+          placeholder={`${INVITE_CODE_LENGTH}자리 코드`}
           placeholderTextColor={colors.fgSubtle}
           autoCapitalize="characters"
           autoCorrect={false}
-          maxLength={CODE_LENGTH}
+          maxLength={INVITE_CODE_LENGTH}
         />
         <Button
           label="확인"
           onPress={handleConfirm}
-          disabled={normalized.length !== CODE_LENGTH}
+          disabled={normalized.length !== INVITE_CODE_LENGTH}
           loading={isChecking}
         />
       </KeyboardAwareScrollView>

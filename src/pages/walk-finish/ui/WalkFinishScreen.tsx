@@ -9,6 +9,7 @@ import { findHousehold, otherMembers, useHouseholds } from '@/entities/household
 import {
   formatWalkWeather,
   getWalkDogIds,
+  MAX_WALK_PHOTOS,
   loadPersistedWalkState,
   useWalkStore,
 } from '@/entities/walk';
@@ -46,9 +47,6 @@ import { BottomSheet, useOverlay } from '@/shared/ui/overlay';
 const PHOTO_SIZE = 56;
 const PHOTO_REMOVE_SIZE = 18;
 const MEMO_MIN_HEIGHT = 50;
-
-/** 산책 한 번에 첨부할 수 있는 사진 수 */
-const MAX_WALK_PHOTOS = 5;
 
 export function WalkFinishScreen() {
   const activeWalk = useWalkStore((s) => s.activeWalk);
@@ -207,6 +205,7 @@ export function WalkFinishScreen() {
     }
   };
 
+  // 서버 `_shared/speechStyle.ts` formatMeetingLevel과 같은 라벨
   const meetingOptions: { label: string; value: DogMeetingLevel }[] = [
     { label: '없음', value: 'NONE' },
     { label: '1~2마리', value: 'ONE_TO_TWO' },
