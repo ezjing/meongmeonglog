@@ -147,3 +147,9 @@ create index if not exists walks_in_progress_started_at
   `select reloptions from pg_class where relname = 'household_member_profiles';` → `{security_barrier=true,security_invoker=false}`
 
 - 2026-11-25 사용자: 현재 코드(초대 수락 중·후 미리보기 조회 끄기 포함)로 커밋·배포 승인
+
+### 배포 (2026-11-25)
+
+- 마이그레이션 `013` 원격 적용. 확인: 뷰 옵션 `{security_barrier=true,security_invoker=false}`, 인덱스 `walks_in_progress_started_at`, 정책 3개가 `in (select my_household_ids())`
+- Edge Function `delete-account` 배포
+- 웹 미리보기·정식 배포, Android OTA `00cb1cb1-8b55-4404-a8bf-acc339aee8df`

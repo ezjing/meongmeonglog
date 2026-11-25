@@ -30,7 +30,7 @@
 | [T08](T08-family-household.md)           | 가족: 집·초대 코드·권한·탈퇴 (가족·다견 계획 3단계 앞부분)                                                              | 완료 (배포됨)               | DB + Edge Function + 정책 페이지 + 웹 + OTA |
 | [T09](T09-family-walk.md)                | 가족: 같이 산책 (동시 산책 막기, 같이 간 가족, 일기 호칭). T08 배포 후                                                  | 완료 (배포됨)               | DB + Edge Function + 웹 + OTA               |
 | [T10](T10-web-photo-swipe.md)            | 웹 사진 넘기기: 점 표시·카운터 멈춤, 크게 보기 스와이프 렉 (iPhone 웹 제보). T09 번호는 가족 2부용                      | 완료 (배포됨)               | 웹                                          |
-| [T11](T11-family-perf-fixes.md)          | 가족 기능 성능·새로 고침 버그 (조회 RLS, 인덱스, 탈퇴 실패, 가족 변경 새로 고침, 초대 오류)                             | 완료 (배포 전)              | DB + Edge Function + 웹 + OTA               |
+| [T11](T11-family-perf-fixes.md)          | 가족 기능 성능·새로 고침 버그 (조회 RLS, 인덱스, 탈퇴 실패, 가족 변경 새로 고침, 초대 오류)                             | 완료 (배포됨)               | DB + Edge Function + 웹 + OTA               |
 | [T12](T12-structure-cleanup.md)          | 구조 정리·공통화 (화면 속 처리 이동, 반복 코드·숫자 상수, 서식). T11 다음                                               | 준비됨                      | 웹 + OTA (+ Edge Function)                  |
 | [T13](T13-docs-rules-tooling.md)         | 문서·Cursor 규칙·서식 검사(`npm run verify`). T12 다음                                                                  | 준비됨                      | 없음                                        |
 | [T14](T14-rls-recorder-scope.md)         | 산책 기록 쓰기 권한을 기록자 또는 관리자로 통일 (DB만). T11 다음                                                        | 준비됨                      | DB                                          |
