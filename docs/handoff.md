@@ -108,3 +108,22 @@
 - `eas` 명령은 `.env`를 읽지 않아 앱 설정 단계에서 카카오 플러그인이 실패한다 → `set -a && . ./.env && set +a` 후 실행. 번들 값은 EAS production 환경 변수(`--environment production`)를 쓴다(값은 `.env`와 같은 Supabase 프로젝트)
 - `supabase/.temp/cli-latest` 변경, `.env.example`(실제 값 포함, 커밋 금지)은 커밋하지 않는다
 - 시뮬레이터 자동화 도구의 탭 입력이 불안정했음 — 화면 확인은 `xcrun simctl io <udid> screenshot`이 확실함
+
+## 6. 기기별 차이 메모 (공유 일기 "나도 멍멍로그 시작하기")
+
+코드: `src/pages/shared-diary/lib/startMeongmeonglog(.web).ts`
+
+| 어디서 열었나 | 동작 | 이유 |
+|---|---|---|
+| Android 웹 | 앱이 있으면 앱 열기, 없으면 Play 스토어 | Android는 `intent://` 링크로 "앱이 있으면 열고 없으면 대체 주소"가 된다 (네이티브 빌드 불필요, 1.0.0도 앱 주소 `meongmeonglog://`가 있음) |
+| iPhone 웹 | 웹 첫 화면(로그인). Safari면 홈 화면 추가 안내 | iOS 앱이 아직 없다. 웹은 앱·PWA 설치 여부를 알 수 없고, 앱 주소로 열기를 시도하면 앱이 없을 때 Safari 오류창이 뜬다 |
+| PC 웹 | 웹 첫 화면(로그인) | 설치할 앱이 없다 |
+| 앱 안 | 앱 첫 화면 | 이미 앱이다 |
+
+iPhone PWA 한계:
+- 홈 화면에 PWA를 추가해도 **링크는 PWA로 열리지 않는다** (iOS가 링크를 PWA에 넘기지 않음). 카카오톡 인앱 브라우저나 Safari에서 열린다
+- PWA와 Safari는 로그인 정보를 따로 보관한다. PWA에서 로그인했어도 Safari에서는 다시 로그인해야 한다
+- 홈 화면 추가는 Safari에서만 된다. 카카오톡 인앱 브라우저에서는 안내 배너도 뜨지 않는다
+- "있으면 앱 열기"를 iPhone에서 하려면 iOS 네이티브 앱 + Universal Links가 필요하다
+
+확인 안 된 것: Android에서 앱이 없을 때 Play 스토어로 가는지, 카카오톡 인앱 브라우저에서 `intent://`가 동작하는지.
