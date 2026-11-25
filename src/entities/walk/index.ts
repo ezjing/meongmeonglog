@@ -6,6 +6,7 @@ export {
 } from './lib/walkTracking';
 export { bindWebWalkWatch } from './lib/webWalkWatch';
 export {
+  activeWalksQueryKey,
   useActiveWalksForDogs,
   useCancelWalk,
   useDeleteDiaryFromWalk,

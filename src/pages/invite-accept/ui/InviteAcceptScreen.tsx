@@ -1,14 +1,13 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { dogKeys, DogAvatar, formatWalkPartyName } from '@/entities/dog';
+import { DogAvatar, formatWalkPartyName } from '@/entities/dog';
 import {
   formatInviteAcceptTitle,
   inviteWarningMessage,
-  useAcceptHouseholdInvite,
   useInvitePreview,
 } from '@/entities/household';
+import { useAcceptInvite } from '@/features/family';
 import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
 import { firstParam } from '@/shared/lib/firstParam';
 import { Button } from '@/shared/ui/Button';
@@ -20,15 +19,17 @@ const DOG_AVATAR_SIZE = 56;
 export function InviteAcceptScreen() {
   const params = useLocalSearchParams<{ code?: string }>();
   const code = firstParam(params.code) ?? '';
-  const { data, isLoading, isError, error, refetch } = useInvitePreview(code);
-  const acceptInvite = useAcceptHouseholdInvite();
-  const queryClient = useQueryClient();
+  const acceptInvite = useAcceptInvite();
+  // 수락 중에는 미리보기를 끈다. 성공하면 hook이 그 조회를 지우고, 켜 둔 채 지우면 다시 요청한다.
+  const { data, isLoading, isError, error, refetch } = useInvitePreview(
+    code,
+    !acceptInvite.isPending && !acceptInvite.isSuccess,
+  );
   const { showToast } = useOverlay();
 
   const handleAccept = async () => {
     try {
       await acceptInvite.mutateAsync(code);
-      await queryClient.invalidateQueries({ queryKey: dogKeys.all });
       showToast({ message: '가족이 되었어요', variant: 'success' });
       router.replace('/(tabs)');
     } catch (acceptError) {

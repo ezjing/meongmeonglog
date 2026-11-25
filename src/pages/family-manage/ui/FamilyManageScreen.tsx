@@ -11,17 +11,10 @@ import {
   formatInviteShareMessage,
   useCreateHouseholdInvite,
   useHouseholds,
-  useLeaveHousehold,
-  useRemoveHouseholdMember,
 } from '@/entities/household';
 import type { HouseholdGroup, HouseholdMember } from '@/entities/household';
-import {
-  colors,
-  spacing,
-  radius,
-  fontSize,
-  fontWeight,
-} from '@/shared/config/theme';
+import { useLeaveHousehold, useRemoveMember } from '@/features/family';
+import { colors, spacing, radius, fontSize, fontWeight } from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -50,7 +43,7 @@ export function FamilyManageScreen() {
   const { data: dogs = [] } = useDogs();
   const { data: guardian } = useGuardianProfile();
   const createInvite = useCreateHouseholdInvite();
-  const removeMember = useRemoveHouseholdMember();
+  const removeMember = useRemoveMember();
   const leaveHouse = useLeaveHousehold();
   const { showAlert, showToast } = useOverlay();
   const [inviteCode, setInviteCode] = useState<string | null>(null);

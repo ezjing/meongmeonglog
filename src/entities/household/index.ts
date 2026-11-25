@@ -1,12 +1,15 @@
-export { fetchHouseholds, previewHouseholdInvite } from './api/householdApi';
+export {
+  acceptHouseholdInvite,
+  fetchHouseholds,
+  leaveHousehold,
+  previewHouseholdInvite,
+  removeHouseholdMember,
+} from './api/householdApi';
 export {
   householdKeys,
-  useAcceptHouseholdInvite,
   useCreateHouseholdInvite,
   useHouseholds,
   useInvitePreview,
-  useLeaveHousehold,
-  useRemoveHouseholdMember,
 } from './api/householdQueries';
 export {
   formatHouseholdTitle,

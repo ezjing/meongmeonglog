@@ -1,15 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { useAuthStore } from '@/shared/session/sessionStore';
 
-import {
-  acceptHouseholdInvite,
-  createHouseholdInvite,
-  fetchHouseholds,
-  leaveHousehold,
-  previewHouseholdInvite,
-  removeHouseholdMember,
-} from './householdApi';
+import { createHouseholdInvite, fetchHouseholds, previewHouseholdInvite } from './householdApi';
 
 export const householdKeys = {
   all: ['households'] as const,
@@ -33,39 +26,11 @@ export function useCreateHouseholdInvite() {
   });
 }
 
-export function useInvitePreview(code: string) {
+export function useInvitePreview(code: string, enabled = true) {
   return useQuery({
     queryKey: householdKeys.preview(code),
     queryFn: () => previewHouseholdInvite(code),
-    enabled: code.length > 0,
+    enabled: enabled && code.length > 0,
     retry: false,
-  });
-}
-
-export function useAcceptHouseholdInvite() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (code: string) => acceptHouseholdInvite(code),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: householdKeys.all }),
-  });
-}
-
-export function useRemoveHouseholdMember() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ householdId, userId }: { householdId: string; userId: string }) =>
-      removeHouseholdMember(householdId, userId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: householdKeys.all }),
-  });
-}
-
-export function useLeaveHousehold() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (householdId: string) => leaveHousehold(householdId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: householdKeys.all }),
   });
 }

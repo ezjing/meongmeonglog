@@ -15,13 +15,16 @@ import {
   fetchActiveWalksForDogs,
 } from './walkApi';
 
+/** 진행 중 산책 조회. 강아지 id와 상관없이 이 접두로 새로 고친다. */
+export const activeWalksQueryKey = ['walks', 'active'] as const;
+
 const walkKeys = {
   all: ['walks'] as const,
   detail: (walkId: string) => [...walkKeys.all, walkId] as const,
   photos: (walkId: string) => [...walkKeys.all, walkId, 'photos'] as const,
   dogs: (walkId: string) => [...walkKeys.all, walkId, 'dogs'] as const,
   people: (walkId: string) => [...walkKeys.all, walkId, 'people'] as const,
-  activeForDogs: (dogIds: string[]) => [...walkKeys.all, 'active', ...dogIds] as const,
+  activeForDogs: (dogIds: string[]) => [...activeWalksQueryKey, ...dogIds] as const,
 };
 
 export function useWalk(walkId: string | undefined) {
