@@ -5,7 +5,12 @@ import { MAX_DOG_COUNT, useSelectedDog } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
 import { isHouseholdAdmin, ownHouseholdId, useHouseholds } from '@/entities/household';
 import { EXTERNAL_LINKS } from '@/shared/config/links';
-import { openDogCreate, openDogEdit, openFamilyManage, openGuardianEdit } from '@/shared/lib/navigation';
+import {
+  openDogCreate,
+  openDogEdit,
+  openFamilyManage,
+  openGuardianEdit,
+} from '@/shared/lib/navigation';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Drawer, type DrawerItem, useOverlay } from '@/shared/ui/overlay';
 

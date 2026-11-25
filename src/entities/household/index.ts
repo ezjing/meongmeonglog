@@ -1,8 +1,4 @@
-export {
-  acceptHouseholdInvite,
-  fetchHouseholds,
-  previewHouseholdInvite,
-} from './api/householdApi';
+export { fetchHouseholds, previewHouseholdInvite } from './api/householdApi';
 export {
   householdKeys,
   useAcceptHouseholdInvite,
@@ -21,4 +17,4 @@ export {
   normalizeInviteCode,
   ownHouseholdId,
 } from './lib/household';
-export type { HouseholdGroup, HouseholdMember, InvitePreview } from './model/types';
+export type { HouseholdGroup, HouseholdMember } from './model/types';

@@ -62,9 +62,9 @@ export async function startWalk(dogIds: string[]): Promise<WalkSession> {
 
   const rest = dogIds.slice(1);
   if (rest.length > 0) {
-    const { error: linkError } = await supabase.from('walk_dogs').insert(
-      rest.map((dogId) => ({ walk_id: data.id, dog_id: dogId })),
-    );
+    const { error: linkError } = await supabase
+      .from('walk_dogs')
+      .insert(rest.map((dogId) => ({ walk_id: data.id, dog_id: dogId })));
     if (linkError) {
       await supabase.from('walks').delete().eq('id', data.id);
       throw new AppError(
@@ -203,7 +203,9 @@ export async function deleteWalk(walkId: string): Promise<void> {
 
   const folders = await walkPhotoFolders(walkId);
   for (const folder of folders) {
-    const { data: files, error: listError } = await supabase.storage.from('walk-photos').list(folder);
+    const { data: files, error: listError } = await supabase.storage
+      .from('walk-photos')
+      .list(folder);
     if (listError) throw new AppError('walk_delete_failed', listError.message);
 
     const paths = (files ?? [])
@@ -303,16 +305,6 @@ function toWalkEventRow(walkId: string, dogId: string, event: WalkEvent) {
     dog_meeting_level: event.dogMeetingLevel,
     memo: event.memo,
   };
-}
-
-export async function saveWalkEvent(walkId: string, dogId: string, event: WalkEvent): Promise<void> {
-  if (!isSupabaseConfigured) return;
-
-  const { error } = await supabase
-    .from('walk_events')
-    .upsert(toWalkEventRow(walkId, dogId, event), { onConflict: 'walk_id,dog_id' });
-
-  if (error) throw new AppError('event_save_failed', error.message);
 }
 
 /** 같이 간 가족. 기록한 사람은 넣지 않는다. 없으면 아무 것도 하지 않는다. */

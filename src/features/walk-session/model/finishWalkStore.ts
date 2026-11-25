@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import type { DogMeetingLevel } from '@/shared/api/database';
 
-export interface DogFinishEvent {
+interface DogFinishEvent {
   peeSelected: boolean;
   poopSelected: boolean;
   dogMeetingLevel: DogMeetingLevel;

@@ -1,6 +1,11 @@
 import { useRef, useState } from 'react';
 
-import { fetchActiveWalksForDogs, stopWalkTracking, useStartWalk, useWalkStore } from '@/entities/walk';
+import {
+  fetchActiveWalksForDogs,
+  stopWalkTracking,
+  useStartWalk,
+  useWalkStore,
+} from '@/entities/walk';
 import { AppError } from '@/shared/lib/AppError';
 import { requestWalkLocationPermissions } from '@/shared/lib/locationPermission';
 
@@ -9,7 +14,7 @@ import { primeWebWalkGeolocation, releaseWebWalkGeolocation } from '../lib/webWa
 
 const FALLBACK_GUARDIAN_TITLE = '보호자';
 
-export type StartWalkResult =
+type StartWalkResult =
   | { status: 'started' }
   | { status: 'permission_denied' }
   | { status: 'failed' }

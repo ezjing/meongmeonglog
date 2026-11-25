@@ -53,7 +53,10 @@ export function formatInviteAcceptTitle(guardianTitle: string | null | undefined
   return `${title}님의 집이에요`;
 }
 
-export function formatInviteShareMessage(guardianTitle: string | null | undefined, code: string): string {
+export function formatInviteShareMessage(
+  guardianTitle: string | null | undefined,
+  code: string,
+): string {
   const title = guardianTitle?.trim() || '보호자';
   return `${title}님이 멍멍로그 가족으로 초대했어요. 앱이나 ${WEB_ORIGIN} 에서 초대 코드 ${code}를 입력해 주세요. (7일 안에)`;
 }

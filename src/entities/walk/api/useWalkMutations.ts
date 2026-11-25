@@ -6,9 +6,7 @@ import {
   startWalk,
   finishWalk,
   cancelWalk,
-  deleteWalk,
   deleteDiaryFromWalk,
-  saveWalkEvent,
   uploadWalkPhotos,
   fetchWalk,
   fetchWalkPhotos,
@@ -16,7 +14,6 @@ import {
   fetchWalkPeople,
   fetchActiveWalksForDogs,
 } from './walkApi';
-import type { WalkEvent } from '../model/types';
 
 const walkKeys = {
   all: ['walks'] as const,
@@ -61,18 +58,6 @@ export function useCancelWalk() {
   });
 }
 
-export function useDeleteWalk() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: deleteWalk,
-    onSuccess: (_data, walkId) => {
-      queryClient.removeQueries({ queryKey: walkKeys.detail(walkId) });
-      queryClient.removeQueries({ queryKey: walkKeys.photos(walkId) });
-    },
-  });
-}
-
 export function useDeleteDiaryFromWalk() {
   const queryClient = useQueryClient();
 
@@ -83,13 +68,6 @@ export function useDeleteDiaryFromWalk() {
       queryClient.removeQueries({ queryKey: walkKeys.detail(walkId) });
       queryClient.removeQueries({ queryKey: walkKeys.photos(walkId) });
     },
-  });
-}
-
-export function useSaveWalkEvent() {
-  return useMutation({
-    mutationFn: ({ walkId, dogId, event }: { walkId: string; dogId: string; event: WalkEvent }) =>
-      saveWalkEvent(walkId, dogId, event),
   });
 }
 

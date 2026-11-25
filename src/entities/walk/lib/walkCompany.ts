@@ -6,7 +6,7 @@ const WITHDRAWN_FAMILY_LABEL = '탈퇴한 가족';
 const GUARDIAN_FALLBACK_LABEL = '보호자';
 
 /** 탈퇴한 사람은 탈퇴한 가족, 호칭이 없으면 보호자. */
-export function walkPersonLabel(person: WalkPerson): string {
+function walkPersonLabel(person: WalkPerson): string {
   if (!person.userId) return WITHDRAWN_FAMILY_LABEL;
   return person.title?.trim() || GUARDIAN_FALLBACK_LABEL;
 }

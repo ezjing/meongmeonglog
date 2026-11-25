@@ -13,7 +13,7 @@ export interface HouseholdGroup {
   members: HouseholdMember[];
 }
 
-export interface InvitePreviewDog {
+interface InvitePreviewDog {
   name: string;
   profileImageUrl: string | null;
   createdAt: string;
