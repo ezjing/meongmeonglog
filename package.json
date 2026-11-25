@@ -67,8 +67,9 @@
     "web": "expo start --web",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"*.{ts,js}\" \"plugins/**/*.js\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"*.{ts,js}\" \"plugins/**/*.js\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"*.{ts,js}\" \"plugins/**/*.js\" \"supabase/functions/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"*.{ts,js}\" \"plugins/**/*.js\" \"supabase/functions/**/*.ts\"",
+    "verify": "tsc --noEmit && eslint . && prettier --check \"src/**/*.{ts,tsx}\" \"*.{ts,js}\" \"plugins/**/*.js\" \"supabase/functions/**/*.ts\""
   },
   "private": true
 }

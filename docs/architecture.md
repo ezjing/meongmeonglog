@@ -95,4 +95,4 @@ slice 안은 목적별 세그먼트로 나눈다. 필요한 것만 만든다.
 - [ ] 다른 slice에서 쓰는 이름을 그 slice의 `index.ts`에 명시해서 추가했다
 - [ ] 쓰지 않게 된 public API export를 지웠다
 - [ ] 색·모서리·그림자는 `@/shared/config/theme`의 의미 토큰을 용도에 맞게 썼다
-- [ ] `npx tsc --noEmit`, `npm run lint`가 통과한다
+- [ ] `npm run verify`가 통과한다
