@@ -249,12 +249,14 @@ npx eas submit --platform android --id <BUILD_ID> --non-interactive
 
 ## 프로젝트 구조
 
-- `src/app/` — Expo Router 화면 (SC-01~SC-12)
-- `src/components/` — 공통 UI
-- `src/hooks/` — React Query / 커스텀 훅
-- `src/lib/` — Supabase, API, utils
-- `src/stores/` — Zustand (산책 세션)
-- `supabase/` — DB 마이그레이션, Edge Functions
+Feature-Sliced Design. 규칙은 [docs/architecture.md](docs/architecture.md).
+
+- `src/app/` — Expo Router 라우트 (화면을 re-export만)
+- `src/pages/` — 화면
+- `src/features/` — 여러 화면에서 쓰는 사용자 행동 (로그인, 산책 기록, 가족, 공유 링크 …)
+- `src/entities/` — 도메인 데이터 (dog, guardian, household, walk, diary)
+- `src/shared/` — 도메인을 모르는 공용 코드 (ui, api, lib, config, session)
+- `supabase/` — DB 마이그레이션, Edge Functions, 권한 시험 스크립트(`supabase/tests/`)
 
 ## MVP 화면
 

@@ -65,3 +65,18 @@
 - 확인하지 못한 것:
   - `.cursor/rules/projectOverview.mdc`, `docs/tasks/README.md` 진행 방식 2번, `docs/architecture.md` 맨 위 "lint가 통과해야 한다"는 지시서 목록에 없어 그대로 둠. 아직 `npx tsc --noEmit`, `npm run lint`
   - 화면 동작은 바꾸지 않음. `npm run verify`만 통과 확인
+
+## 검토 (Claude, 2026-11-25)
+
+결과: **통과.** `npm run verify` 통과 확인.
+
+- A·B: 구조 문서와 Cursor 규칙 4개에 household·`features/family`·`my_household_ids()` RLS 규칙·실제 query key·`npm run verify`가 반영됐다. 문서에 적힌 `src/`·`supabase/`·`docs/` 경로를 모두 확인했고 없는 파일을 가리키지 않는다 (아래 README 제외)
+- C: `verify`·`format`·`format:check`에 `supabase/functions` 포함, `.prettierignore`에서 제외. 서버 함수 서식 커밋(`97680c4`)은 따옴표·줄바꿈·쉼표만 바뀐 것을 파일별로 비교해 확인 (동작 변화 없음, 재배포 불필요)
+- D: handoff·README 네이버 안내가 지금과 맞다
+- 미승인 1건(handoff 5장 검증 명령을 `npm run verify`로): 유지 권장 — C의 의도와 같다
+
+검토하며 Claude가 직접 마무리한 것 (Cursor가 "목록에 없어 그대로 둠"이라 적은 곳)
+- `.cursor/rules/projectOverview.mdc`, `docs/tasks/README.md` 진행 방식, `docs/architecture.md` 맨 위의 검사 명령을 `npm run verify`로
+- `README.md` "프로젝트 구조"가 옛 폴더(`src/components` 등)를 적고 있어 FSD 구조로 바꿈
+
+- 2026-11-25 사용자: 미승인 1건(handoff 검증 명령) 유지

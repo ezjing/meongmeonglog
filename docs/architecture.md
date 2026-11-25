@@ -1,7 +1,7 @@
 # 멍멍로그 구조 규칙 (Feature-Sliced Design)
 
 [FSD 공식 문서](https://fsd.how/docs/get-started/overview/) 기준을 따른다.
-규칙 대부분은 `eslint.config.js`가 강제하므로 **`npm run lint`가 통과해야 한다.**
+규칙 대부분은 `eslint.config.js`가 강제하므로 **`npm run verify`(타입 검사·lint·서식)가 통과해야 한다.**
 
 ## 레이어
 

@@ -25,7 +25,7 @@ alwaysApply: true
 - 위 레이어만 아래를 import. 같은 레이어의 다른 slice는 import 금지(entities끼리는 `@x`만)
 - 다른 slice는 `index.ts`(이름 명시 re-export)로만, slice 내부는 상대 경로
 - 라우트 파일은 `export { XScreen as default } from '@/pages/x';` 한 줄
-- `npx tsc --noEmit`, `npm run lint`가 통과해야 한다. lint 규칙을 끄거나 예외를 추가해 우회하지 않는다
+- `npm run verify`(타입 검사·lint·서식)가 통과해야 한다. lint 규칙을 끄거나 예외를 추가해 우회하지 않는다
 
 ## 작업 원칙 (사용자 지시 — 반드시 지킨다)
 
