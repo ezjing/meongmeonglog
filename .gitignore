@@ -58,3 +58,4 @@ example
 
 # Supabase CLI 로컬 캐시 (연결 정보, 버전)
 supabase/.temp/
+supabase/.branches/

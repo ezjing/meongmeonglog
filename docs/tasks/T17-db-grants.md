@@ -116,3 +116,14 @@ DB 접근은 두 단계로 허락된다.
   - 각 커밋 전에 `npm run verify` 통과. 앱 코드 변경 없음
 - 확인하지 못한 것:
   - 원격 DB에 적용하지 않았다. 위 쿼리의 적용 전후 비교는 배포할 때 한다
+
+## 검토 (Claude, 2026-11-25)
+
+결과: **통과.** 수정 지시 없음. 지시서와 다른 점 없음. dry-run에서 올라갈 마이그레이션은 `016` 하나.
+
+- `016_explicit_grants.sql`이 지시서 SQL과 같다. 함수 일괄 grant 없음
+- Claude가 직접 다시 확인: `supabase db reset --local` 후 **손으로 권한을 주지 않고** `supabase/tests/rls_walk_write.sql` 실행 → `permission denied` 없이 기대 결과가 모두 나옴
+- 막아 둔 함수가 되살아나지 않음: `find_auth_user_id_by_email`·`transfer_household_admins`는 `service_role`만, `get_shared_diary`는 `anon`·`authenticated`, `is_household_member`는 `anon` 없음
+- 함께 정리: Supabase CLI가 새로 만든 로컬 캐시 `supabase/.branches/`를 `.gitignore`에 추가
+
+배포 때: 적용 직전·직후에 "구현 결과"의 비교 쿼리를 돌려 결과가 같은지 확인한다 (운영 권한 변화 없음)
