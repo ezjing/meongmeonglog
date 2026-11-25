@@ -4,7 +4,12 @@ export { DEFAULT_DOG_NAME, MAX_DOG_COUNT } from './config/dog';
 export { dogBreedOptions, filterDogBreeds } from './config/dogBreedLabels';
 export type { DogBreedOption } from './config/dogBreedLabels';
 export { personalityOptions, speechStyleOptions } from './config/personalityOptions';
-export { formatWalkPartyName, orderWalkDogs } from './lib/walkParty';
+export {
+  dogsOfHousehold,
+  formatHouseholdDogNames,
+  formatWalkPartyName,
+  orderWalkDogs,
+} from './lib/walkParty';
 export { useSelectedDogStore } from './model/selectedDogStore';
 export { useSelectedDog } from './model/useSelectedDog';
 export { useDiaryDogName, useDogDisplayName } from './model/useDogName';

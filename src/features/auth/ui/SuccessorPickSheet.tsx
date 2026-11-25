@@ -1,8 +1,8 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { formatWalkPartyName } from '@/entities/dog';
+import { dogsOfHousehold, formatHouseholdDogNames } from '@/entities/dog';
 import { guardianTitleOrDefault } from '@/entities/guardian';
-import { formatHouseholdTitle } from '@/entities/household';
+import { householdTitle, otherMembers } from '@/entities/household';
 import type { HouseholdGroup } from '@/entities/household';
 import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
@@ -27,23 +27,18 @@ export function SuccessorPickSheet({
   onNext,
   onClose,
 }: SuccessorPickSheetProps) {
-  const admin = house?.members.find((member) => member.role === 'admin');
-  const houseDogs = dogs
-    .filter((dog) => dog.householdId === house?.householdId)
-    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-  const candidates = house?.members.filter((member) => member.userId !== userId) ?? [];
+  const houseDogs = dogsOfHousehold(dogs, house?.householdId);
+  const candidates = house ? otherMembers(house, userId) : [];
 
   return (
     <BottomSheet
       visible={house != null}
       title="강아지를 맡을 가족을 골라 주세요"
-      subtitle={house ? formatHouseholdTitle(admin?.guardianTitle) : undefined}
+      subtitle={house ? householdTitle(house) : undefined}
       onClose={onClose}
     >
       {houseDogs.length > 0 ? (
-        <Text style={styles.successorDogs}>
-          {formatWalkPartyName(houseDogs[0]?.name ?? '', Math.max(houseDogs.length - 1, 0))}
-        </Text>
+        <Text style={styles.successorDogs}>{formatHouseholdDogNames(houseDogs)}</Text>
       ) : null}
       {candidates.map((member) => {
         const selected = member.userId === selectedUserId;

@@ -2,7 +2,7 @@ import { guardianTitleOrDefault } from '@/entities/guardian/@x/household';
 import { WEB_ORIGIN } from '@/shared/config/links';
 import { AppError } from '@/shared/lib/AppError';
 
-import type { HouseholdGroup } from '../model/types';
+import type { HouseholdGroup, HouseholdMember } from '../model/types';
 
 const INVITE_WARNING: Record<string, string> = {
   invite_rate_limited: '코드를 너무 많이 틀렸어요. 1시간 뒤에 다시 시도해 주세요.',
@@ -79,6 +79,23 @@ export function householdsNeedingSuccessor(
   return groups.filter(
     (group) => group.myRole === 'admin' && group.members.some((member) => member.userId !== userId),
   );
+}
+
+export function findHousehold(
+  groups: HouseholdGroup[] | null | undefined,
+  householdId: string | null | undefined,
+): HouseholdGroup | undefined {
+  return groups?.find((group) => group.householdId === householdId);
+}
+
+/** 관리자 호칭으로 집 이름을 만든다. 관리자가 없으면 보호자님의 집. */
+export function householdTitle(group: HouseholdGroup): string {
+  const admin = group.members.find((member) => member.role === 'admin');
+  return formatHouseholdTitle(admin?.guardianTitle);
+}
+
+export function otherMembers(group: HouseholdGroup, userId: string | null): HouseholdMember[] {
+  return group.members.filter((member) => member.userId !== userId);
 }
 
 export function formatHouseholdTitle(guardianTitle: string | null | undefined): string {

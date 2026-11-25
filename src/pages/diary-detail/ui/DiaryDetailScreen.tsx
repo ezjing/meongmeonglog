@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DiaryContentView, useDiary } from '@/entities/diary';
 import { useDiaryDogName } from '@/entities/dog';
-import { canManageRecord, useHouseholds } from '@/entities/household';
+import { canManageRecord, findHousehold, useHouseholds } from '@/entities/household';
 import { countWalkDiaries, formatWalkCompanyChip, useWalkPeople } from '@/entities/walk';
 import { colors, spacing } from '@/shared/config/theme';
 import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
@@ -93,8 +93,7 @@ export function DiaryDetailScreen() {
             photos.length > 0 ? `📷 ${photos.length}장` : null,
             formatWalkCompanyChip(
               walkPeople,
-              households?.find((group) => group.householdId === diary.householdId)?.members.length ??
-                0,
+            findHousehold(households, diary.householdId)?.members.length ?? 0,
             ),
           ].filter((chip): chip is string => chip != null)}
         />

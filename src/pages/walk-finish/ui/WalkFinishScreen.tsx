@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { formatWalkPartyName, useDogDisplayName, useSelectedDog } from '@/entities/dog';
 import { guardianTitleOrDefault } from '@/entities/guardian';
-import { useHouseholds } from '@/entities/household';
+import { findHousehold, otherMembers, useHouseholds } from '@/entities/household';
 import {
   formatWalkWeather,
   getWalkDogIds,
@@ -72,11 +72,8 @@ export function WalkFinishScreen() {
   });
   const sections = walkDogs.length > 0 ? walkDogs : [{ dogId: '', name: fallbackName }];
   const householdId = dogs?.find((dog) => dogIds.includes(dog.dogId))?.householdId;
-  const companionGroup = households?.find((item) => item.householdId === householdId);
-  const companionChoices =
-    companionGroup && userId
-      ? companionGroup.members.filter((member) => member.userId !== userId)
-      : [];
+  const companionGroup = findHousehold(households, householdId);
+  const companionChoices = companionGroup && userId ? otherMembers(companionGroup, userId) : [];
   const isMulti = dogIds.length > 1;
   const partyName = isMulti
     ? formatWalkPartyName(sections[0]?.name || fallbackName, dogIds.length - 1)

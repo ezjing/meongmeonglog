@@ -13,7 +13,10 @@ export {
 } from './api/householdQueries';
 export {
   canManageRecord,
+  findHousehold,
   formatHouseholdTitle,
+  householdTitle,
+  otherMembers,
   formatInviteAcceptTitle,
   formatInviteShareMessage,
   inviteFailedMessage,

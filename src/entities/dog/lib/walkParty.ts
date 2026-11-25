@@ -1,3 +1,17 @@
+export function dogsOfHousehold<T extends { householdId: string; createdAt: string }>(
+  dogs: T[],
+  householdId: string | null | undefined,
+): T[] {
+  return dogs
+    .filter((dog) => dog.householdId === householdId)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+/** 등록이 빠른 강아지 이름과 나머지 마리 수. 없으면 빈 문자열. */
+export function formatHouseholdDogNames(dogs: { name: string }[]): string {
+  return formatWalkPartyName(dogs[0]?.name ?? '', Math.max(dogs.length - 1, 0));
+}
+
 export function formatWalkPartyName(representativeName: string, extraCount: number): string {
   if (extraCount <= 0) return representativeName;
   return `${representativeName} 외 ${extraCount}마리`;

@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { DogAvatar, formatWalkPartyName } from '@/entities/dog';
+import { DogAvatar, formatHouseholdDogNames } from '@/entities/dog';
 import {
   formatInviteAcceptTitle,
   inviteFailedMessage,
@@ -49,7 +49,7 @@ export function InviteAcceptScreen() {
 
   const dogNames =
     data && data.dogs.length > 0
-      ? `${formatWalkPartyName(data.dogs[0]?.name ?? '', Math.max(data.dogs.length - 1, 0))}의 산책 일기를 함께 보고 기록할 수 있어요`
+      ? `${formatHouseholdDogNames(data.dogs)}의 산책 일기를 함께 보고 기록할 수 있어요`
       : '아직 등록된 강아지가 없어요. 가족이 되면 함께 기록할 수 있어요';
 
   return (

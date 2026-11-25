@@ -1,7 +1,7 @@
 import { openBrowserAsync } from 'expo-web-browser';
 import { useMemo } from 'react';
 
-import { MAX_DOG_COUNT, useSelectedDog } from '@/entities/dog';
+import { dogsOfHousehold, MAX_DOG_COUNT, useSelectedDog } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
 import { ownHouseholdId, useHouseholds } from '@/entities/household';
 import { EXTERNAL_LINKS } from '@/shared/config/links';
@@ -48,7 +48,7 @@ export function SettingsDrawer({ visible, onClose, onLogout }: SettingsDrawerPro
         onPress: () => {
           if (!dogs || !households) return;
           const ownId = ownHouseholdId(households);
-          const ownCount = dogs.filter((item) => item.householdId === ownId).length;
+          const ownCount = dogsOfHousehold(dogs, ownId).length;
           if (ownCount >= MAX_DOG_COUNT) {
             showToast({
               message: '강아지는 최대 10마리까지 등록할 수 있어요',

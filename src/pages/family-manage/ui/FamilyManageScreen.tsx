@@ -3,12 +3,12 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Clipboard, Platform, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
-import { DogAvatar, formatWalkPartyName, useDogs } from '@/entities/dog';
+import { DogAvatar, dogsOfHousehold, formatHouseholdDogNames, useDogs } from '@/entities/dog';
 import type { DogProfile } from '@/entities/dog';
 import { guardianTitleOrDefault, useGuardianProfile } from '@/entities/guardian';
 import {
-  formatHouseholdTitle,
   formatInviteShareMessage,
+  householdTitle,
   useCreateHouseholdInvite,
   useHouseholds,
 } from '@/entities/household';
@@ -124,13 +124,10 @@ export function FamilyManageScreen() {
           </View>
         ) : null}
         {(households ?? []).map((group) => {
-          const admin = group.members.find((member) => member.role === 'admin');
-          const houseDogs = dogs
-            .filter((dog) => dog.householdId === group.householdId)
-            .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+          const houseDogs = dogsOfHousehold(dogs, group.householdId);
           return (
             <Card key={group.householdId} style={styles.card}>
-              <Text style={styles.houseTitle}>{formatHouseholdTitle(admin?.guardianTitle)}</Text>
+              <Text style={styles.houseTitle}>{householdTitle(group)}</Text>
               <HouseholdDogs dogs={houseDogs} />
               {group.members.map((member) => (
                 <View key={member.userId} style={styles.memberRow}>
@@ -197,7 +194,7 @@ export function FamilyManageScreen() {
 
 function HouseholdDogs({ dogs }: { dogs: DogProfile[] }) {
   if (dogs.length === 0) return null;
-  const names = formatWalkPartyName(dogs[0]?.name ?? '', Math.max(dogs.length - 1, 0));
+  const names = formatHouseholdDogNames(dogs);
   return (
     <View style={styles.dogs}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
