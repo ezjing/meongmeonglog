@@ -1,0 +1,56 @@
+# T13. 문서·Cursor 규칙·서식 검사 맞추기 (T12 다음)
+
+가족·다견 기능(T06~T10) 뒤 문서와 규칙이 코드와 어긋났다. 코드 동작은 바꾸지 않는다.
+
+## A. 구조 문서
+
+`docs/architecture.md`
+- entities 도메인 목록에 `household` 추가 (`dog, guardian, walk, diary` → 지금 slice 기준)
+- features 예시에 `family`(T11) 반영
+- `@x` 예시에 실제로 있는 것(`entities/walk/@x/diary.ts`, `entities/dog/@x/diary.ts` 등)을 확인해 맞춘다
+- "새 코드 어디에 둘까" 표에 "앱·서버에 같이 있는 값은 config 상수 + SQL 동기화 주석" 한 줄 추가
+
+## B. Cursor 규칙 (`.cursor/rules/`)
+
+1. `stateManagement.mdc`
+   - 조회 파일 표에 `householdQueries.ts`, 선택한 강아지 store(`useSelectedDogStore`, AsyncStorage) 추가
+   - `diaryKeys` 예시를 실제(`src/entities/diary/api/diaryApi.ts`의 `diaryKeys`, T12에서 바뀌었으면 그 기준)와 같게
+   - "가족·강아지가 바뀌는 변경은 `features/family`의 hook으로 하고 관련 조회를 한 번에 새로 고친다" 추가
+2. `supabasePatterns.mdc`
+   - entity 목록에 `household` 추가
+   - `startWalk` 예시를 지금 코드(`startWalk(dogIds: string[])`, 대표 강아지는 트리거)로 바꾼다
+   - RLS 작성 규칙 추가: "집 단위 조회 정책은 `household_id in (select public.my_household_ids())` 형태로 (행마다 함수 호출 금지)" (T11 A 기준)
+3. `namingConventions.mdc`: query key 목록을 실제 export(`diaryKeys`, `dogKeys`, `guardianKeys`, `householdKeys`, `walkKeys`, `shareLinkKeys`)에 맞춘다
+4. `taskWorkflow.mdc`: 완료 조건에 `npm run format:check`를 넣는다 (아래 C)
+
+## C. 서식 검사를 빠뜨리지 않게
+
+지금 `npm run lint`는 서식(Prettier)을 검사하지 않아 서식이 어긋난 채로 들어왔다.
+- `package.json`에 `"verify": "tsc --noEmit && eslint . && prettier --check \"src/**/*.{ts,tsx}\" \"*.{ts,js}\" \"plugins/**/*.js\""` 같은 스크립트를 추가한다 (새 패키지 없이)
+- `AGENTS.md`, `docs/architecture.md` 체크리스트, `.cursor/rules/taskWorkflow.mdc`의 "통과해야 하는 검사"를 `npm run verify` 하나로 바꾼다
+- `supabase/functions`도 Prettier 대상에 넣는다 (사용자 승인, 2026-11-25): `.prettierignore`에서 빼고, `format`·`format:check`·`verify` 경로에 `supabase/functions/**/*.ts`를 더하고, 한 번 서식을 맞춘다 (서식만 바꾸는 커밋은 따로)
+
+## D. 인계·작업 문서
+
+- `docs/handoff.md`: "다음은 T06(다견) — Cursor 구현 준비됨" 같은 지난 문장을 지우고 현재 상태(T01~T13, 결정 대기)로 정리
+- `docs/tasks/README.md`: T11~T13 상태, 결정 대기 표 갱신
+- `README.md`: 네이버 로그인 설정 절의 `EXPO_PUBLIC_NAVER_CLIENT_SECRET` 안내 등 지금과 다른 내용 정리 (앱은 브라우저 로그인, secret은 서버만)
+
+## 완료 조건
+
+- [ ] 문서·규칙에 적힌 파일 경로·이름이 실제로 있다 (grep으로 확인)
+- [ ] `npm run verify` 통과
+
+## 하지 말 것
+
+- 코드 동작 변경, push·배포
+
+## 배포
+
+없음 (문서만). `docs/`는 push하면 GitHub Pages에 반영된다.
+
+## 구현 결과 (Cursor가 작성)
+
+- 커밋:
+- 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
+- 확인하지 못한 것:
