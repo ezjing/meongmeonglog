@@ -1,6 +1,7 @@
 -- 산책 기록 쓰기 권한(T14) 시험. 로컬 DB에서만 실행한다 (테스트 계정을 만든다).
 -- 실행: supabase db reset --local 후
 --   docker exec -i supabase_db_meongmeonglog psql -U postgres -d postgres -q < supabase/tests/rls_walk_write.sql
+-- T17 이후에는 권한을 손으로 줄 필요 없다 (016이 운영과 같은 테이블 GRANT를 넣는다).
 -- 기대 결과는 각 \echo 제목에 적혀 있다. "오류여야 함"은 RLS 오류가 나야 정상이다.
 \set ON_ERROR_STOP off
 \pset pager off
