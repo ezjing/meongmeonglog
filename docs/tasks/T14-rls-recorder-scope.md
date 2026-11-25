@@ -60,3 +60,28 @@ T11의 `013` 다음 번호로 새 마이그레이션 `014_rls_recorder_scope.sql
   - `supabase db push --linked --dry-run`: 올라갈 마이그레이션은 `014_rls_recorder_scope.sql` 하나. 적용은 하지 않았다
 - 확인하지 못한 것:
   - 로컬 DB에서 마이그레이션을 적용한 뒤, 기록자 계정으로 산책 시작·종료·이벤트·사진 저장이 되는지, 같은 집 비관리자가 남의 산책 `walks` update를 못 하는지. Docker Desktop이 기동 직후 종료되어 `supabase start`를 하지 못했다
+
+## 검토 (Claude, 2026-11-25)
+
+결과: **통과.** 수정 지시 없음. 지시서와 다른 점 없음. 커밋은 마이그레이션 파일 하나(`014_rls_recorder_scope.sql`), 앱 코드 변경 없음. dry-run에서 올라갈 마이그레이션은 014 하나.
+
+- 표의 5개(`walks` update, `walk_dogs` 쓰기, `walk_events`·`walk_photos`·`diaries` insert)가 모두 `is_walk_recorder_or_admin`으로 바뀌었고, 기존 조건(강아지가 내 집 강아지, 대표 강아지와 같은 집 강아지)은 그대로 남았다. 이벤트·일기 insert는 그 강아지가 그 산책의 `walk_dogs`에 있는지도 본다
+- 보기 정책, 이미 기록자·관리자이던 수정·삭제, 좌표·같이 간 가족·공유 링크·사진 파일 정책은 건드리지 않았다
+- 앱 흐름 확인이 맞다: 산책 시작(`walks` insert 뒤 별도 요청으로 나머지 `walk_dogs` insert — 이때 산책 행이 이미 있어 기록자 판단이 된다), 날씨·종료 update, 이벤트 upsert(수정 쪽은 원래 기록자·관리자), 사진 insert 모두 기록자 기기에서 나간다. 대표 강아지 행은 009 트리거(security definer)라 정책과 무관. 일기 insert는 서버(service role)
+- 종료 시 `update ... select()`의 돌려받기는 012에서 고친 `walks` select 정책을 타므로 영향 없음
+- 남은 확인 (배포 후): 실기기에서 산책 시작 → 종료 → 사진·메모 저장 → 일기 생성이 전처럼 되는지. 강아지 2마리 산책도 한 번
+
+### 로컬 DB 실행 확인 (Claude, 2026-11-25)
+
+`supabase db reset --local`로 001~014를 새로 적용하고, 관리자(엄마)·기록자(딸)·일반 가족(아빠) 계정으로 SQL을 실행했다.
+
+| 누가 | 무엇을 | 결과 |
+|---|---|---|
+| 기록자 | 산책 시작, 강아지 추가, 종료(update), 이벤트 upsert(2마리), 사진 insert | ✅ 모두 성공 |
+| 일반 가족 | 산책·산책 강아지 보기 | ✅ 보임 (1건, 2마리) |
+| 일반 가족 | 남의 산책 update, 산책 강아지 delete | ✅ 0행 (막힘) |
+| 일반 가족 | 산책 강아지·이벤트·사진·일기 insert | ✅ RLS 오류 (막힘) |
+| 관리자 | 딸의 산책 update, 산책에 간 강아지 일기 insert | ✅ 성공 |
+| 기록자 | 산책에서 뺀 강아지로 이벤트·일기 insert | ✅ RLS 오류 (막힘) |
+
+참고: 로컬 DB는 `authenticated` 역할에 테이블 기본 권한(GRANT select·insert·update·delete)이 없어, 시험할 때만 원격과 같은 권한을 줬다. 원격(운영)은 Supabase 플랫폼 기본값으로 권한이 있다. 마이그레이션에 이 GRANT가 없어서, 프로젝트를 새로 만들면 앱이 테이블에 접근하지 못한다 → 별도 작업 후보(마이그레이션에 GRANT 명시).
