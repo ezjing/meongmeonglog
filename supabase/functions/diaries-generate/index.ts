@@ -1,73 +1,79 @@
 /// <reference path="../_shared/deno.d.ts" />
 
-import { guardianTitleOrDefault } from "../_shared/guardianTitle.ts";
-import { generateGroqContent } from "../_shared/groq.ts";
-import { serveJson } from "../_shared/http.ts";
-import { createAdminClient, getRequestUserId } from "../_shared/requestUser.ts";
+import { guardianTitleOrDefault } from '../_shared/guardianTitle.ts';
+import { generateGroqContent } from '../_shared/groq.ts';
+import { serveJson } from '../_shared/http.ts';
+import { createAdminClient, getRequestUserId } from '../_shared/requestUser.ts';
 import {
   buildDiaryImagePrompt,
   buildDiarySystemInstruction,
   buildDiaryUserPrompt,
-} from "../_shared/speechStyle.ts";
+} from '../_shared/speechStyle.ts';
 
 serveJson(async (req) => {
   const body = await req.json();
   const walkId = body.walkId as string | undefined;
   // dogId가 없으면 대표 강아지(walks.dog_id). 옛 앱은 walkId만 보낸다.
   const requestedDogId =
-    typeof body.dogId === "string" && body.dogId.length > 0 ? (body.dogId as string) : undefined;
-  if (!walkId) throw new Error("Walk not found");
+    typeof body.dogId === 'string' && body.dogId.length > 0 ? (body.dogId as string) : undefined;
+  if (!walkId) throw new Error('Walk not found');
 
   const supabase = createAdminClient();
   const userId = await getRequestUserId(req, supabase);
 
   const { data: walk, error: walkError } = await supabase
-    .from("walks")
+    .from('walks')
     .select(
-      "dog_id, recorded_by, duration_sec, distance_meter, weather_condition, weather_temp, walk_photos(image_url, sort_order)",
+      'dog_id, recorded_by, duration_sec, distance_meter, weather_condition, weather_temp, walk_photos(image_url, sort_order)',
     )
-    .eq("id", walkId)
+    .eq('id', walkId)
     .single();
 
-  if (walkError || !walk) throw new Error("Walk not found");
+  if (walkError || !walk) throw new Error('Walk not found');
 
   const dogId = requestedDogId ?? walk.dog_id;
 
-  const [linkResult, dogResult, existingDiaryResult, eventResult, companionResult] = await Promise.all([
-    supabase.from("walk_dogs").select("dog_id").eq("walk_id", walkId).eq("dog_id", dogId).maybeSingle(),
-    supabase
-      .from("dogs")
-      .select(
-        "id, user_id, household_id, name, breed, personality, custom_personality, speech_style, custom_speech_style",
-      )
-      .eq("id", dogId)
-      .maybeSingle(),
-    supabase
-      .from("diaries")
-      .select("id, diary_content, daily_quote, ai_model")
-      .eq("walk_id", walkId)
-      .eq("dog_id", dogId)
-      .maybeSingle(),
-    supabase
-      .from("walk_events")
-      .select("pee_count, poop_count, dog_meeting_level, memo")
-      .eq("walk_id", walkId)
-      .eq("dog_id", dogId)
-      .maybeSingle(),
-    supabase.from("walk_companions").select("user_id").eq("walk_id", walkId).order("user_id"),
-  ]);
+  const [linkResult, dogResult, existingDiaryResult, eventResult, companionResult] =
+    await Promise.all([
+      supabase
+        .from('walk_dogs')
+        .select('dog_id')
+        .eq('walk_id', walkId)
+        .eq('dog_id', dogId)
+        .maybeSingle(),
+      supabase
+        .from('dogs')
+        .select(
+          'id, user_id, household_id, name, breed, personality, custom_personality, speech_style, custom_speech_style',
+        )
+        .eq('id', dogId)
+        .maybeSingle(),
+      supabase
+        .from('diaries')
+        .select('id, diary_content, daily_quote, ai_model')
+        .eq('walk_id', walkId)
+        .eq('dog_id', dogId)
+        .maybeSingle(),
+      supabase
+        .from('walk_events')
+        .select('pee_count, poop_count, dog_meeting_level, memo')
+        .eq('walk_id', walkId)
+        .eq('dog_id', dogId)
+        .maybeSingle(),
+      supabase.from('walk_companions').select('user_id').eq('walk_id', walkId).order('user_id'),
+    ]);
 
   const dog = dogResult.data;
   const memberResult = dog?.household_id
     ? await supabase
-        .from("household_members")
-        .select("user_id")
-        .eq("household_id", dog.household_id)
-        .eq("user_id", userId)
+        .from('household_members')
+        .select('user_id')
+        .eq('household_id', dog.household_id)
+        .eq('user_id', userId)
         .maybeSingle()
     : { data: null };
   // 그 산책에 포함된 강아지이고, 요청자가 그 집의 구성원인지 확인한다
-  if (!dog || !memberResult.data || !linkResult.data) throw new Error("Walk not found");
+  if (!dog || !memberResult.data || !linkResult.data) throw new Error('Walk not found');
 
   const existingDiary = existingDiaryResult.data;
   if (existingDiary) {
@@ -87,11 +93,13 @@ serveJson(async (req) => {
   );
   const recorderId = (walk.recorded_by as string | null) ?? null;
   const companionIds = (companionResult.data ?? []).map((row: { user_id: string }) => row.user_id);
-  const profileIds = [...new Set([recorderId, userId, ...companionIds].filter((id): id is string => !!id))];
+  const profileIds = [
+    ...new Set([recorderId, userId, ...companionIds].filter((id): id is string => !!id)),
+  ];
   const { data: profiles, error: profileError } = await supabase
-    .from("users")
-    .select("id, guardian_title, parenting_style, current_concern")
-    .in("id", profileIds);
+    .from('users')
+    .select('id, guardian_title, parenting_style, current_concern')
+    .in('id', profileIds);
   if (profileError) throw profileError;
 
   const profileRows = (profiles ?? []) as {
@@ -150,12 +158,12 @@ serveJson(async (req) => {
   const parsed = JSON.parse(content);
 
   const { data: diary, error: diaryError } = await supabase
-    .from("diaries")
+    .from('diaries')
     .insert({
       walk_id: walkId,
       dog_id: dog.id,
-      diary_content: parsed.content ?? "오늘 산책 정말 즐거웠어!",
-      daily_quote: parsed.dailyQuote ?? "산책은 최고야!",
+      diary_content: parsed.content ?? '오늘 산책 정말 즐거웠어!',
+      daily_quote: parsed.dailyQuote ?? '산책은 최고야!',
       ai_model: model,
       generated_at: new Date().toISOString(),
     })

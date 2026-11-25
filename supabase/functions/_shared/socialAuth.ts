@@ -2,7 +2,12 @@
 
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-import { createAppLoginState, isAppLoginState, openAppLoginCode, sealAppLoginCode } from './appLogin.ts';
+import {
+  createAppLoginState,
+  isAppLoginState,
+  openAppLoginCode,
+  sealAppLoginCode,
+} from './appLogin.ts';
 import { serveJson } from './http.ts';
 import { createAdminClient } from './requestUser.ts';
 import type { SocialOAuth } from './socialOAuth.ts';

@@ -39,7 +39,10 @@ function fromBase64Url(value: string): Uint8Array {
 }
 
 async function deriveBytes(label: string): Promise<Uint8Array> {
-  const digest = await crypto.subtle.digest('SHA-256', encoder.encode(`${label}:${requireSecret()}`));
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    encoder.encode(`${label}:${requireSecret()}`),
+  );
   return new Uint8Array(digest);
 }
 
@@ -75,7 +78,11 @@ export function isAppLoginState(state: string | undefined): state is string {
 
 function parseState(state: string, provider: string): string {
   const [prefix, stateProvider, nonce] = state.split('.');
-  if (`${prefix}.` !== STATE_PREFIX || stateProvider !== provider || !/^[0-9a-f]{32}$/.test(nonce ?? '')) {
+  if (
+    `${prefix}.` !== STATE_PREFIX ||
+    stateProvider !== provider ||
+    !/^[0-9a-f]{32}$/.test(nonce ?? '')
+  ) {
     throw new Error('로그인에 실패했습니다.');
   }
   return nonce;

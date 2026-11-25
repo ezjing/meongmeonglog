@@ -98,11 +98,7 @@ function pathFromPublicUrl(url: string | null, bucket: string): string | null {
   }
 }
 
-async function removeStoragePaths(
-  supabaseAdmin: SupabaseClient,
-  bucket: string,
-  paths: string[],
-) {
+async function removeStoragePaths(supabaseAdmin: SupabaseClient, bucket: string, paths: string[]) {
   const unique = [...new Set(paths)];
   for (let i = 0; i < unique.length; i += LIST_PAGE_SIZE) {
     const chunk = unique.slice(i, i + LIST_PAGE_SIZE);
@@ -155,7 +151,12 @@ async function loadHouseholdFiles(
   return { walkFolders: [...folders], dogPaths };
 }
 
-function isKeptUserFile(path: string, userId: string, keepWalkIds: Set<string>, keepDogPaths: Set<string>) {
+function isKeptUserFile(
+  path: string,
+  userId: string,
+  keepWalkIds: Set<string>,
+  keepDogPaths: Set<string>,
+) {
   if (keepDogPaths.has(path)) return true;
   const [ownerId, walkId] = path.split('/');
   return ownerId === userId && keepWalkIds.has(walkId ?? '');
