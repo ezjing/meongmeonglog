@@ -1,7 +1,6 @@
-import { Image } from 'expo-image';
-import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import type { ViewStyle } from 'react-native';
 
-import { colors } from '@/shared/config/theme';
+import { Avatar } from '@/shared/ui/Avatar';
 
 const DEFAULT_SIZE = 42;
 
@@ -12,26 +11,5 @@ interface DogAvatarProps {
 }
 
 export function DogAvatar({ imageUri, size = DEFAULT_SIZE, style }: DogAvatarProps) {
-  return (
-    <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }, style]}>
-      {imageUri ? (
-        <Image
-          source={{ uri: imageUri }}
-          style={{ width: size, height: size, borderRadius: size / 2 }}
-          contentFit="cover"
-        />
-      ) : (
-        <Text style={{ fontSize: size * 0.45 }}>🐶</Text>
-      )}
-    </View>
-  );
+  return <Avatar imageUri={imageUri} size={size} emoji="🐶" style={style} />;
 }
-
-const styles = StyleSheet.create({
-  avatar: {
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-});

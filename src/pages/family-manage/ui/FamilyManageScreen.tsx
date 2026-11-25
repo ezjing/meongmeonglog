@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Clipboard, Platform, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
@@ -16,6 +15,7 @@ import type { HouseholdGroup, HouseholdMember } from '@/entities/household';
 import { useLeaveHousehold, useRemoveMember } from '@/features/family';
 import { colors, spacing, radius, fontSize, fontWeight } from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
+import { Avatar } from '@/shared/ui/Avatar';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { BottomSheet, useOverlay } from '@/shared/ui/overlay';
@@ -210,14 +210,7 @@ function HouseholdDogs({ dogs }: { dogs: DogProfile[] }) {
 }
 
 function MemberPhoto({ uri }: { uri: string | null }) {
-  if (!uri) {
-    return (
-      <View style={styles.memberFallback}>
-        <Text>🙂</Text>
-      </View>
-    );
-  }
-  return <Image source={{ uri }} style={styles.memberPhoto} contentFit="cover" />;
+  return <Avatar imageUri={uri} size={MEMBER_PHOTO_SIZE} emoji="🙂" emojiSize={fontSize.base} />;
 }
 
 const styles = StyleSheet.create({
@@ -239,20 +232,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xxs,
-  },
-  memberPhoto: {
-    width: MEMBER_PHOTO_SIZE,
-    height: MEMBER_PHOTO_SIZE,
-    borderRadius: MEMBER_PHOTO_SIZE / 2,
-    backgroundColor: colors.surfaceMuted,
-  },
-  memberFallback: {
-    width: MEMBER_PHOTO_SIZE,
-    height: MEMBER_PHOTO_SIZE,
-    borderRadius: MEMBER_PHOTO_SIZE / 2,
-    backgroundColor: colors.surfaceMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   cardButton: { marginTop: spacing.xs },
   muted: { color: colors.fgMuted, fontSize: fontSize.base },
