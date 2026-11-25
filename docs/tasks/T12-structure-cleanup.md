@@ -54,9 +54,9 @@ T11에서 만든 `features/family`를 그대로 쓴다.
 
 ## 공통 완료 조건
 
-- [ ] `npx tsc --noEmit`, `npm run lint`, `npm run format:check` 통과
-- [ ] `npx expo export --platform web`, `--platform android` 통과
-- [ ] 화면 문구·숫자 값·색 변경 없음 (B-4 아바타 배경, B-6 글자 간격은 승인된 변경)
+- [x] `npx tsc --noEmit`, `npm run lint`, `npm run format:check` 통과
+- [x] `npx expo export --platform web`, `--platform android` 통과
+- [x] 화면 문구·숫자 값·색 변경 없음 (B-4 아바타 배경, B-6 글자 간격은 승인된 변경)
 
 ## 하지 말 것
 
@@ -70,5 +70,29 @@ T11에서 만든 `features/family`를 그대로 쓴다.
 ## 구현 결과 (Cursor가 작성)
 
 - 커밋:
+  - `fdfee62` refactor: 탈퇴할 때 맡을 가족을 고르는 흐름을 auth로 옮긴다
+  - `cb0500c` refactor: 강아지 정보 수정 권한 확인을 한곳으로 모은다
+  - `9dad14f` refactor: 기록 삭제 권한 판단을 집 entity로 옮긴다
+  - `cd4e37c` refactor: 같이 산책할 강아지 선택과 시작 안내를 한곳으로 모은다
+  - `9f0af7d` refactor: 호칭이 없을 때 보호자로 부르는 처리를 한 함수로 모은다
+  - `59fb076` refactor: 집 이름과 강아지 목록 표시를 공통 함수로 묶는다
+  - `16d5392` refactor: 일기 목록 새로 고침을 한 함수로 묶는다
+  - `2c43458` refactor: 사람·강아지 사진을 공통 아바타로 묶는다
+  - `67b0726` refactor: 지도의 내 위치 버튼을 공통 컴포넌트로 뺀다
+  - `337fe04` refactor: 지도 화면의 import 순서를 맞춘다
+  - `d7858e2` refactor: 글자 간격 스케일을 두고 초대 코드에 맞춘다
+  - `3f98d1a` refactor: 앱과 서버가 같이 쓰는 숫자를 상수로 모은다
+  - `b0aeda3` refactor: 로그인 실패 안내를 한 함수로 고른다
+  - `320d125` refactor: 조회 hook과 거리·표시 함수 파일 이름을 맞춘다
+  - `a0ce96a` style: Prettier 서식을 맞춘다
 - 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
+  - 탈퇴 흐름은 `features/auth`에 둠. 지시서가 family 또는 auth를 허용하고, 탈퇴 호출이 auth에 있어서 auth를 씀
+  - 호칭 기본값은 `entities/guardian`과 집·산책용 `@x`. 서버는 `_shared/guardianTitle.ts`
+  - 지도 내 위치 버튼은 `features/walk-session`의 공통 컴포넌트. 지시서가 공통 컴포넌트 또는 `shared/ui/IconButton`을 허용
+  - 사람 아바타 글자 크기는 예전 기본값(`fontSize.base`)을 유지하고, 사진이 없을 때 배경만 `surfacePlaceholder`로 바꿈 (B-4, 승인됨)
+  - 초대 코드 글자 간격은 두 화면 모두 `letterSpacing.wider`(4). 입력 화면은 2에서 4로 바뀜 (B-6, 승인됨)
+  - 강아지 최대 10마리는 SQL에 같은 제한이 없어 기존 `MAX_DOG_COUNT`를 문구에 넣음. 산책 사진 5장도 서버 상수가 없어 `entities/walk/config`로만 옮기고 SQL 주석은 달지 않음
+  - `.cursor/rules/stateManagement.mdc`의 예시 파일 이름을 `guardianQueries.ts`, `walkQueries.ts`로 바꿈. 지운 파일을 가리키지 않게 한 것. `미승인`
 - 확인하지 못한 것:
+  - 화면을 눌러 탈퇴·가족·산책 시작·로그인 실패 문구를 다시 확인하지 않음. `tsc`, `lint`, `format:check`, 웹·안드로이드 번들 생성만 통과
+  - `diaries-generate`는 배포하지 않음. `_shared`의 보호자 함수를 쓰므로 배포할 때 그 Edge Function도 올려야 함
