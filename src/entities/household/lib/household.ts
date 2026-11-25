@@ -51,6 +51,19 @@ export function isHouseholdAdmin(groups: HouseholdGroup[], householdId: string):
   return groups.some((group) => group.householdId === householdId && group.myRole === 'admin');
 }
 
+/**
+ * 다른 가족이 있는 관리자 집. 탈퇴하려면 그 집의 강아지를 맡을 가족을 골라야 한다.
+ * SQL `transfer_household_admins`(010_households.sql)와 같다.
+ */
+export function householdsNeedingSuccessor(
+  groups: HouseholdGroup[],
+  userId: string | null,
+): HouseholdGroup[] {
+  return groups.filter(
+    (group) => group.myRole === 'admin' && group.members.some((member) => member.userId !== userId),
+  );
+}
+
 export function formatHouseholdTitle(guardianTitle: string | null | undefined): string {
   const title = guardianTitle?.trim() || '보호자';
   return `${title}님의 집`;

@@ -17,6 +17,7 @@ export {
   formatInviteShareMessage,
   inviteFailedMessage,
   inviteWarningMessage,
+  householdsNeedingSuccessor,
   isHouseholdAdmin,
   normalizeInviteCode,
   ownHouseholdId,
