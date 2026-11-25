@@ -31,8 +31,8 @@
 | Edge Functions 5개 | 배포 완료 (auth-kakao, auth-naver, diaries-generate, welcome-greeting, delete-account). 2026-11-24 T08 반영: `diaries-generate` v39(집 구성원 권한), `delete-account` v12(관리자 넘기기·남는 집 파일 보존). T09 반영: `diaries-generate` v40(같이 간 가족 호칭, 기록한 사람 기준 양육 정보). 쓰지 않던 share-card는 2026-11-18 삭제 |
 | DB 마이그레이션 | 001~012 원격 적용. 008 일기 공유 링크, 009 다견 산책, 010 가족(집·초대 코드·권한) — 2026-11-24 적용, 사용자 8명 → 집 8개. 011 같이 산책(같이 간 가족·동시 산책 막기·수정 권한) — 2026-11-24 적용. 012 산책 읽기 정책 수정 — 2026-11-25 적용 (010 이후 산책 시작이 RLS 오류로 모두 실패하던 문제). 적용 전 백업은 로컬 scratchpad에만 있음 |
 | 웹 미리보기 | `https://meongmeonglog--preview.expo.app` (alias `preview`). 2026-11-23 T06·T10·사진 4:3 반영본 |
-| 웹 정식 주소 | `https://meongmeonglog.expo.app` 배포됨 (2026-11-24 T08 가족·T09 같이 산책 반영). 카카오·네이버 콜백에 이 주소가 등록된 상태 |
-| 앱 OTA | production 채널, runtime 1.1.0, Android — Update group `a4d72075-3438-4b0f-8882-3ae75e496da9` (2026-11-24, T08 가족, T09 같이 산책). 이전: `24f2ada5-…`(T06 다견, T10 사진 넘기기, 일기 사진 4:3), `c98bca8b-…`(T05 기록 삭제, T07 AI 문구, 앱바 여백), `7d7c0c76-…`(T02 작은 정리), `022e79be-…`(좌표 묶음 전송·리사이즈·속도), `b55d06dc-…`(네이버 브라우저 로그인) |
+| 웹 정식 주소 | `https://meongmeonglog.expo.app` 배포됨 (2026-11-25 앱바 여백·홈 메뉴 높이·공유 일기 시작 버튼. 이전 2026-11-24 T08·T09). 카카오·네이버 콜백에 이 주소가 등록된 상태 |
+| 앱 OTA | production 채널, runtime 1.1.0, Android — Update group `756c6fa6-dcdb-477c-90a0-333db68fddd9` (2026-11-25, 가족·공유 일기 앱바 여백, 홈 메뉴 높이, 공유 일기 시작 버튼). 이전: `a4d72075-…`(T08 가족, T09 같이 산책), `24f2ada5-…`(T06 다견, T10 사진 넘기기, 일기 사진 4:3), `c98bca8b-…`(T05 기록 삭제, T07 AI 문구, 앱바 여백), `7d7c0c76-…`(T02 작은 정리), `022e79be-…`(좌표 묶음 전송·리사이즈·속도), `b55d06dc-…`(네이버 브라우저 로그인) |
 | 스토어 빌드 | production 1.1.0 (version code 6). preview 프로필 빌드는 없음 |
 | 정책 페이지 | GitHub Pages: `/meongmeonglog/terms-of-service`, `/privacy-policy`, `/account-deletion` |
 
