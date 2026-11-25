@@ -156,7 +156,7 @@ echo "AA:BB:...(SHA-1)" | tr -d ':' | xxd -r -p | openssl base64
 - `.env`에 `EXPO_PUBLIC_NAVER_CLIENT_SECRET` (Client Secret) 추가 필요
 - 제공 정보: **이메일 주소만** 사용 (계정 식별 + 설정 > 로그인 계정에 표시)
 - "개발 중" 상태에서는 등록자·멤버관리 테스터만 로그인 가능 → 출시 전 **검수상태 탭에서 검수 요청** 필요
-  - 검수 첨부용 캡처: `store-assets/screenshots/naver-review/` (개인정보 마스킹 완료)
+  - 검수 첨부용 캡처: `store-assets/screenshots/naver-review-v2/` (개인정보 마스킹 완료)
 
 #### 회원 탈퇴 시 연동 해제
 
@@ -183,7 +183,7 @@ npm run ios   # 또는 npm run android
 | 개인정보처리방침 | https://ezjing.github.io/meongmeonglog/privacy-policy | `docs/privacy-policy.md` |
 | 계정 삭제 안내 | https://ezjing.github.io/meongmeonglog/account-deletion | `docs/account-deletion.md` |
 
-> `docs/`는 공개 폴더라 개발 문서(architecture, design-tokens, web-plan)도 함께 공개됩니다. 보안 약점 등 민감한 내용은 적지 않습니다.
+> `docs/`는 공개 폴더라 개발 문서(architecture, design-tokens, tasks)도 함께 공개됩니다. 보안 약점 등 민감한 내용은 적지 않습니다.
 
 ## 배포 (Android)
 

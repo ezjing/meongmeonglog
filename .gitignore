@@ -55,3 +55,6 @@ example
 
 # 예시 파일에 실제 값이 들어 있어 커밋하지 않는다
 .env.example
+
+# Supabase CLI 로컬 캐시 (연결 정보, 버전)
+supabase/.temp/

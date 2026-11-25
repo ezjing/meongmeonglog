@@ -47,7 +47,7 @@
 - 앱은 이미지 공유를 유지하고 "링크 공유"와 "공유 중지"를 추가했다. 웹은 링크 공유만. 앱에서 쓰려면 OTA가 필요하다
 - 카카오 미리보기를 위해 `web.output`을 `server`로 바꿨다
 
-계획 전체: `docs/web-plan.md`. 결정 사항은 그대로다.
+웹 지원 결정 사항 (계획서는 완료 후 삭제):
 - 지도: Google Maps JS. 안드로이드 키와 웹 키는 분리한다. 웹 키 환경 변수는 `EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY`
 - 호스팅: EAS Hosting `*.expo.app`. 미리보기 alias는 `preview`
 - 산책: 화면이 켜진 동안만 기록. 승인된 안내 문구는 아래에 있다
@@ -56,7 +56,8 @@
 ### 다른 컴퓨터에서 시작하기 전에
 - 날씨 대체 주소·홈 화면 앱 위치·5장 안내·W5 공유 링크는 이 커밋들에 들어 있다. push는 사용자가 한다
 - `.env`는 git에 없다. 지금 컴퓨터를 그대로 복사해야 한다. 변수 이름만 적으면 Supabase URL·anon key, 카카오 네이티브 앱 키, 네이버 클라이언트 ID, 구글 지도 안드로이드 키·웹 키, `EXPO_PUBLIC_DEV_AUTH`, `ANDROID_SDK_PATH`, `GROQ_API_KEY`
-- `.env.example`에는 실제 값이 들어 있다. 커밋하지 않는다. `supabase/.temp/cli-latest`도 커밋하지 않는다
+- `.env.example`에는 실제 값이 들어 있다. 커밋하지 않는다
+- `supabase/.temp/`는 git에 없다(CLI 로컬 캐시). 새 컴퓨터에서는 `supabase login` 후 `supabase link --project-ref ansjpqdsujostrhukygy`를 한 번 실행한다. `--project-ref`를 붙이는 명령(함수 배포·secret)은 link 없이도 되고, `db push --linked`는 link가 필요하다
 - `eas` / `expo export` 전에 `set -a && . ./.env && set +a`. EAS는 `.env`를 읽지 않아 카카오 플러그인이 실패한다
 - 웹 배포: `npx expo export --platform web` 후 미리보기는 `npx eas-cli deploy --non-interactive --alias preview --export-dir dist`, 정식 주소는 `npx eas-cli deploy --non-interactive --prod --export-dir dist`. 실행 전 사용자 확인
 
@@ -106,7 +107,7 @@
 
 - 테스트 프레임워크 없음 (단위·E2E 없음)
 - `eas` 명령은 `.env`를 읽지 않아 앱 설정 단계에서 카카오 플러그인이 실패한다 → `set -a && . ./.env && set +a` 후 실행. 번들 값은 EAS production 환경 변수(`--environment production`)를 쓴다(값은 `.env`와 같은 Supabase 프로젝트)
-- `supabase/.temp/cli-latest` 변경, `.env.example`(실제 값 포함, 커밋 금지)은 커밋하지 않는다
+- `.env.example`(실제 값 포함)은 커밋하지 않는다
 - 시뮬레이터 자동화 도구의 탭 입력이 불안정했음 — 화면 확인은 `xcrun simctl io <udid> screenshot`이 확실함
 
 ## 6. 기기별 차이 메모 (공유 일기 "나도 멍멍로그 시작하기")
