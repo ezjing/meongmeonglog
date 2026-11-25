@@ -93,7 +93,7 @@ export function DiaryDetailScreen() {
             photos.length > 0 ? `📷 ${photos.length}장` : null,
             formatWalkCompanyChip(
               walkPeople,
-            findHousehold(households, diary.householdId)?.members.length ?? 0,
+              findHousehold(households, diary.householdId)?.members.length ?? 0,
             ),
           ].filter((chip): chip is string => chip != null)}
         />

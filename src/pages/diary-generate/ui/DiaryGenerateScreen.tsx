@@ -59,8 +59,7 @@ function SingleDogGenerate({ walkId, dogId }: { walkId: string; dogId?: string }
   const resetWalk = useWalkStore((s) => s.reset);
   const { dogs } = useSelectedDog();
   const fallbackName = useDogDisplayName();
-  const dogName =
-    dogs?.find((dog) => dog.dogId === dogId)?.name?.trim() || fallbackName;
+  const dogName = dogs?.find((dog) => dog.dogId === dogId)?.name?.trim() || fallbackName;
   const photos = useWalkPhotos(walkId);
   const { data: walk } = useWalk(walkId);
   const [diary, setDiary] = useState<Diary | null>(null);
@@ -123,7 +122,12 @@ function SingleDogGenerate({ walkId, dogId }: { walkId: string; dogId?: string }
 
         {!isGenerating && diary ? (
           <View style={styles.actions}>
-            <Button label="저장만 하기" variant="secondary" style={styles.actionBtn} onPress={goHome} />
+            <Button
+              label="저장만 하기"
+              variant="secondary"
+              style={styles.actionBtn}
+              onPress={goHome}
+            />
             <Button
               label="저장하고 공유하기"
               style={styles.actionBtnWide}
@@ -264,7 +268,12 @@ function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[]
 
         {batchDone ? (
           <View style={styles.actions}>
-            <Button label="저장만 하기" variant="secondary" style={styles.actionBtn} onPress={goHome} />
+            <Button
+              label="저장만 하기"
+              variant="secondary"
+              style={styles.actionBtn}
+              onPress={goHome}
+            />
             {viewed?.diary ? (
               <Button
                 label="저장하고 공유하기"
