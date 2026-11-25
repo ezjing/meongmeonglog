@@ -85,3 +85,7 @@ T11의 `013` 다음 번호로 새 마이그레이션 `014_rls_recorder_scope.sql
 | 기록자 | 산책에서 뺀 강아지로 이벤트·일기 insert | ✅ RLS 오류 (막힘) |
 
 참고: 로컬 DB는 `authenticated` 역할에 테이블 기본 권한(GRANT select·insert·update·delete)이 없어, 시험할 때만 원격과 같은 권한을 줬다. 원격(운영)은 Supabase 플랫폼 기본값으로 권한이 있다. 마이그레이션에 이 GRANT가 없어서, 프로젝트를 새로 만들면 앱이 테이블에 접근하지 못한다 → 별도 작업 후보(마이그레이션에 GRANT 명시).
+
+### 배포 (2026-11-25)
+
+- 마이그레이션 `014` 원격 적용. 확인: 새 정책 5종(`walks` update, `walk_dogs` insert·update·delete, `walk_events`·`walk_photos`·`diaries` insert)이 있고, 이전 정책 5개는 남아 있지 않다
