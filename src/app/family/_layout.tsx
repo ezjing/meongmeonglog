@@ -1,5 +1,5 @@
-import { Stack } from 'expo-router';
+import { SafeAreaStackLayout } from '@/shared/ui/SafeAreaStackLayout';
 
 export default function FamilyLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <SafeAreaStackLayout />;
 }
