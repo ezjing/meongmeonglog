@@ -136,19 +136,12 @@ async function loadHouseholdFiles(
   const dogIds = (dogs ?? []).map((dog) => dog.id as string);
   if (dogIds.length === 0) return { walkFolders: [], dogPaths };
 
-  const { data: walks, error: walkError } = await supabaseAdmin
-    .from('walks')
-    .select('id')
-    .in('dog_id', dogIds);
-  if (walkError) throw walkError;
-
-  const walkIds = (walks ?? []).map((walk) => walk.id as string);
-  if (walkIds.length === 0) return { walkFolders: [], dogPaths };
-
+  // 산책 id를 주소에 넣으면 기록이 많을 때 길이 제한으로 탈퇴가 실패한다.
+  // 강아지 id로 산책을 조인해 사진을 한 번에 가져온다.
   const { data: photos, error: photoError } = await supabaseAdmin
     .from('walk_photos')
-    .select('image_url')
-    .in('walk_id', walkIds);
+    .select('image_url, walks!inner(dog_id)')
+    .in('walks.dog_id', dogIds);
   if (photoError) throw photoError;
 
   const folders = new Set<string>();
