@@ -1,8 +1,8 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { splitWalkPath, type WalkCoord } from '@/entities/walk';
-import { colors, fontSize, radius, shadows, sizes, spacing } from '@/shared/config/theme';
+import { colors, spacing } from '@/shared/config/theme';
 
 import {
   DEFAULT_MAP_LATITUDE,
@@ -10,6 +10,7 @@ import {
   ROUTE_STROKE_WIDTH,
 } from '../config/walkTracking';
 import { subscribeWebWalkGeolocation } from '../lib/webWalkGeolocation';
+import { RecenterMapButton } from './RecenterMapButton';
 
 const GOOGLE_MAPS_WEB_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY;
 
@@ -211,14 +212,7 @@ export const WalkMap = memo(function WalkMap({ routePath }: WalkMapProps) {
         </View>
       ) : null}
       {!followUser && (lastPoint || hasLiveFix) ? (
-        <Pressable
-          style={styles.recenterBtn}
-          onPress={handleRecenter}
-          accessibilityRole="button"
-          accessibilityLabel="내 위치로 이동"
-        >
-          <Text style={styles.recenterText}>📍</Text>
-        </Pressable>
+        <RecenterMapButton onPress={handleRecenter} />
       ) : null}
     </View>
   );
@@ -234,17 +228,4 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   fallbackText: { color: colors.fgMuted, textAlign: 'center' },
-  recenterBtn: {
-    position: 'absolute',
-    right: spacing.ms,
-    bottom: spacing.ms,
-    backgroundColor: colors.surface,
-    borderRadius: radius.full,
-    width: sizes.iconButton,
-    height: sizes.iconButton,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadows.control,
-  },
-  recenterText: { fontSize: fontSize.lg },
 });
