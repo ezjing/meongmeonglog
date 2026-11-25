@@ -5,10 +5,10 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 import {
   KakaoIcon,
   NaverIcon,
-  PROVIDER_LABEL,
   useAuthSession,
   getKakaoAccessToken,
   isLoginCancelled,
+  loginErrorMessage,
   startAppOAuth,
   startWebOAuth,
 } from '@/features/auth';
@@ -26,7 +26,6 @@ import {
   hitSlop,
 } from '@/shared/config/theme';
 import { AnalyticsEvents, trackEvent } from '@/shared/lib/analytics';
-import { AppError } from '@/shared/lib/AppError';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
 import { BottomSheet, useOverlay } from '@/shared/ui/overlay';
@@ -52,15 +51,7 @@ export function LoginScreen() {
     router.replace(route);
   };
 
-  const getLoginErrorMessage = (error: unknown, providerLabel: string) => {
-    // SDK·브라우저 오류 문구(영어)는 보여주지 않고 앱이 만든 안내만 보여준다
-    if (error instanceof AppError) return error.message;
-    return `${providerLabel} 로그인에 실패했습니다.`;
-  };
-
   const handleProviderLogin = async (provider: AuthProvider, forceAccountPicker = false) => {
-    const providerLabel = PROVIDER_LABEL[provider];
-
     if (Platform.OS === 'web') {
       setIsStartingWebLogin(true);
       try {
@@ -68,7 +59,7 @@ export function LoginScreen() {
       } catch (error) {
         setIsStartingWebLogin(false);
         showToast({
-          message: getLoginErrorMessage(error, providerLabel),
+          message: loginErrorMessage(error, provider),
           variant: 'error',
         });
       }
@@ -92,7 +83,7 @@ export function LoginScreen() {
       trackEvent(AnalyticsEvents.loginComplete, { provider });
       await navigateAfterLogin(session.userId);
     } catch (error) {
-      const message = getLoginErrorMessage(error, providerLabel);
+      const message = loginErrorMessage(error, provider);
       // 직접 취소한 경우는 실패가 아니므로 웹 콜백 화면과 같이 안내(주황)로 보여준다
       showToast({ message, variant: isLoginCancelled(error) ? 'warning' : 'error' });
     }

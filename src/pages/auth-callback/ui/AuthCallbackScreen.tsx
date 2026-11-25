@@ -2,10 +2,15 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { isLoginCancelled, readWebOAuthCallback, useAuthSession } from '@/features/auth';
+import {
+  isLoginCancelled,
+  loginErrorMessage,
+  readWebOAuthCallback,
+  useAuthSession,
+} from '@/features/auth';
 import { resolveOnboardingRoute } from '@/features/onboarding';
+import type { AuthProvider } from '@/shared/api/database';
 import { colors, fontSize } from '@/shared/config/theme';
-import { AppError } from '@/shared/lib/AppError';
 import { firstParam } from '@/shared/lib/firstParam';
 import { useOverlay } from '@/shared/ui/overlay';
 
@@ -20,22 +25,20 @@ export function AuthCallbackScreen() {
     startedRef.current = true;
 
     const finish = async () => {
+      let provider: AuthProvider | null = null;
       try {
         const callback = readWebOAuthCallback({
           code: firstParam(params.code),
           state: firstParam(params.state),
           error: firstParam(params.error),
         });
+        provider = callback.provider;
         const session = await loginWithCode(callback);
         const route = await resolveOnboardingRoute(session.userId);
         router.replace(route);
       } catch (error) {
-        const message =
-          error instanceof AppError || error instanceof Error
-            ? error.message
-            : '로그인에 실패했습니다.';
         showToast({
-          message,
+          message: loginErrorMessage(error, provider),
           variant: isLoginCancelled(error) ? 'warning' : 'error',
         });
         router.replace('/login');
