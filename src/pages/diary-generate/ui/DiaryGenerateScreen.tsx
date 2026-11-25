@@ -1,8 +1,9 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { DiaryContentView, useGenerateDiary } from '@/entities/diary';
+import { DiaryContentView, invalidateDiaryLists, useGenerateDiary } from '@/entities/diary';
 import type { Diary } from '@/entities/diary';
 import { DEFAULT_DOG_NAME, useDogDisplayName, useSelectedDog } from '@/entities/dog';
 import { formatWalkWeather, useWalk, useWalkDogIds, useWalkStore } from '@/entities/walk';
@@ -11,6 +12,7 @@ import { colors, spacing } from '@/shared/config/theme';
 import { formatDistance, formatDuration } from '@/shared/lib/format';
 import { josa } from '@/shared/lib/josa';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
+import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';
 import { Chip } from '@/shared/ui/Chip';
 import { LoadingOverlayScreen } from '@/shared/ui/LoadingOverlay';
@@ -148,7 +150,8 @@ interface DogSlot {
 }
 
 function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[] }) {
-  const generateDiary = useGenerateDiary();
+  const generateDiary = useGenerateDiary({ refreshLists: false });
+  const queryClient = useQueryClient();
   const resetWalk = useWalkStore((s) => s.reset);
   const { dogs } = useSelectedDog();
   const photos = useWalkPhotos(walkId);
@@ -169,6 +172,12 @@ function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[]
     (dogId: string) => dogs?.find((dog) => dog.dogId === dogId)?.name?.trim() || DEFAULT_DOG_NAME,
     [dogs],
   );
+
+  const refreshLists = useCallback(() => {
+    const userId = useAuthStore.getState().userId;
+    if (!userId) return;
+    invalidateDiaryLists(queryClient, userId);
+  }, [queryClient]);
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -193,9 +202,10 @@ function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[]
         }
       }
       resetWalk();
+      refreshLists();
       setBatchDone(true);
     })();
-  }, [dogIds, generateDiary, resetWalk, walkId]);
+  }, [dogIds, generateDiary, refreshLists, resetWalk, walkId]);
 
   const retry = async (dogId: string) => {
     const index = dogIds.indexOf(dogId);
@@ -206,6 +216,7 @@ function MultiDogGenerate({ walkId, dogIds }: { walkId: string; dogIds: string[]
       setSlots((current) =>
         current.map((slot) => (slot.dogId === dogId ? { dogId, phase: 'done', diary } : slot)),
       );
+      refreshLists();
     } catch (error) {
       const errorMessage = diaryGenerateErrorMessage(error);
       setSlots((current) =>
