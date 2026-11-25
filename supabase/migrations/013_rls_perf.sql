@@ -41,3 +41,7 @@ for select using (id in (select public.my_household_ids()));
 drop policy if exists "household_members_select_member" on public.household_members;
 create policy "household_members_select_member" on public.household_members
 for select using (household_id in (select public.my_household_ids()));
+
+-- 끝나지 않은 산책(시작 트리거, active_walks_for_dogs)을 started_at으로 찾는다.
+create index if not exists walks_in_progress_started_at
+  on public.walks (started_at) where ended_at is null;
