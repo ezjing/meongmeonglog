@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
-import { diaryKeys } from '@/entities/diary';
+import { diaryKeys, invalidateDiaryLists } from '@/entities/diary';
 import type { Diary } from '@/entities/diary';
 import { useDeleteDiaryFromWalk } from '@/entities/walk';
 import { useAuthStore } from '@/shared/session/sessionStore';
@@ -19,11 +19,7 @@ export function useDeleteDiaryRecord() {
       if (!userId) return;
 
       queryClient.removeQueries({ queryKey: diaryKeys.detail(userId, diary.diaryId) });
-
-      void queryClient.invalidateQueries({ queryKey: [...diaryKeys.all, userId, 'recent'] });
-      void queryClient.invalidateQueries({ queryKey: [...diaryKeys.all, userId, 'list'] });
-      void queryClient.invalidateQueries({ queryKey: [...diaryKeys.all, userId, 'calendar'] });
-      void queryClient.resetQueries({ queryKey: [...diaryKeys.all, userId, 'pages'] });
+      invalidateDiaryLists(queryClient, userId);
     },
     [deleteDiary, queryClient],
   );

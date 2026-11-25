@@ -1,4 +1,4 @@
-export { diaryKeys, generateDiary } from './api/diaryApi';
+export { diaryKeys, generateDiary, invalidateDiaryLists } from './api/diaryApi';
 export {
   useCalendar,
   useDiariesByDate,

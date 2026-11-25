@@ -1,3 +1,5 @@
+import type { QueryClient } from '@tanstack/react-query';
+
 import { DEFAULT_DOG_NAME } from '@/entities/dog/@x/diary';
 import { fetchWalkPhotos, getMockWalk } from '@/entities/walk/@x/diary';
 import type { DiaryRow } from '@/shared/api/database';
@@ -62,7 +64,19 @@ export const diaryKeys = {
   detail: (userId: string, id: string) => [...diaryKeys.all, userId, id] as const,
   calendar: (userId: string, dogId: string, year: number, month: number) =>
     [...diaryKeys.all, userId, 'calendar', dogId, year, month] as const,
+  recentAll: (userId: string) => [...diaryKeys.all, userId, 'recent'] as const,
+  listAll: (userId: string) => [...diaryKeys.all, userId, 'list'] as const,
+  calendarAll: (userId: string) => [...diaryKeys.all, userId, 'calendar'] as const,
+  pagesAll: (userId: string) => [...diaryKeys.all, userId, 'pages'] as const,
 };
+
+/** 일기 목록·최근·달력은 다시 받고, 무한 스크롤은 쌓인 페이지를 비운다 */
+export function invalidateDiaryLists(queryClient: QueryClient, userId: string) {
+  void queryClient.invalidateQueries({ queryKey: diaryKeys.recentAll(userId) });
+  void queryClient.invalidateQueries({ queryKey: diaryKeys.listAll(userId) });
+  void queryClient.invalidateQueries({ queryKey: diaryKeys.calendarAll(userId) });
+  void queryClient.resetQueries({ queryKey: diaryKeys.pagesAll(userId) });
+}
 
 /** 특정 날짜(로컬 기준 YYYY-MM-DD)의 일기, 최신순 */
 export async function fetchDiariesByDate(date: string, dogId: string): Promise<DiaryListItem[]> {
