@@ -13,7 +13,14 @@ import {
 } from '@/entities/household';
 import type { HouseholdGroup, HouseholdMember } from '@/entities/household';
 import { useLeaveHousehold, useRemoveMember } from '@/features/family';
-import { colors, spacing, radius, fontSize, fontWeight } from '@/shared/config/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  fontWeight,
+  letterSpacing,
+} from '@/shared/config/theme';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Avatar } from '@/shared/ui/Avatar';
 import { Button } from '@/shared/ui/Button';
@@ -23,7 +30,6 @@ import { StackAppBar } from '@/shared/ui/StackAppBar';
 
 const MEMBER_PHOTO_SIZE = 40;
 const DOG_AVATAR_SIZE = 36;
-const CODE_LETTER_SPACING = 4;
 
 function memberLabel(member: HouseholdMember): string {
   return guardianTitleOrDefault(member.guardianTitle);
@@ -241,7 +247,7 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.extrabold,
     color: colors.fg,
     textAlign: 'center',
-    letterSpacing: CODE_LETTER_SPACING,
+    letterSpacing: letterSpacing.wider,
     marginBottom: spacing.md,
   },
   shareButton: { marginTop: spacing.sm },

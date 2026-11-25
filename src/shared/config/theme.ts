@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 /**
  * 화면 코드가 쓰는 디자인 토큰 입구 (명세: docs/design-tokens.md)
  * - 색·모서리·그림자·고정 크기: 2단계 의미 토큰 (tokens/semantic.ts)
- * - 간격·글자 크기 등 아래 스케일: 의미 없이 단계만 있는 기본값으로 화면에서 직접 쓴다
+ * - 간격·글자 간격·글자 크기 등 아래 스케일: 의미 없이 단계만 있는 기본값으로 화면에서 직접 쓴다
  * - 1단계 팔레트(tokens/primitive.ts, palette.json)는 화면 코드에서 import하지 않는다
  */
 export { colors, radius, shadows, sizes } from './tokens/semantic';
@@ -18,6 +18,12 @@ export const spacing = {
   ml: 20,
   lg: 24,
   xl: 32,
+} as const;
+
+export const letterSpacing = {
+  none: 0,
+  wide: 2,
+  wider: 4,
 } as const;
 
 export const fontSize = {

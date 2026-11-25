@@ -107,7 +107,7 @@
 
 ## 기본 스케일 (`theme.ts`)
 
-`spacing`, `fontSize`, `fontWeight`, `lineHeight`, `iconSize`, `emojiSize`, `borderWidth`, `opacity`, `scale`, `zIndex`, `hitSlop`은 의미 없이 단계만 있는 값이다. Tailwind 기본 스케일처럼 화면에서 직접 쓴다.
+`spacing`, `letterSpacing`(`none` 0, `wide` 2, `wider` 4), `fontSize`, `fontWeight`, `lineHeight`, `iconSize`, `emojiSize`, `borderWidth`, `opacity`, `scale`, `zIndex`, `hitSlop`은 의미 없이 단계만 있는 값이다. Tailwind 기본 스케일처럼 화면에서 직접 쓴다.
 
 ## 3단계 — 컴포넌트
 

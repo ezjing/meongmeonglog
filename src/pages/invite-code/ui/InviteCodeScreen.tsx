@@ -8,7 +8,15 @@ import {
   normalizeInviteCode,
   previewHouseholdInvite,
 } from '@/entities/household';
-import { colors, spacing, radius, fontSize, fontWeight, borderWidth } from '@/shared/config/theme';
+import {
+  colors,
+  spacing,
+  radius,
+  fontSize,
+  fontWeight,
+  borderWidth,
+  letterSpacing,
+} from '@/shared/config/theme';
 import { Button } from '@/shared/ui/Button';
 import { KeyboardAwareScrollView } from '@/shared/ui/KeyboardAwareScrollView';
 import { useOverlay } from '@/shared/ui/overlay';
@@ -77,6 +85,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
     color: colors.fg,
     textAlign: 'center',
-    letterSpacing: 2,
+    letterSpacing: letterSpacing.wider,
   },
 });
