@@ -96,5 +96,21 @@ create index if not exists walks_in_progress_started_at
 ## 구현 결과 (Cursor가 작성)
 
 - 커밋:
+  - `1195a1e` perf: 가족 목록 조회가 모든 행의 권한 함수를 타지 않게 한다
+  - `ab29d94` perf: 끝나지 않은 산책 조회에 부분 인덱스를 둔다
+  - `ad2d81d` fix: 산책이 많아도 탈퇴할 때 사진 조회가 실패하지 않게 한다
+  - `d119517` fix: 가족을 바꾸면 강아지·일기·진행 중 산책 캐시를 새로 고친다
+  - `78de7be` fix: 초대 코드를 확인하지 못한 오류를 코드 오류로 안내하지 않는다
 - 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
+  - 초대 수락 화면은 수락이 진행 중이거나 끝난 동안 미리보기 조회를 끈다. 화면이 떠 있는 상태에서 그 조회를 지우면 바로 다시 요청하기 때문이다. `미승인`
+- 확인한 것:
+  - `supabase db push --linked --dry-run`: `013_rls_perf.sql`만 원격에 올라갈 마이그레이션으로 나왔다. 적용은 하지 않았다
+  - 탈퇴 사진 조회는 `walk_photos`에 `walks!inner(dog_id)`를 넣고 `.in('walks.dog_id', dogIds)`로 거른다. 산책 id는 주소에 없다. 문법은 Supabase 조인 문서의 `!inner` + 조인된 컬럼 필터와 같다
+  - 수락 성공 시 `householdKeys.preview(code)`만 `removeQueries`하고, 가족 목록은 `householdKeys.list`만 새로 고친다
+  - `npx tsc --noEmit`, `npm run lint` 통과. `npx expo export --platform web`, `--platform android` 번들 생성 통과
 - 확인하지 못한 것:
+  - 로컬 DB에 마이그레이션을 넣고 `explain`으로 `dogs` 조회가 전체 스캔이 아닌지. Docker가 꺼져 있어 `supabase start`를 하지 못했다
+  - 뷰 `household_member_profiles`의 `security_barrier`, `security_invoker = false`가 `create or replace view` 뒤에도 남는지. 옵션은 바꾸지 않았고, 적용된 DB에서 다시 읽지는 못했다
+  - 앱에서 강아지·가족 목록이 내 집만 보이는지, 나가거나 내보낸 직후 그 집 강아지가 홈에 남지 않는지
+  - 산책이 많은 계정으로 탈퇴할 때 사진 조회가 성공하는지
+  - `npm run format:check`. 이 작업 밖 파일 4개(`DiaryDetailScreen`, `DiaryGenerateScreen`, `SettingsScreen`, `WelcomeScreen`)가 어긋나 있다. 서식만 맞추는 작업은 T12 F다
