@@ -7,6 +7,8 @@ export { useFinishWalkStore } from './model/finishWalkStore';
 export { useAbandonWalk } from './model/useAbandonWalk';
 export { useCompleteWalk } from './model/useCompleteWalk';
 export { resumeWalkSession, useStartWalkSession } from './model/useStartWalkSession';
+export { useWalkPartyPicker } from './model/useWalkPartyPicker';
+export { walkStartFeedback } from './model/walkMessages';
 export { getWalkElapsedSec } from './model/useElapsedSec';
 export { useWalkPhotos } from './model/useWalkPhotos';
 export { useWalkTracker } from './model/useWalkTracker';

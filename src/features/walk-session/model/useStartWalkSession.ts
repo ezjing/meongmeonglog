@@ -14,7 +14,7 @@ import { primeWebWalkGeolocation, releaseWebWalkGeolocation } from '../lib/webWa
 
 const FALLBACK_GUARDIAN_TITLE = '보호자';
 
-type StartWalkResult =
+export type StartWalkResult =
   | { status: 'started' }
   | { status: 'permission_denied' }
   | { status: 'failed' }

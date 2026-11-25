@@ -13,11 +13,16 @@ import {
 
 import { DiaryListCard, useDiariesByDate, useRecentDiaries } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
-import { DogAvatar, orderWalkDogs, useSelectedDog, useSelectedDogStore } from '@/entities/dog';
+import { DogAvatar, useSelectedDog, useSelectedDogStore } from '@/entities/dog';
 import { useActiveWalksForDogs, useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
-import { resumeWalkSession, useStartWalkSession } from '@/features/walk-session';
+import {
+  resumeWalkSession,
+  useStartWalkSession,
+  useWalkPartyPicker,
+  walkStartFeedback,
+} from '@/features/walk-session';
 import {
   colors,
   spacing,
@@ -30,7 +35,6 @@ import {
   borderWidth,
 } from '@/shared/config/theme';
 import { formatDistance, calculateAge } from '@/shared/lib/formatDistance';
-import { josa } from '@/shared/lib/josa';
 import { getLocalDateKey } from '@/shared/lib/localDate';
 import { Card } from '@/shared/ui/Card';
 import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';
@@ -101,8 +105,7 @@ export function HomeScreen() {
   );
   const pendingPhotosByWalkId = useWalkStore((s) => s.pendingWalkPhotosByWalkId);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [pickerVisible, setPickerVisible] = useState(false);
-  const [checkedDogIds, setCheckedDogIds] = useState<string[]>([]);
+  const party = useWalkPartyPicker(dog, dogs);
   const confirmLogout = useConfirmLogout();
   const [profilePreviewVisible, setProfilePreviewVisible] = useState(false);
   const { showToast } = useOverlay();
@@ -149,59 +152,16 @@ export function HomeScreen() {
     const result = await startWalkSession(dogIds);
     if (result.status === 'started') {
       router.push('/walk/active');
-    } else if (result.status === 'permission_denied') {
-      showToast({
-        message:
-          Platform.OS === 'ios'
-            ? '산책 기록을 위해 위치 "항상 허용"이 필요해요. 설정에서 권한을 확인해 주세요.'
-            : Platform.OS === 'web'
-              ? '산책 기록을 위해 위치 권한을 허용해 주세요.'
-              : '산책 기록을 위해 위치(앱 사용 중)와 알림 권한을 허용해 주세요.',
-        variant: 'warning',
-      });
-    } else if (result.status === 'in_progress') {
-      showToast({
-        message: `${result.dogName}${josa(result.dogName, '은', '는')} 지금 ${result.guardianTitle}님과 산책 중이에요`,
-        variant: 'warning',
-      });
-    } else if (result.status === 'failed') {
-      showToast({ message: '산책을 시작하지 못했어요. 다시 시도해주세요.', variant: 'error' });
+      return;
     }
+    const feedback = walkStartFeedback(result);
+    if (feedback) showToast(feedback);
   };
-
-  const partyDogs = dog ? dogs.filter((item) => item.householdId === dog.householdId) : [];
 
   const handleStartWalk = () => {
-    if (!dog) return;
-    if (partyDogs.length <= 1) {
-      void beginWalk([dog.dogId]);
-      return;
-    }
-    setCheckedDogIds([dog.dogId]);
-    setPickerVisible(true);
-  };
-
-  const handleToggleDog = (dogId: string) => {
-    setCheckedDogIds((current) =>
-      current.includes(dogId) ? current.filter((id) => id !== dogId) : [...current, dogId],
-    );
-  };
-
-  const handleConfirmParty = () => {
-    if (!dog) return;
-    if (checkedDogIds.length === 0) {
-      showToast({
-        message: '함께 산책할 강아지를 골라 주세요',
-        variant: 'warning',
-      });
-      return;
-    }
-    const ordered = orderWalkDogs(
-      partyDogs.filter((item) => checkedDogIds.includes(item.dogId)),
-      dog.dogId,
-    ).map((item) => item.dogId);
-    setPickerVisible(false);
-    void beginWalk(ordered);
+    party.beginSelection((dogIds) => {
+      void beginWalk(dogIds);
+    });
   };
 
   return (
@@ -310,12 +270,12 @@ export function HomeScreen() {
         onClose={() => setProfilePreviewVisible(false)}
       />
       <WalkDogPickerSheet
-        visible={pickerVisible}
-        dogs={partyDogs}
-        checkedDogIds={checkedDogIds}
-        onToggle={handleToggleDog}
-        onStart={handleConfirmParty}
-        onClose={() => setPickerVisible(false)}
+        visible={party.pickerVisible}
+        dogs={party.partyDogs}
+        checkedDogIds={party.checkedDogIds}
+        onToggle={party.toggleDog}
+        onStart={() => party.confirmParty((dogIds) => void beginWalk(dogIds))}
+        onClose={party.closePicker}
       />
       <Modal visible={isStartingWalk} transparent animationType="fade" statusBarTranslucent>
         <LoadingOverlay title="산책 준비 중이에요" subtitle="위치와 날씨를 확인하고 있어요" />
