@@ -34,7 +34,7 @@
 | [T12](T12-structure-cleanup.md)          | 구조 정리·공통화 (화면 속 처리 이동, 반복 코드·숫자 상수, 서식). T11 다음                                               | 완료 (배포됨)               | 웹 + OTA (+ Edge Function)                  |
 | [T13](T13-docs-rules-tooling.md)         | 문서·Cursor 규칙·서식 검사(`npm run verify`). T12 다음                                                                  | 완료                        | 없음                                        |
 | [T14](T14-rls-recorder-scope.md)         | 산책 기록 쓰기 권한을 기록자 또는 관리자로 통일 (DB만). T11 다음                                                        | 완료 (배포됨)               | DB                                          |
-| [T15](T15-multi-dog-diary-photo-once.md) | 여러 마리 일기: 사진은 한 번만 AI에 (장면 설명 저장). T14 다음                                                          | 완료 (배포 전)              | DB + Edge Function + 웹 + OTA               |
+| [T15](T15-multi-dog-diary-photo-once.md) | 여러 마리 일기: 사진은 한 번만 AI에 (장면 설명 저장). T14 다음                                                          | 완료 (배포됨)               | DB + Edge Function + 웹 + OTA               |
 | [T16](T16-native-build.md)               | 다음 네이티브 빌드: `expo-clipboard`, 안 쓰는 네이버 SDK·secure-store 제거, 패키지 버전 맞추기. **새 빌드 전 OTA 금지** | 준비됨                      | 스토어 빌드                                 |
 | [T17](T17-db-grants.md)                  | 테이블 기본 권한(GRANT)을 마이그레이션에 적기 (운영과 같게, 새 DB에서도 동작)                                           | 준비됨                      | DB                                          |
 

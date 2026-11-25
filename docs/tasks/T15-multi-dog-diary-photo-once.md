@@ -105,3 +105,10 @@ C안:   [사진 → 장면 설명 저장] [설명+강아지1] [설명+강아지2
 - 문구 제안은 채팅으로 전달 (승인 후 `docs/privacy-policy.md` 수정)
 
 - 2026-11-25 사용자: 미승인 1건 유지, 개인정보처리방침 문구 제안대로 수정 승인 (Claude가 `docs/privacy-policy.md` 수정, 시행·공고일 2026-11-25)
+
+### 배포 (2026-11-25)
+
+- 마이그레이션 `015` 원격 적용 (`walks.photo_description text` 확인)
+- Edge Function `diaries-generate` 배포
+- 웹 미리보기·정식 배포, Android OTA `6e8a0ca9-40d9-4f68-b69f-ba876c23882d`
+- 개인정보처리방침 수정은 push 후 GitHub Pages에 반영
