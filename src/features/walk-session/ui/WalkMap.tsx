@@ -5,12 +5,12 @@ import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { splitWalkPath, type WalkCoord } from '@/entities/walk';
 import { colors } from '@/shared/config/theme';
 
+import { RecenterMapButton } from './RecenterMapButton';
 import {
   DEFAULT_MAP_LATITUDE,
   DEFAULT_MAP_LONGITUDE,
   ROUTE_STROKE_WIDTH,
 } from '../config/walkTracking';
-import { RecenterMapButton } from './RecenterMapButton';
 
 interface WalkMapProps {
   routePath: WalkCoord[];

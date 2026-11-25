@@ -4,13 +4,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import { splitWalkPath, type WalkCoord } from '@/entities/walk';
 import { colors, spacing } from '@/shared/config/theme';
 
+import { RecenterMapButton } from './RecenterMapButton';
 import {
   DEFAULT_MAP_LATITUDE,
   DEFAULT_MAP_LONGITUDE,
   ROUTE_STROKE_WIDTH,
 } from '../config/walkTracking';
 import { subscribeWebWalkGeolocation } from '../lib/webWalkGeolocation';
-import { RecenterMapButton } from './RecenterMapButton';
 
 const GOOGLE_MAPS_WEB_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY;
 
