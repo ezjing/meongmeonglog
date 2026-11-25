@@ -96,3 +96,22 @@ T11에서 만든 `features/family`를 그대로 쓴다.
 - 확인하지 못한 것:
   - 화면을 눌러 탈퇴·가족·산책 시작·로그인 실패 문구를 다시 확인하지 않음. `tsc`, `lint`, `format:check`, 웹·안드로이드 번들 생성만 통과
   - `diaries-generate`는 배포하지 않음. `_shared`의 보호자 함수를 쓰므로 배포할 때 그 Edge Function도 올려야 함
+
+## 검토 (Claude, 2026-11-25)
+
+결과: **통과.** 수정 지시 없음. `tsc`·`lint`·`format:check`(어긋난 파일 0) 통과 확인.
+
+동작이 바뀔 수 있는 곳은 예전 코드와 줄 단위로 대조했다
+- 탈퇴(`useDeleteAccountFlow`·`SuccessorPickSheet`): 맡을 가족 판단·차례로 고르기·확인 문구·실패 안내가 예전 `SettingsScreen`과 같다
+- 산책 시작(`useWalkPartyPicker`·`walkMessages`): 같은 집 강아지 거르기, 1마리면 바로 시작, 선택 0마리 안내, 대표 강아지 순서, 권한·진행 중·실패 문구가 예전 홈과 같다
+- 일기 새로 고침(`invalidateDiaryLists`): 같은 4개 key, prefix 함수로 바뀜
+- 아바타: 구조 같고 배경만 `surfacePlaceholder` (B-4 승인)
+- 로그인 안내(`loginErrorMessage`): 웹 콜백 화면이 이제 일반 `Error` 원문 대신 "○○ 로그인에 실패했습니다."를 보여 준다 — D의 의도대로
+- 화면 문구: 바뀐 한국어 문자열을 모두 뽑아 봤고, 숫자를 상수로 바꾼 것(`7일`→`${INVITE_EXPIRES_DAYS}일` 등)뿐이다
+- 서버 `guardianTitleOrDefault`: 빈 호칭이 들어갈 수 없는 경로라 결과가 같다. **`diaries-generate` 재배포 필요**
+
+지시서와 다른 점
+- `.cursor/rules/stateManagement.mdc` 예시 파일 이름을 새 이름(`guardianQueries.ts`, `walkQueries.ts`)으로 바꿈 (`미승인`) — Claude 의견: 지운 파일을 가리키지 않게 한 것이라 유지 권장 (T13에서 다룰 내용을 미리 한 것)
+- 나머지 "달라진 점"은 지시서가 허용한 선택지 안이거나 승인된 것
+
+- 2026-11-25 사용자: 미승인 1건(규칙 예시 파일 이름) 유지, 커밋·배포 승인
