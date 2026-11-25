@@ -233,6 +233,8 @@ export async function generateGroqContent(options: {
   imageUrl?: string;
   imagePrompt?: string;
   temperature?: number;
+  /** 없으면 일기·인사와 같은 800 */
+  maxTokens?: number;
 }): Promise<{ text: string; model: string }> {
   const apiKey = Deno.env.get('GROQ_API_KEY');
   if (!apiKey) {
@@ -276,7 +278,7 @@ export async function generateGroqContent(options: {
     model,
     messages,
     temperature: options.temperature ?? 0.8,
-    max_tokens: 800,
+    max_tokens: options.maxTokens ?? 800,
   };
 
   if (model.startsWith('qwen/qwen3')) {

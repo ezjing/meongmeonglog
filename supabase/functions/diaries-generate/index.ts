@@ -10,6 +10,57 @@ import {
   buildDiaryUserPrompt,
 } from '../_shared/speechStyle.ts';
 
+const PHOTO_DESCRIPTION_MAX_TOKENS = 300;
+
+const PHOTO_DESCRIPTION_PROMPT = [
+  '산책 사진을 일기 작성용으로 객관적으로 묘사한다: 장소, 날씨·빛, 계절감, 강아지 수·모습·행동. 사람 얼굴·차량 번호·간판 글자 등 개인을 알아볼 수 있는 정보는 쓰지 않는다. 사진에 없는 내용은 지어내지 않는다.',
+  '2~4문장으로 쓴다.',
+].join('\n');
+
+function storedPhotoDescription(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+/** 여러 마리 산책의 장면 설명. 이미 있으면 재사용하고, 요청이 실패하면 사진 없이 일기를 계속한다. */
+async function ensurePhotoDescription(
+  supabase: ReturnType<typeof createAdminClient>,
+  walkId: string,
+  existing: unknown,
+  imageUrl: string,
+): Promise<string | undefined> {
+  const saved = storedPhotoDescription(existing);
+  if (saved) return saved;
+
+  let generated: string;
+  try {
+    const { text } = await generateGroqContent({
+      userPrompt: PHOTO_DESCRIPTION_PROMPT,
+      imageUrl,
+      maxTokens: PHOTO_DESCRIPTION_MAX_TOKENS,
+    });
+    generated = text.trim();
+  } catch {
+    return undefined;
+  }
+  if (!generated) return undefined;
+
+  await supabase
+    .from('walks')
+    .update({ photo_description: generated })
+    .eq('id', walkId)
+    .is('photo_description', null);
+
+  const { data } = await supabase
+    .from('walks')
+    .select('photo_description')
+    .eq('id', walkId)
+    .maybeSingle();
+
+  return storedPhotoDescription(data?.photo_description) ?? generated;
+}
+
 serveJson(async (req) => {
   const body = await req.json();
   const walkId = body.walkId as string | undefined;
@@ -24,7 +75,7 @@ serveJson(async (req) => {
   const { data: walk, error: walkError } = await supabase
     .from('walks')
     .select(
-      'dog_id, recorded_by, duration_sec, distance_meter, weather_condition, weather_temp, walk_photos(image_url, sort_order)',
+      'dog_id, recorded_by, duration_sec, distance_meter, weather_condition, weather_temp, photo_description, walk_photos(image_url, sort_order)',
     )
     .eq('id', walkId)
     .single();
@@ -33,14 +84,9 @@ serveJson(async (req) => {
 
   const dogId = requestedDogId ?? walk.dog_id;
 
-  const [linkResult, dogResult, existingDiaryResult, eventResult, companionResult] =
+  const [walkDogsResult, dogResult, existingDiaryResult, eventResult, companionResult] =
     await Promise.all([
-      supabase
-        .from('walk_dogs')
-        .select('dog_id')
-        .eq('walk_id', walkId)
-        .eq('dog_id', dogId)
-        .maybeSingle(),
+      supabase.from('walk_dogs').select('dog_id').eq('walk_id', walkId),
       supabase
         .from('dogs')
         .select(
@@ -72,8 +118,9 @@ serveJson(async (req) => {
         .eq('user_id', userId)
         .maybeSingle()
     : { data: null };
+  const walkDogIds = ((walkDogsResult.data ?? []) as { dog_id: string }[]).map((row) => row.dog_id);
   // 그 산책에 포함된 강아지이고, 요청자가 그 집의 구성원인지 확인한다
-  if (!dog || !memberResult.data || !linkResult.data) throw new Error('Walk not found');
+  if (!dog || !memberResult.data || !walkDogIds.includes(dogId)) throw new Error('Walk not found');
 
   const existingDiary = existingDiaryResult.data;
   if (existingDiary) {
@@ -124,6 +171,23 @@ serveJson(async (req) => {
   }
   const styleSource = profileOf(recorderId ?? userId);
 
+  const firstPhotoUrl = photos.length > 0 ? photos[0].image_url : undefined;
+  const multiDog = walkDogIds.length >= 2;
+  let imageUrl: string | undefined;
+  let photoDescription: string | undefined;
+  if (multiDog) {
+    if (firstPhotoUrl) {
+      photoDescription = await ensurePhotoDescription(
+        supabase,
+        walkId,
+        walk.photo_description,
+        firstPhotoUrl,
+      );
+    }
+  } else {
+    imageUrl = firstPhotoUrl;
+  }
+
   const { text: content, model } = await generateGroqContent({
     systemInstruction: buildDiarySystemInstruction({
       dogName: dog.name,
@@ -148,9 +212,10 @@ serveJson(async (req) => {
       poopCount: event?.poop_count,
       dogMeetingLevel: event?.dog_meeting_level,
       memo: event?.memo,
+      photoDescription,
     }),
     jsonResponse: true,
-    imageUrl: photos.length > 0 ? photos[0].image_url : undefined,
+    imageUrl,
     imagePrompt: buildDiaryImagePrompt(),
     temperature: 0.7,
   });

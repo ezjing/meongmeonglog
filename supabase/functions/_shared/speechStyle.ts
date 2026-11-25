@@ -159,6 +159,14 @@ export function buildDiaryImagePrompt(): string {
   ].join(' ');
 }
 
+/** 사진을 직접 보지 않을 때, 저장된 장면 설명에 같은 의도를 적용한다 */
+function buildDiaryPhotoDescriptionGuide(): string {
+  return [
+    '산책 사진 설명에 있는 장면만 일기 말투에 맞춰 한 조각으로 섞어 주세요.',
+    '풍경 나열이나 설명체(잔디가 초록색이었다)는 쓰지 마세요.',
+  ].join(' ');
+}
+
 function formatWalkDuration(durationSec?: number | null): string | null {
   if (!durationSec || durationSec <= 0) return null;
   const minutes = Math.max(1, Math.round(durationSec / 60));
@@ -217,6 +225,8 @@ export function buildDiaryUserPrompt(options: {
   poopCount?: number | null;
   dogMeetingLevel?: string | null;
   memo?: string | null;
+  /** 여러 마리 산책에서 사진을 한 번만 보고 저장한 장면 설명 */
+  photoDescription?: string | null;
 }): string {
   const guide = resolveSpeechStyleGuide(options.speechStyle, options.customSpeechStyle);
   const personality = joinList([...(options.personality ?? []), options.customPersonality]);
@@ -226,6 +236,7 @@ export function buildDiaryUserPrompt(options: {
   ]);
   const weather = formatWeather(options.weatherCondition, options.weatherTemp);
   const memo = options.memo?.trim();
+  const photoDescription = options.photoDescription?.trim() ?? '';
   const guardianTitles = options.guardianTitles
     .map((title) => title.trim())
     .filter((title) => title.length > 0);
@@ -251,7 +262,10 @@ export function buildDiaryUserPrompt(options: {
       options.poopCount,
     )}, 친구 만남 ${formatMeetingLevel(options.dogMeetingLevel)}`,
     memo ? `메모: ${memo}` : '',
+    photoDescription ? `산책 사진 설명: ${photoDescription}` : '',
   ].filter(Boolean);
+
+  const photoSceneGuide = photoDescription ? `${buildDiaryPhotoDescriptionGuide()}\n\n` : '';
 
   const exampleBlock =
     guide.key === '기타'
@@ -261,7 +275,7 @@ export function buildDiaryUserPrompt(options: {
   return `
 ${lines.join('\n')}
 
-작성 규칙:
+${photoSceneGuide}작성 규칙:
 - 본문 3~5문장, 250자 안팎. (누구랑 어디) → (실제로 있었던 일 1~2개) → 짧은 여운.
 - 소변/대변/친구/메모/사진에 없는 일은 지어내지 않는다.
 - ${exampleBlock}
