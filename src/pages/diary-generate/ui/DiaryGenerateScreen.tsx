@@ -8,7 +8,7 @@ import { DEFAULT_DOG_NAME, useDogDisplayName, useSelectedDog } from '@/entities/
 import { formatWalkWeather, useWalk, useWalkDogIds, useWalkStore } from '@/entities/walk';
 import { useWalkPhotos, useFinishWalkStore } from '@/features/walk-session';
 import { colors, spacing } from '@/shared/config/theme';
-import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';
+import { formatDistance, formatDuration } from '@/shared/lib/format';
 import { josa } from '@/shared/lib/josa';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
 import { Button } from '@/shared/ui/Button';

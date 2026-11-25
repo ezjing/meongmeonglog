@@ -30,7 +30,7 @@ import {
   lineHeight,
   borderWidth,
 } from '@/shared/config/theme';
-import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';
+import { formatDistance, formatDuration } from '@/shared/lib/format';
 import { pickImageFromCamera, pickImageFromLibrary } from '@/shared/lib/pickImage';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
 import { useAuthStore } from '@/shared/session/sessionStore';

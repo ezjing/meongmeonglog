@@ -35,7 +35,7 @@ import {
   scale,
   borderWidth,
 } from '@/shared/config/theme';
-import { formatDistance, calculateAge } from '@/shared/lib/formatDistance';
+import { formatDistance, calculateAge } from '@/shared/lib/format';
 import { getLocalDateKey } from '@/shared/lib/localDate';
 import { Card } from '@/shared/ui/Card';
 import { ImagePreviewModal } from '@/shared/ui/ImagePreviewModal';

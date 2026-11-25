@@ -7,7 +7,7 @@ import { useDiaryDogName } from '@/entities/dog';
 import { canManageRecord, findHousehold, useHouseholds } from '@/entities/household';
 import { countWalkDiaries, formatWalkCompanyChip, useWalkPeople } from '@/entities/walk';
 import { colors, spacing } from '@/shared/config/theme';
-import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
+import { formatDate, formatDistance, formatDuration } from '@/shared/lib/format';
 import { goBackOrHome } from '@/shared/lib/navigation';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Button } from '@/shared/ui/Button';

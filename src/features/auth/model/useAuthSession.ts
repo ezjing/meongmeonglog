@@ -13,6 +13,11 @@ import {
 } from '../api/authApi';
 import { resetClientAuthState } from '../lib/resetClientAuthState';
 
+const accountEmailKeys = {
+  all: ['accountEmail'] as const,
+  byUser: (userId: string) => [...accountEmailKeys.all, userId] as const,
+};
+
 export function useAuthSession() {
   const queryClient = useQueryClient();
   const userId = useAuthStore((s) => s.userId);
@@ -74,7 +79,7 @@ export function useAccountEmail() {
   const userId = useAuthStore((s) => s.userId);
 
   return useQuery({
-    queryKey: ['accountEmail', userId],
+    queryKey: accountEmailKeys.byUser(userId ?? ''),
     queryFn: () => getCurrentUserEmail(userId!),
     enabled: !!userId,
   });

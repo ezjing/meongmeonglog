@@ -9,7 +9,7 @@ import {
   withWalkStateLock,
   type WalkSession,
 } from '@/entities/walk';
-import { haversineDistance } from '@/shared/lib/formatDistance';
+import { haversineDistance } from '@/shared/lib/geo';
 
 import { MAX_ACCURACY_M, processWalkLocations } from './walkLocationProcessor';
 import { acquireWebWalkWakeLock, releaseWebWalkWakeLock } from './webWakeLock';

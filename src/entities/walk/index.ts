@@ -9,15 +9,18 @@ export { bindWebWalkWatch } from './lib/webWalkWatch';
 export {
   activeWalksQueryKey,
   useActiveWalksForDogs,
+  useWalk,
+  useWalkDogIds,
+  useWalkPeople,
+  useWalkPhotosQuery,
+  walkKeys,
+} from './api/walkQueries';
+export {
   useCancelWalk,
   useDeleteDiaryFromWalk,
   useFinishWalk,
   useStartWalk,
   useUploadWalkPhotos,
-  useWalk,
-  useWalkDogIds,
-  useWalkPeople,
-  useWalkPhotosQuery,
 } from './api/useWalkMutations';
 export {
   countWalkDiaries,

@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { DiaryContentView } from '@/entities/diary';
 import { useSharedDiary } from '@/features/share-link';
 import { colors, spacing } from '@/shared/config/theme';
-import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
+import { formatDate, formatDistance, formatDuration } from '@/shared/lib/format';
 import { Button } from '@/shared/ui/Button';
 import { StackAppBar } from '@/shared/ui/StackAppBar';
 

@@ -11,7 +11,7 @@ import {
   freezeWalkSession,
 } from '@/features/walk-session';
 import { colors, spacing, radius, fontSize, fontWeight } from '@/shared/config/theme';
-import { formatDistance, formatDuration } from '@/shared/lib/formatDistance';
+import { formatDistance, formatDuration } from '@/shared/lib/format';
 import { useBackConfirmAction } from '@/shared/lib/useBackConfirmAction';
 import { Button } from '@/shared/ui/Button';
 import { useOverlay } from '@/shared/ui/overlay';

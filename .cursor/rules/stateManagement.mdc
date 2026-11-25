@@ -8,7 +8,7 @@ alwaysApply: false
 
 | 데이터 | 도구 | 위치 |
 |--------|------|------|
-| 서버 데이터 조회·변경 | TanStack Query | 각 entity의 `api/` (`diaryQueries.ts`, `dogQueries.ts`, `useGuardianProfile.ts`, `useWalkMutations.ts`) |
+| 서버 데이터 조회·변경 | TanStack Query | 각 entity의 `api/` (`diaryQueries.ts`, `dogQueries.ts`, `guardianQueries.ts`, `walkQueries.ts`, `useWalkMutations.ts`) |
 | 로그인 사용자(userId, provider) | zustand `useAuthStore` | `shared/session/sessionStore.ts` |
 | 진행 중 산책(경로·거리·시간) | zustand `useWalkStore` + AsyncStorage | `entities/walk/model/walkStore.ts`, `walkSessionStorage.ts` |
 | 온보딩·강아지 정보 입력 폼 | zustand `useOnboardingStore` | `features/onboarding/model/onboardingStore.ts` |

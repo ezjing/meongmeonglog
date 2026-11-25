@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native'
 
 import type { WalkPhoto } from '@/entities/walk/@x/diary';
 import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
-import { formatDate, formatDistance, formatDuration } from '@/shared/lib/formatDistance';
+import { formatDate, formatDistance, formatDuration } from '@/shared/lib/format';
 import { Card } from '@/shared/ui/Card';
 
 import { DiaryThumbnail } from './DiaryThumbnail';

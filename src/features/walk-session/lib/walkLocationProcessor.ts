@@ -7,7 +7,7 @@ import {
   updatePersistedWalkState,
   type WalkCoord,
 } from '@/entities/walk';
-import { haversineDistance } from '@/shared/lib/formatDistance';
+import { haversineDistance } from '@/shared/lib/geo';
 
 /** 오차 반경이 이보다 크면 Wi-Fi·기지국 추정 위치로 보고 버린다 */
 export const MAX_ACCURACY_M = 30;

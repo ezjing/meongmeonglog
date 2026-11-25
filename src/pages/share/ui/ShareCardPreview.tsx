@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { QuoteCard } from '@/entities/diary';
 import { WalkPhotoCarousel, type WalkPhoto } from '@/entities/walk';
 import { colors, spacing, radius, fontSize, lineHeight, shadows } from '@/shared/config/theme';
-import { formatDate } from '@/shared/lib/formatDistance';
+import { formatDate } from '@/shared/lib/format';
 
 const PHOTO_HEIGHT = 150;
 
