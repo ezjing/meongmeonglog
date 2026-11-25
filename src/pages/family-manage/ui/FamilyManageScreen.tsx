@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Clipboard, Platform, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { DogAvatar, dogsOfHousehold, formatHouseholdDogNames, useDogs } from '@/entities/dog';
 import type { DogProfile } from '@/entities/dog';
@@ -22,6 +22,7 @@ import {
   fontWeight,
   letterSpacing,
 } from '@/shared/config/theme';
+import { copyText } from '@/shared/lib/copyText';
 import { useAuthStore } from '@/shared/session/sessionStore';
 import { Avatar } from '@/shared/ui/Avatar';
 import { Button } from '@/shared/ui/Button';
@@ -34,14 +35,6 @@ const DOG_AVATAR_SIZE = 36;
 
 function memberLabel(member: HouseholdMember): string {
   return guardianTitleOrDefault(member.guardianTitle);
-}
-
-async function copyCode(code: string) {
-  if (Platform.OS === 'web') {
-    await navigator.clipboard.writeText(code);
-    return;
-  }
-  Clipboard.setString(code);
 }
 
 export function FamilyManageScreen() {
@@ -67,7 +60,7 @@ export function FamilyManageScreen() {
   const handleCopy = async () => {
     if (!inviteCode) return;
     try {
-      await copyCode(inviteCode);
+      await copyText(inviteCode);
       showToast({ message: '초대 코드를 복사했어요', variant: 'success' });
     } catch {
       // 복사 실패 문구는 승인된 표에 없다

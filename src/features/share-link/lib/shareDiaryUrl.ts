@@ -1,6 +1,7 @@
 import { Platform, Share } from 'react-native';
 
 import { WEB_ORIGIN } from '@/shared/config/links';
+import { copyText } from '@/shared/lib/copyText';
 
 export function shareDiaryUrl(token: string): string {
   const origin =
@@ -19,7 +20,7 @@ export async function presentDiaryShare(url: string): Promise<'shared' | 'copied
         if (error instanceof DOMException && error.name === 'AbortError') return 'shared';
       }
     }
-    await navigator.clipboard.writeText(url);
+    await copyText(url);
     return 'copied';
   }
 
