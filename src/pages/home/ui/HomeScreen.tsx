@@ -207,51 +207,54 @@ export function HomeScreen() {
   return (
     <>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        {dog && (dogs.length <= 1 || hydrated) ? (
+        {dog && (dogs.length <= 1 || hydrated) && showSwitcher ? (
+          <>
+            {/* 메뉴 버튼이 아바타 줄과 같은 높이에 오도록 앱바에는 아바타 줄만 넣는다 */}
+            <TabAppBar onMenuPress={() => setDrawerVisible(true)} style={styles.switcherBar}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.avatarRow}
+              >
+                {dogs.map((item) => {
+                  const selected = item.dogId === dog.dogId;
+                  return (
+                    <Pressable
+                      key={item.dogId}
+                      onPress={() => useSelectedDogStore.getState().setSelectedDogId(item.dogId)}
+                      accessibilityRole="button"
+                      accessibilityLabel={item.name}
+                      accessibilityState={{ selected }}
+                    >
+                      <DogAvatar
+                        imageUri={item.profileImageUrl}
+                        style={selected ? styles.avatarSelected : styles.avatarIdle}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </TabAppBar>
+            <View style={styles.switcherInfo}>
+              <Text style={styles.dogName}>{dog.name}</Text>
+              <Text style={styles.dogBreed}>
+                {dog.breed} · {calculateAge(dog.birthDate)}살
+              </Text>
+            </View>
+          </>
+        ) : dog && (dogs.length <= 1 || hydrated) ? (
           <TabAppBar onMenuPress={() => setDrawerVisible(true)}>
-            {showSwitcher ? (
-              <View style={styles.switcher}>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.avatarRow}
-                >
-                  {dogs.map((item) => {
-                    const selected = item.dogId === dog.dogId;
-                    return (
-                      <Pressable
-                        key={item.dogId}
-                        onPress={() => useSelectedDogStore.getState().setSelectedDogId(item.dogId)}
-                        accessibilityRole="button"
-                        accessibilityLabel={item.name}
-                        accessibilityState={{ selected }}
-                      >
-                        <DogAvatar
-                          imageUri={item.profileImageUrl}
-                          style={selected ? styles.avatarSelected : styles.avatarIdle}
-                        />
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
+            <View style={styles.headerMain}>
+              <Pressable onPress={() => setProfilePreviewVisible(true)}>
+                <DogAvatar imageUri={dog.profileImageUrl} />
+              </Pressable>
+              <View>
                 <Text style={styles.dogName}>{dog.name}</Text>
                 <Text style={styles.dogBreed}>
                   {dog.breed} · {calculateAge(dog.birthDate)}살
                 </Text>
               </View>
-            ) : (
-              <View style={styles.headerMain}>
-                <Pressable onPress={() => setProfilePreviewVisible(true)}>
-                  <DogAvatar imageUri={dog.profileImageUrl} />
-                </Pressable>
-                <View>
-                  <Text style={styles.dogName}>{dog.name}</Text>
-                  <Text style={styles.dogBreed}>
-                    {dog.breed} · {calculateAge(dog.birthDate)}살
-                  </Text>
-                </View>
-              </View>
-            )}
+            </View>
           </TabAppBar>
         ) : dogs.length > 1 ? (
           <TabAppBar onMenuPress={() => setDrawerVisible(true)} />
@@ -325,7 +328,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
   headerMain: { flexDirection: 'row', alignItems: 'center', gap: spacing.ms },
-  switcher: { gap: spacing.sm },
+  // 아바타 줄 → 이름 → 견종 간격은 예전 한 덩어리일 때(sm)와 같게, 아래 카드까지는 앱바 기본(md)
+  switcherBar: { marginBottom: spacing.sm },
+  switcherInfo: { gap: spacing.sm, marginBottom: spacing.md },
   avatarRow: { gap: spacing.sm, paddingVertical: spacing.xxs },
   avatarSelected: { borderWidth: borderWidth.thick, borderColor: colors.primaryFg },
   avatarIdle: { borderWidth: borderWidth.thick, borderColor: colors.bg },
