@@ -33,7 +33,7 @@ T11의 `013` 다음 번호로 새 마이그레이션 `014_rls_recorder_scope.sql
 ## 완료 조건
 
 - [ ] 로컬 DB(`supabase start`)에서 마이그레이션 적용 후, 기록자 계정으로 산책 시작 → 종료 → 이벤트·사진 저장이 되는지 SQL 또는 앱으로 확인. 가능하면 같은 집 비관리자 계정으로 남의 산책 `walks` update가 막히는지도 확인 (못 하면 "확인하지 못한 것"에)
-- [ ] `npx tsc --noEmit`, `npm run lint` 통과 (앱 코드 변경이 없으면 그대로)
+- [x] `npx tsc --noEmit`, `npm run lint` 통과 (앱 코드 변경이 없으면 그대로)
 
 ## 하지 말 것
 
@@ -47,5 +47,16 @@ T11의 `013` 다음 번호로 새 마이그레이션 `014_rls_recorder_scope.sql
 ## 구현 결과 (Cursor가 작성)
 
 - 커밋:
+  - `7022c36` fix: 산책 기록 쓰기를 기록한 사람과 집 관리자로 제한한다
 - 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
+  - 없음
+- 앱에서 쓰는 곳 (구현 전 확인):
+  - 산책 시작·날씨·종료·배변·사진 저장은 이 기기의 진행 중 산책(`activeWalk`)에서만 나간다. 그 산책은 `startWalk`가 넣고, `recorded_by` 기본값이 로그인한 사용자라 쓰는 사람이 기록자다
+  - 대표 강아지 `walk_dogs` 행은 009 트리거(`security definer`)가 넣는다. 정책과 무관하다. 나머지 강아지는 산책을 만든 직후 같은 요청에서 넣는다
+  - 다른 가족이 진행 중 산책을 볼 때는 `active_walks_for_dogs` 조회만 한다. 같이 간 가족 저장은 `walk_companions`이고 이번 변경 밖이다
+  - 일기 행을 넣는 곳은 `diaries-generate`뿐이고 service role이라 RLS를 타지 않는다. 앱의 `diaries` 접근은 조회와 삭제뿐이다
+- 확인한 것:
+  - `npx tsc --noEmit`, `npm run lint` 통과 (앱 코드 변경 없음)
+  - `supabase db push --linked --dry-run`: 올라갈 마이그레이션은 `014_rls_recorder_scope.sql` 하나. 적용은 하지 않았다
 - 확인하지 못한 것:
+  - 로컬 DB에서 마이그레이션을 적용한 뒤, 기록자 계정으로 산책 시작·종료·이벤트·사진 저장이 되는지, 같은 집 비관리자가 남의 산책 `walks` update를 못 하는지. Docker Desktop이 기동 직후 종료되어 `supabase start`를 하지 못했다

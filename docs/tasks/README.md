@@ -33,7 +33,7 @@
 | [T11](T11-family-perf-fixes.md)          | 가족 기능 성능·새로 고침 버그 (조회 RLS, 인덱스, 탈퇴 실패, 가족 변경 새로 고침, 초대 오류)                             | 완료 (배포됨)               | DB + Edge Function + 웹 + OTA               |
 | [T12](T12-structure-cleanup.md)          | 구조 정리·공통화 (화면 속 처리 이동, 반복 코드·숫자 상수, 서식). T11 다음                                               | 준비됨                      | 웹 + OTA (+ Edge Function)                  |
 | [T13](T13-docs-rules-tooling.md)         | 문서·Cursor 규칙·서식 검사(`npm run verify`). T12 다음                                                                  | 준비됨                      | 없음                                        |
-| [T14](T14-rls-recorder-scope.md)         | 산책 기록 쓰기 권한을 기록자 또는 관리자로 통일 (DB만). T11 다음                                                        | 준비됨                      | DB                                          |
+| [T14](T14-rls-recorder-scope.md)         | 산책 기록 쓰기 권한을 기록자 또는 관리자로 통일 (DB만). T11 다음                                                        | 검토 대기                    | DB                                          |
 | [T15](T15-multi-dog-diary-photo-once.md) | 여러 마리 일기: 사진은 한 번만 AI에 (장면 설명 저장). T14 다음                                                          | 준비됨                      | DB + Edge Function + 웹 + OTA               |
 | [T16](T16-native-build.md)               | 다음 네이티브 빌드: `expo-clipboard`, 안 쓰는 네이버 SDK·secure-store 제거, 패키지 버전 맞추기. **새 빌드 전 OTA 금지** | 준비됨                      | 스토어 빌드                                 |
 
