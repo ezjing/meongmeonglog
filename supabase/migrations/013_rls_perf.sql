@@ -21,8 +21,10 @@ drop policy if exists "dogs_select_member" on public.dogs;
 create policy "dogs_select_member" on public.dogs
 for select using (household_id in (select public.my_household_ids()));
 
--- 010에서 만든 security_barrier, security_invoker = false 는 그대로 둔다.
-create or replace view public.household_member_profiles as
+-- create or replace view는 적지 않은 옵션을 지우므로 010과 같은 옵션을 다시 적는다.
+-- security_barrier: 아래 where(내 집만)가 다른 함수보다 먼저 적용되게 한다 (뷰 주인 권한으로 RLS를 우회하므로 필수).
+create or replace view public.household_member_profiles
+with (security_barrier = true, security_invoker = false) as
 select
   member.household_id,
   member.user_id,

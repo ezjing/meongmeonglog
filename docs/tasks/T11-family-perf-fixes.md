@@ -114,3 +114,36 @@ create index if not exists walks_in_progress_started_at
   - 앱에서 강아지·가족 목록이 내 집만 보이는지, 나가거나 내보낸 직후 그 집 강아지가 홈에 남지 않는지
   - 산책이 많은 계정으로 탈퇴할 때 사진 조회가 성공하는지
   - `npm run format:check`. 이 작업 밖 파일 4개(`DiaryDetailScreen`, `DiaryGenerateScreen`, `SettingsScreen`, `WelcomeScreen`)가 어긋나 있다. 서식만 맞추는 작업은 T12 F다
+
+## 검토 (Claude, 2026-11-25)
+
+결과: **수정 필요 (1건).** 나머지는 통과. `tsc`·`lint` 통과 확인. 마이그레이션은 아직 원격에 적용되지 않았다(dry-run만) — **수정 전에 `db push` 하지 않는다.**
+
+통과
+- A: `my_household_ids()`(security definer, `search_path=''`, 실행 권한 010과 같음) + `dogs`·`households`·`household_members` 정책을 `in (select …)`로 바꿈. 지시서대로
+- B: 부분 인덱스 `walks_in_progress_started_at`
+- C: `walk_photos`에 `walks!inner(dog_id)` + `.in('walks.dog_id', dogIds)`. 산책 id가 주소에 없다. 탈퇴 동작은 그대로
+- D: `features/family`에 수락·나가기·내보내기 hook, 가족 목록·강아지·일기·진행 중 산책을 새로 고침. 수락 성공 시 미리보기 조회는 지움. 화면의 `queryClient` 직접 호출 제거
+- E: 모르는 오류는 `invite_failed` + 승인된 문구. 서버가 알려 준 이유는 기존 안내 그대로
+
+### 수정 지시 1 (필수, 높음): 뷰 보안 옵션이 사라진다
+
+- `013_rls_perf.sql`의 `create or replace view public.household_member_profiles`에 `with (...)`가 없다
+- Postgres는 `create or replace view`에서 **옵션을 새로 적은 것으로 통째로 바꾼다 (안 적으면 비운다).** 그래서 010에서 둔 `security_barrier = true`가 꺼진다 (주석 "그대로 둔다"와 반대로 동작)
+- 이 뷰는 주인 권한으로 RLS를 우회하고 where 조건으로만 다른 집을 거르므로, `security_barrier`가 꺼지면 조건보다 먼저 실행되는 함수로 다른 집 행이 새어 나갈 수 있다
+- 고칠 것: `create or replace view public.household_member_profiles with (security_barrier = true, security_invoker = false) as ...`로 010과 같은 옵션을 명시. 013 상단 주석도 맞게 고친다
+- 확인: 가능하면 로컬 DB에서 적용 후 `select reloptions from pg_class where relname = 'household_member_profiles';`에 두 옵션이 있는지
+
+### 지시서와 다른 점 (사용자 결정 필요)
+
+- 초대 수락 화면이 수락 중·수락 후 미리보기 조회를 끈다(`useInvitePreview(code, enabled)`). Cursor 표시 `미승인`
+- Claude 의견: **유지 권장.** 켜 둔 채 지우면 화면에 붙어 있는 조회가 바로 다시 나가서, 지시서 목표("수락 직후 미리보기 다시 요청 안 함")를 지키려면 필요하다. 다른 동작 변화 없음
+
+### 수정 지시 1 결과 (Claude가 직접 반영, 2026-11-25)
+
+- `013_rls_perf.sql`의 뷰를 `with (security_barrier = true, security_invoker = false)`로 다시 만들도록 고치고 주석을 맞췄다
+- `supabase db push --linked --dry-run`: 올라갈 마이그레이션은 `013_rls_perf.sql` 하나
+- 확인하지 못한 것: 로컬 DB(Docker 꺼짐)에서 적용 후 `pg_class.reloptions` 확인. 원격 적용 후 아래로 확인한다
+  `select reloptions from pg_class where relname = 'household_member_profiles';` → `{security_barrier=true,security_invoker=false}`
+
+- 2026-11-25 사용자: 현재 코드(초대 수락 중·후 미리보기 조회 끄기 포함)로 커밋·배포 승인
