@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { formatWalkPartyName } from '@/entities/dog';
+import { guardianTitleOrDefault } from '@/entities/guardian';
 import { formatHouseholdTitle } from '@/entities/household';
 import type { HouseholdGroup } from '@/entities/household';
 import { colors, spacing, fontSize, fontWeight } from '@/shared/config/theme';
@@ -46,7 +47,7 @@ export function SuccessorPickSheet({
       ) : null}
       {candidates.map((member) => {
         const selected = member.userId === selectedUserId;
-        const label = member.guardianTitle?.trim() || '보호자';
+        const label = guardianTitleOrDefault(member.guardianTitle);
         return (
           <Pressable
             key={member.userId}

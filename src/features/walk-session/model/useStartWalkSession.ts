@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 
+import { guardianTitleOrDefault } from '@/entities/guardian';
 import {
   fetchActiveWalksForDogs,
   stopWalkTracking,
@@ -11,8 +12,6 @@ import { requestWalkLocationPermissions } from '@/shared/lib/locationPermission'
 
 import { acquireWebWalkWakeLock, releaseWebWalkWakeLock } from '../lib/webWakeLock';
 import { primeWebWalkGeolocation, releaseWebWalkGeolocation } from '../lib/webWalkGeolocation';
-
-const FALLBACK_GUARDIAN_TITLE = '보호자';
 
 export type StartWalkResult =
   | { status: 'started' }
@@ -82,7 +81,7 @@ export function useStartWalkSession() {
               return {
                 status: 'in_progress',
                 dogName: blocked.dogName,
-                guardianTitle: blocked.recorderTitle?.trim() || FALLBACK_GUARDIAN_TITLE,
+                guardianTitle: guardianTitleOrDefault(blocked.recorderTitle),
               };
             }
           } catch {

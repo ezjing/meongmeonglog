@@ -5,7 +5,7 @@ import { Clipboard, Platform, ScrollView, Share, StyleSheet, Text, View } from '
 
 import { DogAvatar, formatWalkPartyName, useDogs } from '@/entities/dog';
 import type { DogProfile } from '@/entities/dog';
-import { useGuardianProfile } from '@/entities/guardian';
+import { guardianTitleOrDefault, useGuardianProfile } from '@/entities/guardian';
 import {
   formatHouseholdTitle,
   formatInviteShareMessage,
@@ -26,7 +26,7 @@ const DOG_AVATAR_SIZE = 36;
 const CODE_LETTER_SPACING = 4;
 
 function memberLabel(member: HouseholdMember): string {
-  return member.guardianTitle?.trim() || '보호자';
+  return guardianTitleOrDefault(member.guardianTitle);
 }
 
 async function copyCode(code: string) {

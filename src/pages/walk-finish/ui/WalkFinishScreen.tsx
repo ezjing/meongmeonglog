@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { formatWalkPartyName, useDogDisplayName, useSelectedDog } from '@/entities/dog';
+import { guardianTitleOrDefault } from '@/entities/guardian';
 import { useHouseholds } from '@/entities/household';
 import {
   formatWalkWeather,
@@ -309,7 +310,7 @@ export function WalkFinishScreen() {
               {companionChoices.map((member) => (
                 <Chip
                   key={member.userId}
-                  label={member.guardianTitle?.trim() || '보호자'}
+                  label={guardianTitleOrDefault(member.guardianTitle)}
                   selected={companionIds.includes(member.userId)}
                   onPress={() =>
                     setCompanionIds((current) =>

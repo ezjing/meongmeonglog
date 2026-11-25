@@ -1,3 +1,5 @@
+import { guardianTitleOrDefault } from "./guardianTitle.ts";
+
 export type SpeechStyleKey = "기본" | "아기말투" | "반말" | "존댓말" | "기타";
 
 export type SpeechStyleGuide = {
@@ -239,7 +241,7 @@ export function buildDiaryUserPrompt(options: {
     .filter((title) => title.length > 0);
   const guardianLine = guardianTitles.length > 1
     ? `함께한 보호자: ${guardianTitles.join(", ")} (이 호칭들만 사용)`
-    : `보호자 호칭: ${guardianTitles[0] ?? "보호자"} (이 호칭만 사용)`;
+    : `보호자 호칭: ${guardianTitleOrDefault(guardianTitles[0])} (이 호칭만 사용)`;
 
   const lines = [
     `오늘 산책 일기. 화자: 강아지 ${options.dogName}${

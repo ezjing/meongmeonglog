@@ -14,6 +14,7 @@ import {
 import { DiaryListCard, useDiariesByDate, useRecentDiaries } from '@/entities/diary';
 import type { DiaryListItem } from '@/entities/diary';
 import { DogAvatar, useSelectedDog, useSelectedDogStore } from '@/entities/dog';
+import { guardianTitleOrDefault } from '@/entities/guardian';
 import { useActiveWalksForDogs, useWalkStore } from '@/entities/walk';
 import { useConfirmLogout } from '@/features/auth';
 import { SettingsDrawer } from '@/features/settings';
@@ -144,7 +145,7 @@ export function HomeScreen() {
     [],
   );
   const familyWalk = activeByFamily.find((row) => row.dogId === selectedDogId);
-  const familyWalkerTitle = familyWalk ? familyWalk.recorderTitle?.trim() || '보호자' : null;
+  const familyWalkerTitle = familyWalk ? guardianTitleOrDefault(familyWalk.recorderTitle) : null;
   const walkStatus = getTodayWalkStatus(activeWalk, todayDiaries, familyWalkerTitle);
   const showSwitcher = dogs.length > 1;
 

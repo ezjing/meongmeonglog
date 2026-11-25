@@ -1,5 +1,6 @@
 /// <reference path="../_shared/deno.d.ts" />
 
+import { guardianTitleOrDefault } from "../_shared/guardianTitle.ts";
 import { generateGroqContent } from "../_shared/groq.ts";
 import { serveJson } from "../_shared/http.ts";
 import { createAdminClient, getRequestUserId } from "../_shared/requestUser.ts";
@@ -103,14 +104,16 @@ serveJson(async (req) => {
   const titleOf = (id: string | null): string | null => {
     const row = profileOf(id);
     if (!row) return null;
-    return row.guardian_title?.trim() || "보호자";
+    return guardianTitleOrDefault(row.guardian_title);
   };
   // 호칭은 기록한 사람 다음 같이 간 가족. 기록한 사람이 탈퇴했으면 그 호칭은 빠지고, 양육 정보는 요청자 것을 쓴다.
   const guardianTitles = [
     ...(recorderId ? [titleOf(recorderId)] : []),
     ...companionIds.map((id) => titleOf(id)),
   ].filter((title): title is string => !!title);
-  if (guardianTitles.length === 0) guardianTitles.push(titleOf(userId) || "보호자");
+  if (guardianTitles.length === 0) {
+    guardianTitles.push(guardianTitleOrDefault(profileOf(userId)?.guardian_title));
+  }
   const styleSource = profileOf(recorderId ?? userId);
 
   const { text: content, model } = await generateGroqContent({
