@@ -16,7 +16,8 @@ import { ShareIcon } from './ShareIcon';
 
 interface StackAppBarProps {
   title: string;
-  onBackPress: () => void;
+  /** 없으면 뒤로 버튼 자리를 비운다 (돌아갈 곳이 없는 공유 일기 화면) */
+  onBackPress?: () => void;
   onSharePress?: () => void;
   style?: ViewStyle;
 }
@@ -27,9 +28,13 @@ const sideSize = sizes.iconButton;
 export function StackAppBar({ title, onBackPress, onSharePress, style }: StackAppBarProps) {
   return (
     <View style={[styles.bar, style]}>
-      <IconButton style={styles.raised} onPress={onBackPress} accessibilityLabel="뒤로">
-        <Text style={styles.backIcon}>‹</Text>
-      </IconButton>
+      {onBackPress ? (
+        <IconButton style={styles.raised} onPress={onBackPress} accessibilityLabel="뒤로">
+          <Text style={styles.backIcon}>‹</Text>
+        </IconButton>
+      ) : (
+        <View style={styles.sidePlaceholder} />
+      )}
 
       <Text style={styles.title} numberOfLines={1}>
         {title}
