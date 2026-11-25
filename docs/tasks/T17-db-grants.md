@@ -60,5 +60,59 @@ DB 접근은 두 단계로 허락된다.
 ## 구현 결과 (Cursor가 작성)
 
 - 커밋:
+  - `0bace81` feat: 운영과 같은 테이블 기본 권한을 마이그레이션에 적는다
+  - `4040678` docs: T17 이후 권한 시험은 손으로 주지 않는다고 적는다
 - 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
+  - 없음. SQL은 지시서 그대로다. 함수 일괄 grant는 넣지 않았고, 그 이유를 주석 한 줄로만 적었다
+- RPC 확인 (`grep -rn "\.rpc(" src supabase/functions`): 빠진 grant 없음. 사용자에게 묻지 않았다
+  - 앱(로그인): `create_household_invite`, `preview_household_invite`, `accept_household_invite`, `remove_household_member`, `leave_household`, `walk_people`, `active_walks_for_dogs`, `ensure_diary_share_link`, `stop_diary_share_link` → `authenticated`
+  - 공유 일기: `get_shared_diary` → `anon`, `authenticated`
+  - Edge Function(service role): `find_auth_user_id_by_email`, `transfer_household_admins` → `service_role`만. `authenticated`는 원래 revoke라 그대로 두었다
+- 로컬 시험 (`supabase db reset --local` 후 권한을 손으로 주지 않고 `supabase/tests/rls_walk_write.sql`):
+
+  | 누가 | 무엇을 | 결과 |
+  | --- | --- | --- |
+  | 기록자 | 산책 시작, 강아지 추가, 종료, 이벤트 2마리, 사진 | 성공 |
+  | 일반 가족 | 산책 보기, 산책 강아지 보기 | 1건, 2마리 |
+  | 일반 가족 | 남의 산책 수정, 산책 강아지 삭제 | 0행 |
+  | 일반 가족 | 산책 강아지·이벤트·사진·일기 추가 | RLS 오류 |
+  | 관리자 | 딸의 산책 수정, 산책에 간 강아지 일기 | 성공 (1행) |
+  | 기록자 | 산책에서 뺀 강아지로 이벤트·일기 | RLS 오류 |
+
+  `permission denied`는 없었다. 테이블은 세 역할 모두 SELECT·INSERT·UPDATE·DELETE·TRUNCATE·REFERENCES·TRIGGER가 빠지지 않았다. 시퀀스 `household_invite_attempts_id_seq`는 `rwU`(SELECT, UPDATE, USAGE). 함수 execute는 위 개별 grant와 같고, revoke된 함수에 `anon`이 다시 붙지 않았다
+- 원격 적용 전후 비교 (적용은 하지 않음). 적용 직전과 직후에 같은 쿼리를 실행해 결과가 같으면 권한 변화가 없다. `information_schema.usage_privileges`는 시퀀스 USAGE만 보여 주므로 시퀀스는 `relacl`로 본다
+
+  ```sql
+  select table_name, grantee, privilege_type
+  from information_schema.role_table_grants
+  where table_schema = 'public'
+    and grantee in ('anon', 'authenticated', 'service_role')
+  order by 1, 2, 3;
+
+  select c.relname, c.relacl::text
+  from pg_class c
+  join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public' and c.relkind = 'S'
+  order by 1;
+
+  select pg_get_userbyid(d.defaclrole) as owner, d.defaclobjtype, d.defaclacl::text
+  from pg_default_acl d
+  join pg_namespace n on n.oid = d.defaclnamespace
+  where n.nspname = 'public' and pg_get_userbyid(d.defaclrole) = 'postgres'
+  order by 2;
+
+  select p.proname, r.rolname
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  join lateral aclexplode(p.proacl) a on true
+  join pg_roles r on r.oid = a.grantee
+  where n.nspname = 'public'
+    and a.privilege_type = 'EXECUTE'
+    and r.rolname in ('anon', 'authenticated', 'service_role')
+  order by 1, 2;
+  ```
+
+- 확인한 것:
+  - 각 커밋 전에 `npm run verify` 통과. 앱 코드 변경 없음
 - 확인하지 못한 것:
+  - 원격 DB에 적용하지 않았다. 위 쿼리의 적용 전후 비교는 배포할 때 한다

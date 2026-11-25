@@ -36,7 +36,7 @@
 | [T14](T14-rls-recorder-scope.md)         | 산책 기록 쓰기 권한을 기록자 또는 관리자로 통일 (DB만). T11 다음                                                        | 완료 (배포됨)               | DB                                          |
 | [T15](T15-multi-dog-diary-photo-once.md) | 여러 마리 일기: 사진은 한 번만 AI에 (장면 설명 저장). T14 다음                                                          | 완료 (배포됨)               | DB + Edge Function + 웹 + OTA               |
 | [T16](T16-native-build.md)               | 다음 네이티브 빌드: `expo-clipboard`, 안 쓰는 네이버 SDK·secure-store 제거, 패키지 버전 맞추기. **새 빌드 전 OTA 금지** | 준비됨                      | 스토어 빌드                                 |
-| [T17](T17-db-grants.md)                  | 테이블 기본 권한(GRANT)을 마이그레이션에 적기 (운영과 같게, 새 DB에서도 동작)                                           | 준비됨                      | DB                                          |
+| [T17](T17-db-grants.md)                  | 테이블 기본 권한(GRANT)을 마이그레이션에 적기 (운영과 같게, 새 DB에서도 동작)                                           | 검토 대기                   | DB                                          |
 
 상태: `준비됨` → `진행 중` → `검토 대기` → `완료`. Cursor는 시작할 때와 끝낼 때 이 표의 상태를 바꾼다.
 
