@@ -38,8 +38,8 @@
 
 ## 완료 조건
 
-- [ ] 문서·규칙에 적힌 파일 경로·이름이 실제로 있다 (grep으로 확인)
-- [ ] `npm run verify` 통과
+- [x] 문서·규칙에 적힌 파일 경로·이름이 실제로 있다 (grep으로 확인)
+- [x] `npm run verify` 통과
 
 ## 하지 말 것
 
@@ -52,5 +52,16 @@
 ## 구현 결과 (Cursor가 작성)
 
 - 커밋:
+  - `e07ac2b` docs: 구조 문서에 household·@x·공유 상수를 반영한다
+  - `1d0f7a9` docs: Cursor 규칙에 가족 조회·RLS·query key를 반영한다
+  - `97680c4` chore: supabase/functions 서식을 맞춘다
+  - `cfea6c8` chore: npm run verify로 타입·lint·서식 검사를 묶는다
+  - 인계 문서·네이버 안내·이 결과는 그 다음 커밋
 - 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
+  - B.4의 `npm run format:check`는 C가 정한 `npm run verify` 안에 넣었다. 지시서의 "(아래 C)"대로라 완료 조건에 format:check를 따로 적지 않음
+  - `docs/handoff.md` 5장 검증 명령을 `npm run verify`로 바꿈. 지시서 D는 지난 문장과 작업 상태만 적음. 채팅 승인 없음 → `미승인`
+  - features 예시는 폴더 이름(`auth`, `onboarding`, `walk-session`, `settings`, `share-link`, `family`)으로 맞춤. `family`는 원래 적혀 있었음
+  - 네이버 절에서 탈퇴 연동 해제 문단도 지금 코드에 맞춤 (`src/features/auth/api/authApi.ts`, 네이버는 앱에서 해제하지 않음)
 - 확인하지 못한 것:
+  - `.cursor/rules/projectOverview.mdc`, `docs/tasks/README.md` 진행 방식 2번, `docs/architecture.md` 맨 위 "lint가 통과해야 한다"는 지시서 목록에 없어 그대로 둠. 아직 `npx tsc --noEmit`, `npm run lint`
+  - 화면 동작은 바꾸지 않음. `npm run verify`만 통과 확인

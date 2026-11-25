@@ -151,19 +151,21 @@ echo "AA:BB:...(SHA-1)" | tr -d ':' | xxd -r -p | openssl base64
 
 #### 네이버 개발자센터
 
-- Android 패키지 / iOS Bundle ID: `com.ezjing.meongmeonglog`
-- iOS URL Scheme: `navergCz8w9XGrHS81JnOoJB6`
-- `.env`에 `EXPO_PUBLIC_NAVER_CLIENT_SECRET` (Client Secret) 추가 필요
-- 제공 정보: **이메일 주소만** 사용 (계정 식별 + 설정 > 로그인 계정에 표시)
+앱·웹 모두 브라우저 로그인이다. 네이버 SDK로 토큰을 받지 않는다. 콜백은 웹 `/callback`이고, 앱은 그 주소를 연 뒤 `meongmeonglog://oauth-callback`으로 돌아온다.
+
+- 콘솔 콜백 URL: `https://meongmeonglog.expo.app/callback`, `https://meongmeonglog--preview.expo.app/callback`
+- Client ID·Client Secret은 서버(Supabase secret `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`)만 쓴다. 앱 `.env`에 `EXPO_PUBLIC_NAVER_CLIENT_SECRET`을 넣지 않는다
+- 앱의 `EXPO_PUBLIC_NAVER_CLIENT_ID`는 아직 네이티브 플러그인(`@react-native-seoul/naver-login`) 설정에만 쓰인다. 로그인 요청에는 쓰지 않는다
+- 이메일을 계정 식별에 쓰고, 닉네임·프로필 사진이 있으면 함께 저장한다. 실명은 저장하지 않는다
 - "개발 중" 상태에서는 등록자·멤버관리 테스터만 로그인 가능 → 출시 전 **검수상태 탭에서 검수 요청** 필요
   - 검수 첨부용 캡처: `store-assets/screenshots/naver-review-v2/` (개인정보 마스킹 완료)
 
 #### 회원 탈퇴 시 연동 해제
 
-`deleteAccount()`(`src/lib/api/authApi.ts`)는 서버 계정 삭제 성공 후 로그인 수단에 맞춰 연동을 해제한다.
+`deleteAccount()`(`src/features/auth/api/authApi.ts`)는 서버에서 계정을 지운 뒤 기기 세션을 정리한다.
 
-- 네이버: `NaverLogin.deleteToken()` / 카카오: `unlink()`
-- 기기에 저장된 SDK 토큰으로 요청하므로, 앱 재설치 등으로 토큰이 없으면 해제되지 않는다 (탈퇴 자체는 정상 진행)
+- 카카오: 서버가 연결을 끊고, 앱도 `unlinkKakaoAccount()`를 호출한다
+- 네이버: 앱에 토큰을 두지 않아 연동 해제 API를 호출하지 않는다. 사용자는 네이버 > 내정보 > 보안설정 > 외부 사이트 연결에서 직접 해제한다 (`docs/account-deletion.md`)
 
 콘솔 설정(키·스킴) 변경 후에는 다시 빌드한다:
 

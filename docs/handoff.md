@@ -39,7 +39,7 @@
 **사용자 확인 대기**: OTA 적용 후 실기기에서 로그인, 실제 걸으며 산책 기록, 종료(메모 키보드)·일기 생성, 리스트 스크롤, 강아지 정보 수정.
 문제 시 롤백: `npx eas-cli update:rollback` → **Embedded Update** 선택.
 
-## 3. 다음 작업: W5 실기기 확인
+## 3. 웹 W5 (배포됨)
 
 공유 링크와 5장 초과 안내는 미리보기·정식 웹 주소에 배포됐다. 앱 업데이트는 아직 없다.
 - 일기마다 토큰 하나. 다시 공유하면 같은 주소를 다시 켠다. 토큰은 서버가 만든다
@@ -84,14 +84,17 @@
 ### 아직 열린 확인
 - iPhone에서 화면을 끄거나 다른 앱으로 나갔을 때 그 구간이 경로에서 빠지는지, 실외에서 실선이 이어지는지
 
-## 4. 백로그
+## 4. 지금 할 일
 
-- W5 웹 배포됨. 남은 것은 실기기에서 링크 공유·받는 페이지·카톡 미리보기 확인, 앱 OTA는 별도 → W6 QA
-- 다음 작업과 결정 대기 항목은 `docs/tasks/README.md`에 정리돼 있다
-- 가족·다견 기능: 결정 사항과 단계(삭제 → 다견 → 가족)는 `docs/family-plan.md`. T05(기록 삭제)·T07(AI 문구) 웹·OTA 배포됨, 실기기 확인 대기. 다음은 T06(다견) — Cursor 구현 준비됨
-- 썸네일 원본 크기(46px에 원본 사용) — 방식 결정 대기 (`docs/tasks/README.md`)
+기준은 `docs/tasks/README.md`.
+
+- T01~T12, T14: 완료 (배포됨)
+- T13: 검토 대기 (문서·규칙·`npm run verify`)
+- T15~T17: 준비됨. T15 여러 마리 일기 사진은 한 번만, T16 다음 네이티브 빌드, T17 테이블 기본 권한
+- 지시서가 없는 결정: 일기 생성 실패의 서버 로그, 썸네일, 오류 모니터링, 분석 도구, 웹 프로필 사진 자르기, PWA 오프라인, 다음 스토어 빌드 시점 (넣을 항목은 T16)
 - 이용약관 초안 법률 검토 (사용자)
 - 1.0.0 사용자는 OTA를 못 받음 → 스토어에서 1.1.0 업데이트 필요
+- W5 공유 링크는 웹에 배포됨. 실기기에서 링크 공유·받는 페이지·카톡 미리보기 확인은 남아 있다
 
 ## 5. 환경·명령
 
@@ -99,7 +102,7 @@
 |---|---|
 | 개발 서버 | `npm start` (Metro 8081, dev client) |
 | iOS 시뮬레이터 빌드 | `npx expo run:ios` (`npm run ios`는 `--device`라 실기기용) |
-| 검증 | `npx tsc --noEmit` · `npm run lint` · `npx expo export --platform android` (번들 확인) |
+| 검증 | `npm run verify` (타입·lint·서식) · `npx expo export --platform android` (번들 확인) |
 | 웹 빌드 확인 | `npx expo export --platform web` |
 | Edge Function 배포 | `supabase functions deploy <이름> --project-ref ansjpqdsujostrhukygy` |
 | 마이그레이션 | `supabase db push --linked --dry-run` → 확인 후 `supabase db push --linked` |
