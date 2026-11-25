@@ -3,7 +3,6 @@ import { ScrollView, StyleSheet, Text } from 'react-native';
 
 import { useSelectedDog } from '@/entities/dog';
 import { useGuardianProfile } from '@/entities/guardian';
-import { isHouseholdAdmin, useHouseholds } from '@/entities/household';
 import {
   PROVIDER_LABEL,
   SuccessorPickSheet,
@@ -12,13 +11,12 @@ import {
   useConfirmLogout,
   useDeleteAccountFlow,
 } from '@/features/auth';
-import { SettingsDrawer } from '@/features/settings';
+import { SettingsDrawer, useOpenDogEdit } from '@/features/settings';
 import { colors, spacing, fontSize, fontWeight, lineHeight } from '@/shared/config/theme';
-import { openDogEdit, openGuardianEdit } from '@/shared/lib/navigation';
+import { openGuardianEdit } from '@/shared/lib/navigation';
 import { useLocationPermissionCheck } from '@/shared/lib/useLocationPermissionCheck';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
-import { useOverlay } from '@/shared/ui/overlay';
 import { TabAppBar } from '@/shared/ui/TabAppBar';
 
 export function SettingsScreen() {
@@ -28,8 +26,7 @@ export function SettingsScreen() {
   const checkLocationPermission = useLocationPermissionCheck();
   const { data: accountEmail } = useAccountEmail();
   const { dog } = useSelectedDog();
-  const { data: households } = useHouseholds();
-  const { showToast } = useOverlay();
+  const openDogEdit = useOpenDogEdit();
   const { data: guardianProfile } = useGuardianProfile();
   const [drawerVisible, setDrawerVisible] = useState(false);
   const guardianTitle = guardianProfile?.guardianTitle?.trim();
@@ -72,16 +69,7 @@ export function SettingsScreen() {
               <Button
                 label="강아지 정보 수정"
                 variant="secondary"
-                onPress={() => {
-                  if (households && !isHouseholdAdmin(households, dog.householdId)) {
-                    showToast({
-                      message: '강아지 정보는 집 관리자만 바꿀 수 있어요',
-                      variant: 'warning',
-                    });
-                    return;
-                  }
-                  openDogEdit(dog.dogId);
-                }}
+                onPress={() => openDogEdit(dog)}
                 style={styles.btn}
               />
             </>
