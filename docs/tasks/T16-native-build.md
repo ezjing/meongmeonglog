@@ -27,7 +27,7 @@ OTA로는 못 바꾸는 네이티브 변경을 한 번에 모아 새 빌드(스�
 
 ## 완료 조건
 
-- [ ] `npm run verify`(T13 이후) 또는 `npx tsc --noEmit`, `npm run lint`, `npm run format:check` 통과
+- [x] `npm run verify`(T13 이후) 또는 `npx tsc --noEmit`, `npm run lint`, `npm run format:check` 통과
 - [ ] `npx expo prebuild --clean` 후 Android 개발 빌드(`npx expo run:android`)가 뜨고, 가족 초대 코드 복사·일기 링크 공유·카카오/네이버 로그인이 된다 (가능한 만큼, 못 한 것은 "확인하지 못한 것"에)
 - [ ] 웹 빌드 `npx expo export --platform web` 통과, 웹에서 초대 코드 복사 동작
 
@@ -45,5 +45,26 @@ OTA로는 못 바꾸는 네이티브 변경을 한 번에 모아 새 빌드(스�
 ## 구현 결과 (Cursor가 작성)
 
 - 커밋:
+  - `e04606e` feat: 클립보드 복사를 expo-clipboard로 통일한다
+  - `33299d7` chore: 쓰지 않는 네이버 로그인 SDK와 secure-store를 뺀다
+  - `0d17dd9` chore: react-native-screens와 react-native-svg를 SDK 56 버전에 맞춘다
+  - `eff7dd9` chore: 나머지 Expo 패키지를 SDK 56 권장 버전에 맞춘다
 - 지시서와 달라진 점 (각 항목에 `승인됨`/`미승인` 표시):
+  - `expo install --check`에 screens·svg 외 패키지 16개가 더 있어, 맞춘 뒤에 커밋했다. `승인됨` (`@expo/ui`, `expo`, `expo-constants`, `expo-dev-client`, `expo-file-system`, `expo-image`, `expo-image-manipulator`, `expo-image-picker`, `expo-linking`, `expo-location`, `expo-router`, `expo-sharing`, `expo-splash-screen`, `expo-symbols`, `expo-task-manager`, `expo-web-browser`)
+  - README 네이버 절: `EXPO_PUBLIC_NAVER_CLIENT_ID`는 플러그인을 뺀 뒤 앱에서 쓰지 않는다고 고쳤다. `승인됨`
+  - `expo-constants`·`expo-file-system`의 package.json 범위는 그대로다(`~56.0.18`, `~56.0.8`). 그 범위가 권장 버전을 포함하고, 잠금 파일은 `56.0.27`·`56.0.11`이다. `npx expo install --check`는 최신이라고 했다
+  - `expo install --fix`가 `expo-image`, `expo-web-browser` 플러그인을 `app.config.ts`에 넣으려다 동적 설정이라 실패했다. 넣지 않았다. `미승인` (`expo-web-browser` 플러그인은 옵션 없이 호출하면 아무 것도 하지 않고, `expo-image` 플러그인은 iOS Pod에 기본값 `disableLibdav1d=false`만 적는다)
+- 확인한 것:
+  - 각 커밋 전에 `npm run verify` 통과
+  - SDK 56 문서: `expo-clipboard` `setStringAsync`는 Android·iOS·웹. 웹은 Async Clipboard라 `.web.ts`로 나누지 않았다. Safari에서 주소를 나중에 채우는 `copyDiaryUrlWhenReady`는 그대로 두었다
+  - `src`에 `expo-secure-store`, `@react-native-seoul/naver-login` import 없음. `EXPO_PUBLIC_NAVER_CLIENT_ID`는 빼기 전 플러그인 설정에만 있었다
+  - `npx expo export --platform web` 통과. 웹 번들에 `copyText`와 `setStringAsync`가 들어 있다. `http://localhost:8082/login`이 로그인 화면까지 열렸다
+  - `npx expo prebuild --clean --platform android` 후 Gradle 빌드 성공(6분 32초). 네이티브 모듈 목록에 `expo-clipboard` 56.0.4가 있고 `naver-login`·`expo-secure-store`는 없다
+  - 에뮬레이터 저장 공간이 부족해 첫 설치는 실패했다. 예전 앱을 지운 뒤 APK 설치에 성공하고, 개발 빌드가 로그인 화면(카카오·네이버 버튼)까지 떴다. Android 번들도 Metro에서 만들어졌다
 - 확인하지 못한 것:
+  - 가족 초대 코드 복사, 일기 링크 공유. 로그인된 계정이 없어 그 화면까지 가지 못했다
+  - 카카오·네이버 로그인. 버튼만 보였고 로그인은 누르지 않았다
+  - 웹에서 초대 코드 복사. 개발용 로그인이 꺼져 있고, 자동화 브라우저는 문서 포커스가 없어 클립보드 쓰기가 `NotAllowedError`로 거절됐다
+  - iOS 빌드·실기기
+  - `.env`의 `EXPO_PUBLIC_NAVER_CLIENT_ID`는 지우지 않았다. 앱은 더 이상 읽지 않는다
+- push·OTA·스토어 배포는 하지 않았다. 이 커밋은 새 스토어 빌드 전에 OTA로 보내면 안 된다

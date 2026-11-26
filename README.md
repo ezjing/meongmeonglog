@@ -155,7 +155,7 @@ echo "AA:BB:...(SHA-1)" | tr -d ':' | xxd -r -p | openssl base64
 
 - 콘솔 콜백 URL: `https://meongmeonglog.expo.app/callback`, `https://meongmeonglog--preview.expo.app/callback`
 - Client ID·Client Secret은 서버(Supabase secret `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`)만 쓴다. 앱 `.env`에 `EXPO_PUBLIC_NAVER_CLIENT_SECRET`을 넣지 않는다
-- 앱의 `EXPO_PUBLIC_NAVER_CLIENT_ID`는 아직 네이티브 플러그인(`@react-native-seoul/naver-login`) 설정에만 쓰인다. 로그인 요청에는 쓰지 않는다
+- 앱 코드와 네이티브 설정은 `EXPO_PUBLIC_NAVER_CLIENT_ID`를 쓰지 않는다. 로그인 Client ID는 서버 secret `NAVER_CLIENT_ID`만 쓴다
 - 이메일을 계정 식별에 쓰고, 닉네임·프로필 사진이 있으면 함께 저장한다. 실명은 저장하지 않는다
 - "개발 중" 상태에서는 등록자·멤버관리 테스터만 로그인 가능 → 출시 전 **검수상태 탭에서 검수 요청** 필요
   - 검수 첨부용 캡처: `store-assets/screenshots/naver-review-v2/` (개인정보 마스킹 완료)
