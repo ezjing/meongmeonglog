@@ -68,3 +68,18 @@ OTA로는 못 바꾸는 네이티브 변경을 한 번에 모아 새 빌드(스�
   - iOS 빌드·실기기
   - `.env`의 `EXPO_PUBLIC_NAVER_CLIENT_ID`는 지우지 않았다. 앱은 더 이상 읽지 않는다
 - push·OTA·스토어 배포는 하지 않았다. 이 커밋은 새 스토어 빌드 전에 OTA로 보내면 안 된다
+
+## 검토 (Claude, 2026-11-26)
+
+결과: **통과.** 수정 지시 없음.
+
+- `copyText`(`shared/lib`)가 `setStringAsync`의 실패(`false`)를 오류로 바꿔, 초대 코드 복사 실패 처리가 예전과 같다. Safari 예약 복사(`copyDiaryUrlWhenReady`)는 그대로다
+- `src`·`app.config.ts`·`app.json`에 `naver-login`, `expo-secure-store`, RN `Clipboard`, `EXPO_PUBLIC_NAVER_CLIENT_ID` 사용이 남지 않았다
+- Claude가 직접 다시 확인: `npm run verify` 통과, `npx expo install --check` → "Dependencies are up to date"
+- `expo-image`·`expo-web-browser` 플러그인을 넣지 않은 것(`미승인`): 둘 다 옵션 없이는 바뀌는 네이티브 설정이 사실상 없어 그대로 둔다
+- 함께 처리 (Claude): 앱 버전 `1.1.0` → `1.2.0`(`app.json`, `package.json`), `EXPO_PUBLIC_NAVER_CLIENT_ID`를 로컬 `.env`와 EAS 환경 변수(production·preview)에서 삭제
+
+`expo-doctor` 경고 (이번 작업 전부터 있던 것, 이번 빌드를 막지 않음):
+- `assets/images/icon.png`의 실제 형식이 JPG다 (확장자는 png). iOS 스토어 빌드 전에 PNG로 다시 저장하는 것이 좋다
+- `eas-cli`가 프로젝트 의존성에 있다
+- Expo SDK 56(React Native 0.85)의 Hermes에 알려진 메모리 문제가 있다. SDK 57 업그레이드에서 고쳐진다 (별도 작업)
